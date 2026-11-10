@@ -2,7 +2,7 @@
      data-i18n-aria an aria-label and data-i18n-alt an image description, in whichever language is chosen. -->
 <canvas id="snow" aria-hidden="true"></canvas>
 <main class="wrap" id="main">
-
+ <div class="side">
   <div class="hero">
     <button type="button" class="motion-toggle" id="motionBtn" aria-pressed="false" data-i18n-aria="pauseAll">
       <svg class="ic-pause" viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><rect x="4" y="3" width="4" height="14" rx="1"/><rect x="12" y="3" width="4" height="14" rx="1"/></svg>
@@ -54,12 +54,15 @@
     <dl class="fields one" id="homeFields" hidden>
       <div><dt data-i18n="howTitle"></dt><dd data-i18n="howBody"></dd></div>
     </dl>
-    <p class="deadline" id="deadline" hidden></p>
+    <p class="deadline" id="deadline" hidden><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 5.5V10l3 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="deadlineText"></span></p>
     <!-- language buttons, filled in by app.js from the list in i18n.js -->
     <nav class="langs" id="langs" data-i18n-aria="langLabel"></nav>
   </header>
-
+ </div>
+ <div class="flow">
   <p class="notice" id="notice" role="status" hidden></p>
+  <!-- placeholder while the first answer from the server is on its way -->
+  <section class="card skeleton" id="skeleton" aria-hidden="true"><span></span><span></span><span></span></section>
   <!-- shown only when this page is opened at an old address -->
   <p class="moved" id="moved" hidden><span id="movedText"></span> <a id="movedLink" href="#"></a></p>
 
@@ -110,6 +113,10 @@
     <p id="meStatus"></p>
     <p class="hint" id="resetNote" hidden></p>
     <div id="tagSlot"></div>
+    <div class="nudge" id="nudge" hidden>
+      <span id="nudgeText"></span>
+      <button type="button" class="btn sm" id="shareBtn" data-i18n="share"></button>
+    </div>
     <form id="wishForm" class="stack inset">
       <label for="wishInput" data-i18n="wishLabel"></label>
       <input id="wishInput" aria-describedby="wishHelp" maxlength="100" autocomplete="off">
@@ -138,8 +145,9 @@
       <label for="joinName" data-i18n="yourName"></label>
       <input id="joinName" maxlength="24" autocomplete="off">
       <label for="joinPin" data-i18n="pinLabel"></label>
-      <input id="joinPin" class="pin" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off">
-      <p class="hint"><span data-i18n="pinHint"></span><b data-i18n="pinWarn"></b></p>
+      <input id="joinPin" class="pin" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" aria-describedby="pinShort">
+      <p class="hint" id="pinShort" data-i18n="pinShort"></p>
+      <details class="why"><summary data-i18n="pinWhy"></summary><p class="hint" data-i18n="pinWhyBody"></p></details>
       <label for="joinWish" data-i18n="joinWishLabel"></label>
       <input id="joinWish" aria-describedby="wishPrivacy" maxlength="100" autocomplete="off" data-i18n-ph="joinWishPh">
       <p class="hint" id="wishPrivacy" data-i18n="wishPrivacy"></p>
@@ -192,8 +200,17 @@
     </details>
   </section>
 
-  <footer><p class="dut-stamp" lang="en">Department of Unnecessary Things · Holiday Gift Division</p><span data-i18n="merry"></span> <span id="retention"></span> <a id="homeLink" href="./" data-i18n="makeOwn" hidden></a></footer>
+  <footer>
+    <a class="stamp" href="https://departmentofunnecessarythings.com/" target="_blank" rel="noopener" lang="en" aria-label="Department of Unnecessary Things">
+      <span class="stamp-top">Department of</span>
+      <span class="stamp-main">Unnecessary Things</span>
+      <span class="stamp-sub">★ Gift Division ★</span>
+    </a>
+    <p><span data-i18n="merry"></span> <span id="retention"></span> <a id="homeLink" href="./" data-i18n="makeOwn" hidden></a></p>
+  </footer>
+ </div>
 </main>
+<canvas id="fx" aria-hidden="true" hidden></canvas>
 
 <dialog id="dlg" aria-labelledby="dlgTitle">
   <form id="dlgForm" method="dialog">

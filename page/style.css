@@ -7,11 +7,12 @@
   --night-glow:#1c5641;
   --on-night:#eef6f0;
   --on-night-soft:#b4cbbf;
-  --card:#ffffff;
-  --field:#f0f4f0;
+  --card:#fbf7ef;          /* cream: an invitation, not a form */
+  --paper:#ffffff;         /* the parcel label stays white */
+  --field:#f4efe3;
   --pine:#12352b;
-  --moss:#566e64;
-  --rule:#d3ddd6;
+  --moss:#5d6f66;
+  --rule:#e3dac8;
   --berry:#b8203a;
   --berry-deep:#93182d;
   --on-berry:#ffffff;
@@ -53,7 +54,7 @@ h2{font:700 18px/1.3 var(--font-body);text-wrap:balance}
 .nametag.dog{left:70%;background:var(--ok)}
 
 /* parcel label with a candy-stripe edge */
-.label{position:relative;background:var(--card);padding:30px 16px 0;border:7px solid var(--berry);
+.label{position:relative;background:var(--paper);padding:30px 16px 0;border:7px solid var(--berry);
   border-image:repeating-linear-gradient(135deg,var(--berry) 0 9px,#fff 9px 18px,var(--ok) 18px 27px,#fff 27px 36px) 7}
 .label-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:6px 10px;min-height:26px}
 .eyebrow{display:flex;align-items:center;gap:8px;min-width:0;font-size:11px;letter-spacing:.12em;color:var(--moss);font-weight:600}
@@ -67,13 +68,15 @@ h2{font:700 18px/1.3 var(--font-body);text-wrap:balance}
 .pill.drawn{background:var(--ok);border-color:var(--ok);color:#fff}
 
 /* cards and forms */
-.card{background:var(--card);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:0 8px 22px rgba(0,0,0,.22)}
+.card{background:var(--card);border-radius:16px;padding:18px 16px;display:flex;flex-direction:column;gap:12px;box-shadow:0 12px 30px rgba(0,0,0,.18)}
 .card p,.hint{font-size:14px;color:var(--moss)}
 .stack{display:flex;flex-direction:column;gap:8px}
 label{font-size:13px;font-weight:600;color:var(--moss);margin-top:4px}
-input,textarea{font:16px/1.45 var(--font-body);color:var(--pine);background:var(--field);border:1.5px solid var(--rule);border-radius:8px;padding:10px 12px;width:100%}
+input,textarea{font:16px/1.45 var(--font-body);color:var(--pine);background:var(--field);border:1.5px solid var(--rule);border-radius:10px;padding:11px 12px;width:100%}
+input:focus-visible,textarea:focus-visible{outline:none;border-color:var(--pine);box-shadow:0 0 0 3px rgba(18,53,43,.15)}
 input::placeholder,textarea::placeholder{color:var(--moss);opacity:.7}
-.btn{font:600 16px/1.2 var(--font-body);padding:13px 16px;border-radius:8px;border:1.5px solid var(--pine);background:transparent;color:var(--pine);cursor:pointer}
+.btn{font:600 16px/1.2 var(--font-body);padding:13px 16px;border-radius:12px;border:1.5px solid var(--pine);background:transparent;color:var(--pine);cursor:pointer;transition:transform .08s ease}
+.btn:active{transform:scale(.985)}
 .btn.primary{background:var(--berry);border-color:var(--berry);color:var(--on-berry)}
 .btn.primary:active{background:var(--berry-deep)}
 .btn:disabled{opacity:.45;cursor:not-allowed}
@@ -89,8 +92,21 @@ details[open]>summary{margin-bottom:10px}
 /* who is in, and the name buttons */
 .roster{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:6px}
 .roster li{font-size:14px;padding:4px 11px;border:1px solid var(--rule);border-radius:999px;background:var(--field);overflow-wrap:anywhere}
-.names{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:8px}
-.names .btn{overflow-wrap:anywhere}
+.names{display:flex;flex-wrap:wrap;gap:8px}
+.roster{gap:8px}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:5px 14px 5px 5px;border-radius:999px;border:1.5px solid var(--rule);background:#fff;color:var(--pine);font:600 14px/1.2 var(--font-body);cursor:default;max-width:100%}
+.chip-name{overflow-wrap:anywhere;min-width:0}
+button.chip{cursor:pointer;border-color:var(--pine)}
+button.chip:active{transform:scale(.98)}
+.names.big .chip{padding:7px 18px 7px 7px;font-size:16px;min-height:48px}
+.names.big .avatar{width:34px;height:34px;font-size:15px}
+.avatar{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;color:#fff;font:700 13px/1 var(--font-body)}
+.people .avatar{width:36px;height:36px;font-size:15px}
+.roster .chip{border-color:var(--rule);background:#fff}
+#rosterCard.after-join{order:1}      /* a first-time visitor: the sign-up card comes first, the people already in after it */
+#adminCard{order:2}
+.flow>footer{order:9}
+.roster li{padding:0;border:0;background:none}
 
 /* the gift tag */
 .tag{width:100%;max-width:310px;margin:10px auto 6px;transform:rotate(-1.5deg)}
@@ -99,6 +115,7 @@ details[open]>summary{margin-bottom:10px}
 .tag-side{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;width:100%;min-height:250px;padding:46px 22px 22px;border:0;text-align:center;
   clip-path:polygon(38px 0,calc(100% - 38px) 0,100% 38px,100% 100%,0 100%,0 38px)}
 .hole{position:absolute;top:15px;left:50%;width:15px;height:15px;margin-left:-7.5px;border-radius:50%;background:var(--card);box-shadow:inset 0 1px 2px rgba(0,0,0,.35)}
+.tag-back .hole{background:#fff}
 .tag-back{cursor:pointer;color:#fff;font:inherit;
   background:repeating-linear-gradient(135deg,var(--berry) 0 16px,var(--berry-deep) 16px 32px)}
 .tag-back .for{font-size:14px;font-weight:600;letter-spacing:.04em;background:rgba(0,0,0,.3);padding:4px 12px;border-radius:999px;overflow-wrap:anywhere;max-width:100%}
@@ -114,7 +131,7 @@ details[open]>summary{margin-bottom:10px}
 .paw{position:absolute;right:14px;bottom:12px;width:34px;height:34px;fill:var(--kraft-ink);opacity:.16;transform:rotate(18deg)}
 
 /* dialog + toast */
-dialog{border:0;border-radius:14px;background:var(--card);color:var(--pine);padding:18px;width:min(92vw,400px);max-height:90vh;overflow:auto}
+dialog{border:0;border-radius:18px;background:var(--card);color:var(--pine);padding:18px;width:min(92vw,400px);max-height:90vh;overflow:auto}
 dialog::backdrop{background:rgba(4,16,12,.72)}
 dialog h2{margin-bottom:8px}
 #dlgBody{font-size:15px;color:var(--moss);display:flex;flex-direction:column;gap:10px}
@@ -126,7 +143,8 @@ dialog h2{margin-bottom:8px}
 
 /* page chrome that only this hosted version has */
 .notice{font-size:14px;color:var(--on-night-soft);padding:0 2px}
-.deadline{font-size:13px;font-weight:600;color:var(--berry);padding:8px 0 10px;border-top:1px dashed var(--moss);margin:0 -16px;padding-left:16px;padding-right:16px}
+.deadline{display:flex;gap:8px;align-items:flex-start;font-size:13px;font-weight:500;color:var(--pine);padding:9px 16px 10px;border-top:1px dashed var(--moss);margin:0 -16px;line-height:1.45}
+.deadline svg{flex:none;margin-top:2px;color:var(--moss)}
 .row{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center}
 .people{list-style:none;padding:0;display:flex;flex-direction:column}
 .people li{display:flex;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--rule);flex-wrap:wrap}
@@ -160,15 +178,14 @@ html:lang(ko){--font-body:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo"
 /* The Christmas title face and the handwriting face only have plain Latin letters. Vietnamese (ơ ư ễ ...) would come
    out half in one font and half in another, so those words switch to a face that has every letter. */
 html:lang(vi) .tag-back .cta{font:800 28px/1.15 var(--font-body)}
-.label h1.plain{font-family:var(--font-body);font-weight:800;font-size:clamp(32px,10vw,44px);line-height:1.08}
+.label h1.plain{font-family:var(--font-body);font-weight:800;font-size:clamp(30px,9vw,40px);line-height:1.12;color:var(--pine);letter-spacing:-.01em}
 .card .tag-front .tag-name.plain,.tag-name.plain{font-family:"Patrick Hand","Caveat",var(--font-body);font-weight:400;font-size:40px}
 
 /* Keep custom event titles legible and small controls comfortable on touchscreens. */
 .link,.btn.sm,.langs button,details>summary{min-height:44px}
 .link,details>summary{display:inline-flex;align-items:center}
 input::placeholder,textarea::placeholder{opacity:1}
-.dut-stamp{font-size:10px;line-height:1.6;letter-spacing:.08em;text-transform:uppercase;margin:8px 0;color:var(--on-night-soft)}
-@media (min-width:900px){.wrap{max-width:600px}.stage{width:390px}.label h1.plain{font-size:38px}}
+
 
 /* Two clipped copies of the original artwork keep each pet moving independently,
    with paws anchored to the snow and the surrounding scene still. */
@@ -228,3 +245,45 @@ html.event .label h1.plain{font-size:clamp(26px,8vw,36px)}
 /* ---- an old address: point to the new one ---- */
 .moved{font-size:14px;color:var(--pine);background:var(--gold);border-radius:10px;padding:10px 14px;line-height:1.45}
 .moved a{color:var(--pine);font-weight:700;overflow-wrap:anywhere}
+
+/* ---- layout: the scene and label ("side"), then everything that flows; side by side on a laptop ---- */
+.side,.flow{display:flex;flex-direction:column;gap:14px;min-width:0}
+.side{gap:0}
+@media (min-width:900px){
+  .wrap{max-width:1080px;padding:0 24px 56px;flex-direction:row;align-items:flex-start;gap:32px}
+  .side{flex:0 0 420px;position:sticky;top:0}
+  .flow{flex:1 1 auto;padding-top:28px;max-width:600px}
+  .stage{width:360px}
+  html.event .stage{width:300px}
+  .label h1.plain{font-size:36px}
+}
+
+/* ---- skeleton while the first answer is on its way ---- */
+.skeleton{gap:12px;min-height:150px}
+.skeleton span{display:block;height:14px;border-radius:7px;background:linear-gradient(90deg,var(--field) 25%,#ebe3d2 50%,var(--field) 75%);background-size:200% 100%;animation:shimmer 1.4s linear infinite}
+.skeleton span:nth-child(1){width:55%;height:20px}
+.skeleton span:nth-child(2){width:90%}
+.skeleton span:nth-child(3){width:70%}
+@keyframes shimmer{to{background-position:-200% 0}}
+@media (prefers-reduced-motion:reduce){.skeleton span{animation:none}}
+
+/* ---- after joining: bring friends in ---- */
+.nudge{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;padding:12px 14px;border-radius:12px;background:#fff;border:1.5px dashed var(--rule);font-size:14px;color:var(--moss)}
+
+/* ---- the long PIN explanation, behind a tap ---- */
+.why>summary{font-size:13px;font-weight:600;color:var(--moss);min-height:32px;padding:0;list-style:none;text-decoration:underline;text-underline-offset:3px;text-decoration-style:dotted}
+.why>summary::-webkit-details-marker{display:none}
+.why>summary{display:inline-flex;align-items:center;gap:10px;padding-right:4px}
+.why>summary::after{content:"";flex:none;width:7px;height:7px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:translateY(-2px) rotate(45deg);transition:transform .15s}
+.why[open]>summary::after{transform:translateY(2px) rotate(-135deg)}
+.why[open]>summary{margin-bottom:4px}
+
+/* ---- the brand, as a rubber stamp ---- */
+footer{display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 8px 4px}
+.stamp{display:inline-flex;flex-direction:column;align-items:center;gap:1px;padding:7px 14px 8px;border:2px solid var(--on-night-soft);border-radius:8px;color:var(--on-night-soft);text-decoration:none;transform:rotate(-2.5deg);opacity:.85;
+  mask-image:radial-gradient(circle at 30% 40%,#000 94%,transparent 95%),linear-gradient(#000,#000);-webkit-mask-image:linear-gradient(#000,#000)}
+.stamp:hover,.stamp:focus-visible{opacity:1;color:var(--gold);border-color:var(--gold)}
+.stamp-top{font:600 9px/1.2 var(--font-body);letter-spacing:.22em;text-transform:uppercase}
+.stamp-main{font:700 13px/1.2 var(--font-body);letter-spacing:.14em;text-transform:uppercase}
+.stamp-sub{font:600 8.5px/1.4 var(--font-body);letter-spacing:.2em;text-transform:uppercase;border-top:1px solid currentColor;margin-top:3px;padding-top:3px}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50}

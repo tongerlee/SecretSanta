@@ -26,11 +26,12 @@
   --night-glow:#1c5641;
   --on-night:#eef6f0;
   --on-night-soft:#b4cbbf;
-  --card:#ffffff;
-  --field:#f0f4f0;
+  --card:#fbf7ef;          /* cream: an invitation, not a form */
+  --paper:#ffffff;         /* the parcel label stays white */
+  --field:#f4efe3;
   --pine:#12352b;
-  --moss:#566e64;
-  --rule:#d3ddd6;
+  --moss:#5d6f66;
+  --rule:#e3dac8;
   --berry:#b8203a;
   --berry-deep:#93182d;
   --on-berry:#ffffff;
@@ -72,7 +73,7 @@ h2{font:700 18px/1.3 var(--font-body);text-wrap:balance}
 .nametag.dog{left:70%;background:var(--ok)}
 
 /* parcel label with a candy-stripe edge */
-.label{position:relative;background:var(--card);padding:30px 16px 0;border:7px solid var(--berry);
+.label{position:relative;background:var(--paper);padding:30px 16px 0;border:7px solid var(--berry);
   border-image:repeating-linear-gradient(135deg,var(--berry) 0 9px,#fff 9px 18px,var(--ok) 18px 27px,#fff 27px 36px) 7}
 .label-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:6px 10px;min-height:26px}
 .eyebrow{display:flex;align-items:center;gap:8px;min-width:0;font-size:11px;letter-spacing:.12em;color:var(--moss);font-weight:600}
@@ -86,13 +87,15 @@ h2{font:700 18px/1.3 var(--font-body);text-wrap:balance}
 .pill.drawn{background:var(--ok);border-color:var(--ok);color:#fff}
 
 /* cards and forms */
-.card{background:var(--card);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:0 8px 22px rgba(0,0,0,.22)}
+.card{background:var(--card);border-radius:16px;padding:18px 16px;display:flex;flex-direction:column;gap:12px;box-shadow:0 12px 30px rgba(0,0,0,.18)}
 .card p,.hint{font-size:14px;color:var(--moss)}
 .stack{display:flex;flex-direction:column;gap:8px}
 label{font-size:13px;font-weight:600;color:var(--moss);margin-top:4px}
-input,textarea{font:16px/1.45 var(--font-body);color:var(--pine);background:var(--field);border:1.5px solid var(--rule);border-radius:8px;padding:10px 12px;width:100%}
+input,textarea{font:16px/1.45 var(--font-body);color:var(--pine);background:var(--field);border:1.5px solid var(--rule);border-radius:10px;padding:11px 12px;width:100%}
+input:focus-visible,textarea:focus-visible{outline:none;border-color:var(--pine);box-shadow:0 0 0 3px rgba(18,53,43,.15)}
 input::placeholder,textarea::placeholder{color:var(--moss);opacity:.7}
-.btn{font:600 16px/1.2 var(--font-body);padding:13px 16px;border-radius:8px;border:1.5px solid var(--pine);background:transparent;color:var(--pine);cursor:pointer}
+.btn{font:600 16px/1.2 var(--font-body);padding:13px 16px;border-radius:12px;border:1.5px solid var(--pine);background:transparent;color:var(--pine);cursor:pointer;transition:transform .08s ease}
+.btn:active{transform:scale(.985)}
 .btn.primary{background:var(--berry);border-color:var(--berry);color:var(--on-berry)}
 .btn.primary:active{background:var(--berry-deep)}
 .btn:disabled{opacity:.45;cursor:not-allowed}
@@ -108,8 +111,21 @@ details[open]>summary{margin-bottom:10px}
 /* who is in, and the name buttons */
 .roster{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:6px}
 .roster li{font-size:14px;padding:4px 11px;border:1px solid var(--rule);border-radius:999px;background:var(--field);overflow-wrap:anywhere}
-.names{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:8px}
-.names .btn{overflow-wrap:anywhere}
+.names{display:flex;flex-wrap:wrap;gap:8px}
+.roster{gap:8px}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:5px 14px 5px 5px;border-radius:999px;border:1.5px solid var(--rule);background:#fff;color:var(--pine);font:600 14px/1.2 var(--font-body);cursor:default;max-width:100%}
+.chip-name{overflow-wrap:anywhere;min-width:0}
+button.chip{cursor:pointer;border-color:var(--pine)}
+button.chip:active{transform:scale(.98)}
+.names.big .chip{padding:7px 18px 7px 7px;font-size:16px;min-height:48px}
+.names.big .avatar{width:34px;height:34px;font-size:15px}
+.avatar{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;color:#fff;font:700 13px/1 var(--font-body)}
+.people .avatar{width:36px;height:36px;font-size:15px}
+.roster .chip{border-color:var(--rule);background:#fff}
+#rosterCard.after-join{order:1}      /* a first-time visitor: the sign-up card comes first, the people already in after it */
+#adminCard{order:2}
+.flow>footer{order:9}
+.roster li{padding:0;border:0;background:none}
 
 /* the gift tag */
 .tag{width:100%;max-width:310px;margin:10px auto 6px;transform:rotate(-1.5deg)}
@@ -118,6 +134,7 @@ details[open]>summary{margin-bottom:10px}
 .tag-side{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;width:100%;min-height:250px;padding:46px 22px 22px;border:0;text-align:center;
   clip-path:polygon(38px 0,calc(100% - 38px) 0,100% 38px,100% 100%,0 100%,0 38px)}
 .hole{position:absolute;top:15px;left:50%;width:15px;height:15px;margin-left:-7.5px;border-radius:50%;background:var(--card);box-shadow:inset 0 1px 2px rgba(0,0,0,.35)}
+.tag-back .hole{background:#fff}
 .tag-back{cursor:pointer;color:#fff;font:inherit;
   background:repeating-linear-gradient(135deg,var(--berry) 0 16px,var(--berry-deep) 16px 32px)}
 .tag-back .for{font-size:14px;font-weight:600;letter-spacing:.04em;background:rgba(0,0,0,.3);padding:4px 12px;border-radius:999px;overflow-wrap:anywhere;max-width:100%}
@@ -133,7 +150,7 @@ details[open]>summary{margin-bottom:10px}
 .paw{position:absolute;right:14px;bottom:12px;width:34px;height:34px;fill:var(--kraft-ink);opacity:.16;transform:rotate(18deg)}
 
 /* dialog + toast */
-dialog{border:0;border-radius:14px;background:var(--card);color:var(--pine);padding:18px;width:min(92vw,400px);max-height:90vh;overflow:auto}
+dialog{border:0;border-radius:18px;background:var(--card);color:var(--pine);padding:18px;width:min(92vw,400px);max-height:90vh;overflow:auto}
 dialog::backdrop{background:rgba(4,16,12,.72)}
 dialog h2{margin-bottom:8px}
 #dlgBody{font-size:15px;color:var(--moss);display:flex;flex-direction:column;gap:10px}
@@ -145,7 +162,8 @@ dialog h2{margin-bottom:8px}
 
 /* page chrome that only this hosted version has */
 .notice{font-size:14px;color:var(--on-night-soft);padding:0 2px}
-.deadline{font-size:13px;font-weight:600;color:var(--berry);padding:8px 0 10px;border-top:1px dashed var(--moss);margin:0 -16px;padding-left:16px;padding-right:16px}
+.deadline{display:flex;gap:8px;align-items:flex-start;font-size:13px;font-weight:500;color:var(--pine);padding:9px 16px 10px;border-top:1px dashed var(--moss);margin:0 -16px;line-height:1.45}
+.deadline svg{flex:none;margin-top:2px;color:var(--moss)}
 .row{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center}
 .people{list-style:none;padding:0;display:flex;flex-direction:column}
 .people li{display:flex;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--rule);flex-wrap:wrap}
@@ -179,15 +197,14 @@ html:lang(ko){--font-body:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo"
 /* The Christmas title face and the handwriting face only have plain Latin letters. Vietnamese (ơ ư ễ ...) would come
    out half in one font and half in another, so those words switch to a face that has every letter. */
 html:lang(vi) .tag-back .cta{font:800 28px/1.15 var(--font-body)}
-.label h1.plain{font-family:var(--font-body);font-weight:800;font-size:clamp(32px,10vw,44px);line-height:1.08}
+.label h1.plain{font-family:var(--font-body);font-weight:800;font-size:clamp(30px,9vw,40px);line-height:1.12;color:var(--pine);letter-spacing:-.01em}
 .card .tag-front .tag-name.plain,.tag-name.plain{font-family:"Patrick Hand","Caveat",var(--font-body);font-weight:400;font-size:40px}
 
 /* Keep custom event titles legible and small controls comfortable on touchscreens. */
 .link,.btn.sm,.langs button,details>summary{min-height:44px}
 .link,details>summary{display:inline-flex;align-items:center}
 input::placeholder,textarea::placeholder{opacity:1}
-.dut-stamp{font-size:10px;line-height:1.6;letter-spacing:.08em;text-transform:uppercase;margin:8px 0;color:var(--on-night-soft)}
-@media (min-width:900px){.wrap{max-width:600px}.stage{width:390px}.label h1.plain{font-size:38px}}
+
 
 /* Two clipped copies of the original artwork keep each pet moving independently,
    with paws anchored to the snow and the surrounding scene still. */
@@ -247,6 +264,48 @@ html.event .label h1.plain{font-size:clamp(26px,8vw,36px)}
 /* ---- an old address: point to the new one ---- */
 .moved{font-size:14px;color:var(--pine);background:var(--gold);border-radius:10px;padding:10px 14px;line-height:1.45}
 .moved a{color:var(--pine);font-weight:700;overflow-wrap:anywhere}
+
+/* ---- layout: the scene and label ("side"), then everything that flows; side by side on a laptop ---- */
+.side,.flow{display:flex;flex-direction:column;gap:14px;min-width:0}
+.side{gap:0}
+@media (min-width:900px){
+  .wrap{max-width:1080px;padding:0 24px 56px;flex-direction:row;align-items:flex-start;gap:32px}
+  .side{flex:0 0 420px;position:sticky;top:0}
+  .flow{flex:1 1 auto;padding-top:28px;max-width:600px}
+  .stage{width:360px}
+  html.event .stage{width:300px}
+  .label h1.plain{font-size:36px}
+}
+
+/* ---- skeleton while the first answer is on its way ---- */
+.skeleton{gap:12px;min-height:150px}
+.skeleton span{display:block;height:14px;border-radius:7px;background:linear-gradient(90deg,var(--field) 25%,#ebe3d2 50%,var(--field) 75%);background-size:200% 100%;animation:shimmer 1.4s linear infinite}
+.skeleton span:nth-child(1){width:55%;height:20px}
+.skeleton span:nth-child(2){width:90%}
+.skeleton span:nth-child(3){width:70%}
+@keyframes shimmer{to{background-position:-200% 0}}
+@media (prefers-reduced-motion:reduce){.skeleton span{animation:none}}
+
+/* ---- after joining: bring friends in ---- */
+.nudge{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;padding:12px 14px;border-radius:12px;background:#fff;border:1.5px dashed var(--rule);font-size:14px;color:var(--moss)}
+
+/* ---- the long PIN explanation, behind a tap ---- */
+.why>summary{font-size:13px;font-weight:600;color:var(--moss);min-height:32px;padding:0;list-style:none;text-decoration:underline;text-underline-offset:3px;text-decoration-style:dotted}
+.why>summary::-webkit-details-marker{display:none}
+.why>summary{display:inline-flex;align-items:center;gap:10px;padding-right:4px}
+.why>summary::after{content:"";flex:none;width:7px;height:7px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:translateY(-2px) rotate(45deg);transition:transform .15s}
+.why[open]>summary::after{transform:translateY(2px) rotate(-135deg)}
+.why[open]>summary{margin-bottom:4px}
+
+/* ---- the brand, as a rubber stamp ---- */
+footer{display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 8px 4px}
+.stamp{display:inline-flex;flex-direction:column;align-items:center;gap:1px;padding:7px 14px 8px;border:2px solid var(--on-night-soft);border-radius:8px;color:var(--on-night-soft);text-decoration:none;transform:rotate(-2.5deg);opacity:.85;
+  mask-image:radial-gradient(circle at 30% 40%,#000 94%,transparent 95%),linear-gradient(#000,#000);-webkit-mask-image:linear-gradient(#000,#000)}
+.stamp:hover,.stamp:focus-visible{opacity:1;color:var(--gold);border-color:var(--gold)}
+.stamp-top{font:600 9px/1.2 var(--font-body);letter-spacing:.22em;text-transform:uppercase}
+.stamp-main{font:700 13px/1.2 var(--font-body);letter-spacing:.14em;text-transform:uppercase}
+.stamp-sub{font:600 8.5px/1.4 var(--font-body);letter-spacing:.2em;text-transform:uppercase;border-top:1px solid currentColor;margin-top:3px;padding-top:3px}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50}
 </style>
 </head>
 <body>
@@ -254,7 +313,7 @@ html.event .label h1.plain{font-size:clamp(26px,8vw,36px)}
      data-i18n-aria an aria-label and data-i18n-alt an image description, in whichever language is chosen. -->
 <canvas id="snow" aria-hidden="true"></canvas>
 <main class="wrap" id="main">
-
+ <div class="side">
   <div class="hero">
     <button type="button" class="motion-toggle" id="motionBtn" aria-pressed="false" data-i18n-aria="pauseAll">
       <svg class="ic-pause" viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><rect x="4" y="3" width="4" height="14" rx="1"/><rect x="12" y="3" width="4" height="14" rx="1"/></svg>
@@ -330,12 +389,15 @@ html.event .label h1.plain{font-size:clamp(26px,8vw,36px)}
     <dl class="fields one" id="homeFields" hidden>
       <div><dt data-i18n="howTitle"></dt><dd data-i18n="howBody"></dd></div>
     </dl>
-    <p class="deadline" id="deadline" hidden></p>
+    <p class="deadline" id="deadline" hidden><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 5.5V10l3 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="deadlineText"></span></p>
     <!-- language buttons, filled in by app.js from the list in i18n.js -->
     <nav class="langs" id="langs" data-i18n-aria="langLabel"></nav>
   </header>
-
+ </div>
+ <div class="flow">
   <p class="notice" id="notice" role="status" hidden></p>
+  <!-- placeholder while the first answer from the server is on its way -->
+  <section class="card skeleton" id="skeleton" aria-hidden="true"><span></span><span></span><span></span></section>
   <!-- shown only when this page is opened at an old address -->
   <p class="moved" id="moved" hidden><span id="movedText"></span> <a id="movedLink" href="#"></a></p>
 
@@ -386,6 +448,10 @@ html.event .label h1.plain{font-size:clamp(26px,8vw,36px)}
     <p id="meStatus"></p>
     <p class="hint" id="resetNote" hidden></p>
     <div id="tagSlot"></div>
+    <div class="nudge" id="nudge" hidden>
+      <span id="nudgeText"></span>
+      <button type="button" class="btn sm" id="shareBtn" data-i18n="share"></button>
+    </div>
     <form id="wishForm" class="stack inset">
       <label for="wishInput" data-i18n="wishLabel"></label>
       <input id="wishInput" aria-describedby="wishHelp" maxlength="100" autocomplete="off">
@@ -414,8 +480,9 @@ html.event .label h1.plain{font-size:clamp(26px,8vw,36px)}
       <label for="joinName" data-i18n="yourName"></label>
       <input id="joinName" maxlength="24" autocomplete="off">
       <label for="joinPin" data-i18n="pinLabel"></label>
-      <input id="joinPin" class="pin" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off">
-      <p class="hint"><span data-i18n="pinHint"></span><b data-i18n="pinWarn"></b></p>
+      <input id="joinPin" class="pin" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" aria-describedby="pinShort">
+      <p class="hint" id="pinShort" data-i18n="pinShort"></p>
+      <details class="why"><summary data-i18n="pinWhy"></summary><p class="hint" data-i18n="pinWhyBody"></p></details>
       <label for="joinWish" data-i18n="joinWishLabel"></label>
       <input id="joinWish" aria-describedby="wishPrivacy" maxlength="100" autocomplete="off" data-i18n-ph="joinWishPh">
       <p class="hint" id="wishPrivacy" data-i18n="wishPrivacy"></p>
@@ -468,8 +535,17 @@ html.event .label h1.plain{font-size:clamp(26px,8vw,36px)}
     </details>
   </section>
 
-  <footer><p class="dut-stamp" lang="en">Department of Unnecessary Things · Holiday Gift Division</p><span data-i18n="merry"></span> <span id="retention"></span> <a id="homeLink" href="./" data-i18n="makeOwn" hidden></a></footer>
+  <footer>
+    <a class="stamp" href="https://departmentofunnecessarythings.com/" target="_blank" rel="noopener" lang="en" aria-label="Department of Unnecessary Things">
+      <span class="stamp-top">Department of</span>
+      <span class="stamp-main">Unnecessary Things</span>
+      <span class="stamp-sub">★ Gift Division ★</span>
+    </a>
+    <p><span data-i18n="merry"></span> <span id="retention"></span> <a id="homeLink" href="./" data-i18n="makeOwn" hidden></a></p>
+  </footer>
+ </div>
 </main>
+<canvas id="fx" aria-hidden="true" hidden></canvas>
 
 <dialog id="dlg" aria-labelledby="dlgTitle">
   <form id="dlgForm" method="dialog">
@@ -533,11 +609,14 @@ const SANTA_I18N = (() => {
     joinTitle: '报名',
     yourName: '你的名字',
     pinLabel: '给自己设一个 PIN（4 位数字）',
-    pinHint: '换手机或换浏览器回来看结果时要用到它。自己定，记住它，别告诉别人。',
-    pinWarn: '别用银行卡密码、手机解锁码这类真密码。',
+    pinShort: '换设备看结果时要用。随便编一个，别用银行卡密码。',
+    pinWhy: '为什么要 PIN？',
+    pinWhyBody: '抽签结果只有你自己能看。这台设备会记住你，换手机或换浏览器回来时，点自己的名字输入 PIN 就行。自己定、记住它、别告诉别人；别用银行卡密码、手机解锁码这类真密码。忘了可以找组织者重设。',
+    nudge: (n) => `已经 ${n} 人报名。还有朋友没进来？`,
+    share: '分享链接',
     joinWishLabel: '心愿或备注（可不填）',
     joinWishPh: '抽到你的人会看到',
-    wishPrivacy: '抽到你的人和组织者可见。请勿填写私密信息。',
+    wishPrivacy: '抽到你的人和组织者看得到，别写太私密的。',
     joinBtn: '报名',
     organizer: '组织者操作区',
     adminOnlyYou: '只有你在这台设备上看得到：浏览器记住了你的组织者链接。打开群链接的人看到的是参与者页面。',
@@ -609,7 +688,6 @@ const SANTA_I18N = (() => {
     rosterTapDrawn: '点你的名字，输入 PIN 看结果',
     rosterTapOpen: '已经报过名？点你的名字',
     rosterHintDrawn: '签已经抽好了。每个人只能用自己的 PIN 看到自己的结果。',
-    rosterHintOpen: (n) => `已经报名 ${n} 人。换了设备回来时，点自己的名字，输入 PIN。`,
     adminDrawn: '已经抽好了。每个人凭自己的 PIN 看结果，你这里也看不到谁抽到谁。',
     adminNeed: (n, min) => `现在 ${n} 人，至少要 ${min} 人才能抽。把群链接发出去让大家报名。`,
     adminReady: (n) => `现在 ${n} 人。人齐了就抽。`,
@@ -695,11 +773,14 @@ const SANTA_I18N = (() => {
     joinTitle: 'Sign up',
     yourName: 'Your name',
     pinLabel: 'Pick a PIN (4 digits)',
-    pinHint: 'You’ll need it to see your match from another phone or browser. Make one up, remember it, and keep it to yourself. ',
-    pinWarn: 'Don’t reuse a real one like your bank PIN or phone passcode.',
+    pinShort: 'Your key to your match from another device. Make one up; not your bank PIN.',
+    pinWhy: 'Why a PIN?',
+    pinWhyBody: 'Only you can see your match. This device will remember you; on another phone or browser, tap your name and enter the PIN. Make one up, remember it, keep it to yourself, and don’t reuse a real one like your bank PIN or phone passcode. Forgot it? The organizer can reset it.',
+    nudge: (n) => `${n} in so far. Know someone who should join?`,
+    share: 'Share the link',
     joinWishLabel: 'Wish or note (optional)',
     joinWishPh: 'Whoever draws you will see this',
-    wishPrivacy: 'Your gift giver and organizer can read this. Keep private details out.',
+    wishPrivacy: 'Seen by your gift giver and the organizer, so keep it light.',
     joinBtn: 'Sign up',
     organizer: 'Organizer controls',
     adminOnlyYou: 'Only visible to you on this device: your browser remembers the organizer link. Anyone opening the group link sees the participant view.',
@@ -771,7 +852,6 @@ const SANTA_I18N = (() => {
     rosterTapDrawn: 'Tap your name and enter your PIN to see your match',
     rosterTapOpen: 'Already signed up? Tap your name',
     rosterHintDrawn: 'Names have been drawn. Everyone can only see their own match, using their own PIN.',
-    rosterHintOpen: (n) => `${n} signed up so far. Back on a different device? Tap your name and enter your PIN.`,
     adminDrawn: 'Names are drawn. Everyone checks their own match with their PIN. Not even you can see who got whom.',
     adminNeed: (n, min) => `${n} signed up so far. You need at least ${min} to draw names. Share the group link so people can join.`,
     adminReady: (n) => `${n} signed up. Draw names once everyone’s in.`,
@@ -857,11 +937,14 @@ const SANTA_I18N = (() => {
     joinTitle: '참가하기',
     yourName: '이름',
     pinLabel: 'PIN 번호 정하기 (숫자 4자리)',
-    pinHint: '다른 휴대폰이나 브라우저에서 결과를 볼 때 필요해요. 직접 정해서 기억해 두고, 다른 사람에게는 알려 주지 마세요. ',
-    pinWarn: '은행 비밀번호나 휴대폰 잠금 번호처럼 실제로 쓰는 번호는 피해 주세요.',
+    pinShort: '다른 기기에서 결과를 볼 때 쓰는 열쇠예요. 새로 만들고, 은행 비밀번호는 피해 주세요.',
+    pinWhy: 'PIN은 왜 필요해요?',
+    pinWhyBody: '뽑기 결과는 본인만 볼 수 있어요. 이 기기는 당신을 기억하고, 다른 휴대폰이나 브라우저에서는 이름을 누르고 PIN을 입력하면 돼요. 직접 정해서 기억해 두고 다른 사람에게 알려 주지 마세요. 은행 비밀번호나 휴대폰 잠금 번호처럼 실제로 쓰는 번호는 피해 주세요. 잊어버리면 주최자가 재설정해 줄 수 있어요.',
+    nudge: (n) => `지금까지 ${n}명 참가했어요. 더 부를 사람 있나요?`,
+    share: '링크 공유',
     joinWishLabel: '받고 싶은 선물이나 메모 (선택)',
     joinWishPh: '나를 뽑은 사람에게 보여요',
-    wishPrivacy: '나를 뽑은 사람과 주최자가 볼 수 있어요. 민감한 정보는 적지 마세요.',
+    wishPrivacy: '나를 뽑은 사람과 주최자가 볼 수 있으니 가볍게 적어 주세요.',
     joinBtn: '참가하기',
     organizer: '주최자 메뉴',
     adminOnlyYou: '이 기기에서 주최자인 당신에게만 보여요. 브라우저가 주최자 링크를 기억하고 있거든요. 참가 링크로 들어온 사람에게는 참가자 화면만 보여요.',
@@ -933,7 +1016,6 @@ const SANTA_I18N = (() => {
     rosterTapDrawn: '이름을 누르고 PIN을 입력하면 결과를 볼 수 있어요',
     rosterTapOpen: '이미 참가했나요? 이름을 눌러 주세요',
     rosterHintDrawn: '뽑기가 끝났어요. 각자 자기 PIN으로 자기 결과만 볼 수 있어요.',
-    rosterHintOpen: (n) => `지금까지 ${n}명이 참가했어요. 다른 기기로 다시 들어왔다면 이름을 누르고 PIN을 입력해 주세요.`,
     adminDrawn: '뽑기가 끝났어요. 각자 PIN으로 자기 결과만 확인하고, 누가 누구를 뽑았는지는 주최자도 볼 수 없어요.',
     adminNeed: (n, min) => `지금 ${n}명이에요. 최소 ${min}명이 모여야 뽑을 수 있어요. 참가 링크를 공유해 주세요.`,
     adminReady: (n) => `지금 ${n}명이에요. 다 모이면 뽑아 주세요.`,
@@ -1018,11 +1100,14 @@ const SANTA_I18N = (() => {
     joinTitle: 'Đăng ký tham gia',
     yourName: 'Tên của bạn',
     pinLabel: 'Tự đặt mã PIN (4 chữ số)',
-    pinHint: 'Bạn sẽ cần mã này khi xem kết quả trên điện thoại hoặc trình duyệt khác. Tự nghĩ ra, nhớ kỹ và đừng nói cho ai biết. ',
-    pinWarn: 'Đừng dùng mật khẩu thật như mã PIN ngân hàng hay mã mở khóa điện thoại.',
+    pinShort: 'Chìa khóa để xem kết quả trên thiết bị khác. Tự nghĩ ra, đừng dùng mã PIN ngân hàng.',
+    pinWhy: 'Vì sao cần mã PIN?',
+    pinWhyBody: 'Chỉ bạn xem được kết quả của mình. Thiết bị này sẽ nhớ bạn; trên điện thoại hay trình duyệt khác, bạn bấm vào tên mình rồi nhập mã PIN. Tự nghĩ ra, nhớ kỹ, đừng nói cho ai, và đừng dùng mật khẩu thật như mã PIN ngân hàng hay mã mở khóa điện thoại. Quên thì nhờ người tổ chức đặt lại.',
+    nudge: (n) => `Đã có ${n} người. Còn ai nên tham gia nữa không?`,
+    share: 'Chia sẻ link',
     joinWishLabel: 'Gợi ý quà hoặc ghi chú (không bắt buộc)',
     joinWishPh: 'Người bốc trúng bạn sẽ thấy',
-    wishPrivacy: 'Người tặng quà và người tổ chức có thể đọc. Đừng ghi thông tin riêng tư.',
+    wishPrivacy: 'Người bốc trúng bạn và người tổ chức sẽ thấy, nên đừng ghi gì quá riêng tư.',
     joinBtn: 'Đăng ký',
     organizer: 'Khu vực người tổ chức',
     adminOnlyYou: 'Chỉ bạn thấy phần này trên thiết bị này, vì trình duyệt đã ghi nhớ link quản lý. Người mở link nhóm chỉ thấy trang của người tham gia.',
@@ -1094,7 +1179,6 @@ const SANTA_I18N = (() => {
     rosterTapDrawn: 'Bấm vào tên bạn rồi nhập mã PIN để xem kết quả',
     rosterTapOpen: 'Đăng ký rồi? Bấm vào tên bạn',
     rosterHintDrawn: 'Đã bốc thăm xong. Mỗi người chỉ xem được kết quả của mình bằng mã PIN riêng.',
-    rosterHintOpen: (n) => `Đã có ${n} người đăng ký. Nếu bạn quay lại bằng thiết bị khác, hãy bấm vào tên mình rồi nhập mã PIN.`,
     adminDrawn: 'Đã bốc thăm xong. Mỗi người tự xem kết quả bằng mã PIN của mình, ngay cả bạn cũng không xem được ai bốc trúng ai.',
     adminNeed: (n, min) => `Hiện có ${n} người, cần ít nhất ${min} người mới bốc thăm được. Bạn gửi link nhóm để mọi người đăng ký nhé.`,
     adminReady: (n) => `Hiện có ${n} người. Đủ người thì bốc thăm thôi.`,
@@ -1218,12 +1302,32 @@ for (const code of L.order) {
 }
 $('langs').addEventListener('click', (ev) => { const b = ev.target.closest('button[data-lang]'); if (b) setLang(b.dataset.lang); });
 
-/** The decorative title and handwriting fonts only cover plain Latin. A name like "Hương" or "Nguyễn" would come out
-    half in one font, half in another, so text with those letters gets a font that has all of them. */
+/** The handwriting fonts cover Latin, Chinese and Korean but not Vietnamese letters: a name like "Hương" would come out
+    half in one font, half in another, so names with those letters get a face that has all of them. */
 const beyondPlainLatin = (text) => Array.from(String(text || '')).some((ch) => {
   const c = ch.codePointAt(0);
   return (c >= 0x100 && c <= 0x24F) || (c >= 0x300 && c <= 0x36F) || (c >= 0x1E00 && c <= 0x1EFF);
 });
+/** The festive title face has plain Latin only. Any title with other letters (Chinese, Korean, Vietnamese) is set in
+    the ordinary bold face instead of coming out half and half. */
+const titleNeedsPlain = (text) => Array.from(String(text || '')).some((ch) => {
+  const c = ch.codePointAt(0);
+  return c > 0x7F && !/[\p{P}\p{S}\p{Z}]/u.test(ch);
+});
+/** A colored circle with the first letter of a name, so a list of names reads as people, not as form controls. */
+const AVATAR_COLORS = ['#b8203a', '#1c7450', '#c77d12', '#2b6cb0', '#7a3e9d', '#566e64'];
+function avatar(name) {
+  const s = String(name || '');
+  let first = s;
+  try { first = [...new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(s)][0].segment; } catch (e) { first = Array.from(s)[0] || '?'; }
+  let hsh = 0; for (const ch of s) hsh = (hsh * 31 + ch.codePointAt(0)) >>> 0;
+  const n = el('span', 'avatar', first.toLocaleUpperCase()); n.style.background = AVATAR_COLORS[hsh % AVATAR_COLORS.length]; n.setAttribute('aria-hidden', 'true');
+  return n;
+}
+const chip = (name, asButton) => {
+  const n = el(asButton ? 'button' : 'li', 'chip'); if (asButton) { n.type = 'button'; n.dataset.name = name; }
+  n.append(avatar(name), el('span', 'chip-name', name)); return n;
+};
 
 /* ---------- talking to the API ---------- */
 // The body is sent without a JSON content type on purpose: that keeps it a "simple" cross-origin request,
@@ -1323,6 +1427,32 @@ function remember(id, title, isAdmin) {
 }
 function forgetEvent(id) { store.set(K_LIST, (store.get(K_LIST) || []).filter((e) => e && e.id !== id)); }
 
+/* ---------- a burst of confetti (skipped when the system asks for reduced motion) ---------- */
+function confetti(x, y) {
+  if (reduced) return;
+  const cv = $('fx'), ctx = cv.getContext && cv.getContext('2d');
+  if (!ctx) return;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; cv.hidden = false; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const colors = ['#b8203a', '#f2c14e', '#2f8a66', '#ffffff', '#e8495e', '#dcbf93'];
+  const bits = Array.from({ length: 90 }, () => {
+    const a = -Math.PI / 2 + (Math.random() - .5) * 1.6, v = 380 + Math.random() * 420;
+    return { x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: 3 + Math.random() * 4, c: colors[(Math.random() * colors.length) | 0], spin: Math.random() * 6.28, w: 6 + Math.random() * 6 };
+  });
+  let last = 0, t0 = 0;
+  const step = (now) => {
+    if (!t0) t0 = now; const dt = last ? Math.min(.04, (now - last) / 1000) : 0; last = now;
+    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    for (const b of bits) {
+      b.vy += 900 * dt; b.vx *= .985; b.x += b.vx * dt; b.y += b.vy * dt; b.spin += dt * 8;
+      ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(b.spin); ctx.fillStyle = b.c; ctx.globalAlpha = Math.max(0, 1 - (now - t0) / 1600);
+      ctx.fillRect(-b.w / 2, -b.r / 2, b.w, b.r); ctx.restore();
+    }
+    if (now - t0 < 1600) requestAnimationFrame(step); else { ctx.clearRect(0, 0, innerWidth, innerHeight); cv.hidden = true; }
+  };
+  requestAnimationFrame(step);
+}
+
 /* ---------- the gift tag ---------- */
 const PAW = '<svg class="paw" viewBox="0 0 40 40" aria-hidden="true"><ellipse cx="20" cy="26" rx="9" ry="7.5"/><ellipse cx="8.5" cy="16" rx="3.6" ry="4.6"/><ellipse cx="16" cy="9.5" rx="3.6" ry="4.8"/><ellipse cx="24" cy="9.5" rx="3.6" ry="4.8"/><ellipse cx="31.5" cy="16" rx="3.6" ry="4.6"/></svg>';
 function buildTag(a) {
@@ -1347,7 +1477,7 @@ function buildTag(a) {
     inner.classList.add('fold');
     setTimeout(() => { swap(); inner.classList.remove('fold'); }, 200);
   };
-  back.addEventListener('click', () => flip(true));
+  back.addEventListener('click', () => { const r = back.getBoundingClientRect(); confetti(r.left + r.width / 2, r.top + r.height / 2); flip(true); });
   hide.addEventListener('click', () => flip(false));
   return tag;
 }
@@ -1363,12 +1493,13 @@ function renderMine() {
     const li = el('li'); const who = el('div', 'who');
     const a = el('a', '', e.title || 'Secret Santa'); a.href = eventUrl(e.id);
     const b = el('b'); b.append(a); who.append(b, el('small', '', e.admin ? t('iOrganize') : t('iJoined')));
-    li.append(who); $('mineList').append(li);
+    li.append(avatar(e.title || 'S'), who); $('mineList').append(li);
   }
 }
 function startHome() {
   const now = new Date();
   const year = now.getMonth() === 11 && now.getDate() > 24 ? now.getFullYear() + 1 : now.getFullYear();
+  $('skeleton').hidden = true;
   $('homeFields').hidden = false;
   $('createCard').hidden = false;
   $('newTitle').value = 'Secret Santa ' + year;
@@ -1410,22 +1541,23 @@ const S = {
 function render() {
   const st = S.state;
   $('goneCard').hidden = !S.gone;
-  const note = S.gone ? '' : (st ? (S.loadError ? t('staleNote') : '') : (S.loadError ? t('offlineNote') : t('loading')));
+  const note = S.gone ? '' : (st ? (S.loadError ? t('staleNote') : '') : (S.loadError ? t('offlineNote') : ''));
   $('notice').textContent = note; $('notice').hidden = !note;
+  $('skeleton').hidden = S.gone || !!st || S.loadError;          // grey bars stand in for the cards until the first answer arrives
   for (const id of ['meCard', 'joinCard', 'rosterCard', 'adminCard']) if (S.gone || !st) $(id).hidden = true;
   $('eventFields').hidden = S.gone || !st;
   if (S.gone || !st) { $('statusPill').hidden = true; $('deadline').hidden = true; $('retention').textContent = ''; return; }
 
   const drawn = st.status === 'drawn';
   $('title').textContent = st.title; document.title = st.title;
-  $('title').classList.toggle('plain', beyondPlainLatin(st.title) || !/^Secret Santa(?: \d{4})?$/i.test(st.title));
+  $('title').classList.toggle('plain', titleNeedsPlain(st.title));
   $('fBudget').textContent = st.budget || '—';
   $('fDate').textContent = dayText(st.exchangeOn);
   const pill = $('statusPill'); pill.hidden = false;
   pill.textContent = drawn ? t('pillDrawn') : t('pillOpen');
   pill.className = 'pill' + (drawn ? ' drawn' : '');
   $('deadline').hidden = drawn || !st.drawAt;
-  if (st.drawAt) $('deadline').textContent = t('deadline', timeText(st.drawAt), tzName(st.drawAt));
+  if (st.drawAt) $('deadlineText').textContent = t('deadline', timeText(st.drawAt), tzName(st.drawAt));
   $('retention').textContent = t('retention', monthDayText(st.deleteAt));
 
   const v = S.view;
@@ -1445,19 +1577,23 @@ function render() {
     }
     if (document.activeElement !== $('wishInput') && !S.busy) $('wishInput').value = v.me.wish;
     $('leaveBtn').hidden = drawn;
+    $('nudge').hidden = drawn;
+    $('nudgeText').textContent = t('nudge', st.people.length);
   } else if (S.tagKey) { S.tagKey = ''; $('tagSlot').replaceChildren(); }
 
   const n = st.people.length;
   $('rosterCard').hidden = n === 0;
-  $('rosterTitle').textContent = v ? t('rosterIn', n) : (drawn ? t('rosterTapDrawn') : t('rosterTapOpen'));
-  $('rosterHint').textContent = v ? '' : (drawn ? t('rosterHintDrawn') : t('rosterHintOpen', n));
+  // A first-time visitor while sign-ups are open: "Sign up" leads, the people already in come second as small chips.
+  // After the draw there is nothing to sign up for, so "tap your name" is the main thing and the chips are big.
+  const secondary = !v && !drawn;
+  $('rosterCard').classList.toggle('after-join', secondary);
+  $('rosterTitle').textContent = v || secondary ? t('rosterIn', n) : t('rosterTapDrawn');
+  $('rosterHint').textContent = v ? '' : (drawn ? t('rosterHintDrawn') : t('rosterTapOpen'));
   $('rosterHint').hidden = !!v;
   $('names').hidden = !!v; $('roster').hidden = !v;
+  $('names').classList.toggle('big', drawn);
   const box = v ? $('roster') : $('names'); box.replaceChildren();
-  for (const name of st.people) {
-    if (v) box.append(el('li', '', name));
-    else { const b = el('button', 'btn', name); b.type = 'button'; b.dataset.name = name; box.append(b); }
-  }
+  for (const name of st.people) box.append(chip(name, !v));
   renderAdmin();
 }
 function renderAdmin() {
@@ -1468,7 +1604,7 @@ function renderAdmin() {
   $('adminStatus').textContent = drawn ? t('adminDrawn') : (n < st.min ? t('adminNeed', n, st.min) : t('adminReady', n));
   const list = $('adminList'); list.replaceChildren();
   for (const p of a.people) {
-    const li = el('li'); const who = el('div', 'who'); who.append(el('b', '', p.name));
+    const li = el('li'); const who = el('div', 'who'); who.append(el('b', '', p.name)); li.append(avatar(p.name));
     who.append(el('small', '', (p.wish ? t('wishOf', p.wish) : t('noWish')) + (p.locked ? t('pinLocked') : '')));
     const acts = el('div', 'row');
     const pin = el('button', 'btn sm', t('resetPin')); pin.type = 'button'; pin.dataset.act = 'setPin'; pin.dataset.name = p.name;
@@ -1562,6 +1698,12 @@ function wireEvent() {
     S.busy = false;
     if (!r.ok) { $('wishErr').textContent = errText(r.data); return; }
     S.view = r.data; S.state = r.data.state; $('wishOk').textContent = t('saved'); $('wishInput').blur(); render();
+  });
+  $('shareBtn').addEventListener('click', async () => {
+    const url = eventUrl(EVENT_ID), title = (S.state && S.state.title) || 'Secret Santa';
+    if (navigator.share) { try { await navigator.share({ title, url }); } catch (e) { /* closed the sheet */ } return; }
+    let p; try { p = navigator.clipboard.writeText(url); } catch (e) { p = Promise.reject(e); }
+    p.then(() => toast(t('copied')), () => toast(t('copyManual')));
   });
   $('logoutBtn').addEventListener('click', () => {
     if (S.me) api('logout', Object.assign({ id: EVENT_ID }, S.me));       // cancels this device's token on the server too

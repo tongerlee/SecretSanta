@@ -68,12 +68,32 @@ for (const code of L.order) {
 }
 $('langs').addEventListener('click', (ev) => { const b = ev.target.closest('button[data-lang]'); if (b) setLang(b.dataset.lang); });
 
-/** The decorative title and handwriting fonts only cover plain Latin. A name like "Hương" or "Nguyễn" would come out
-    half in one font, half in another, so text with those letters gets a font that has all of them. */
+/** The handwriting fonts cover Latin, Chinese and Korean but not Vietnamese letters: a name like "Hương" would come out
+    half in one font, half in another, so names with those letters get a face that has all of them. */
 const beyondPlainLatin = (text) => Array.from(String(text || '')).some((ch) => {
   const c = ch.codePointAt(0);
   return (c >= 0x100 && c <= 0x24F) || (c >= 0x300 && c <= 0x36F) || (c >= 0x1E00 && c <= 0x1EFF);
 });
+/** The festive title face has plain Latin only. Any title with other letters (Chinese, Korean, Vietnamese) is set in
+    the ordinary bold face instead of coming out half and half. */
+const titleNeedsPlain = (text) => Array.from(String(text || '')).some((ch) => {
+  const c = ch.codePointAt(0);
+  return c > 0x7F && !/[\p{P}\p{S}\p{Z}]/u.test(ch);
+});
+/** A colored circle with the first letter of a name, so a list of names reads as people, not as form controls. */
+const AVATAR_COLORS = ['#b8203a', '#1c7450', '#c77d12', '#2b6cb0', '#7a3e9d', '#566e64'];
+function avatar(name) {
+  const s = String(name || '');
+  let first = s;
+  try { first = [...new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(s)][0].segment; } catch (e) { first = Array.from(s)[0] || '?'; }
+  let hsh = 0; for (const ch of s) hsh = (hsh * 31 + ch.codePointAt(0)) >>> 0;
+  const n = el('span', 'avatar', first.toLocaleUpperCase()); n.style.background = AVATAR_COLORS[hsh % AVATAR_COLORS.length]; n.setAttribute('aria-hidden', 'true');
+  return n;
+}
+const chip = (name, asButton) => {
+  const n = el(asButton ? 'button' : 'li', 'chip'); if (asButton) { n.type = 'button'; n.dataset.name = name; }
+  n.append(avatar(name), el('span', 'chip-name', name)); return n;
+};
 
 /* ---------- talking to the API ---------- */
 // The body is sent without a JSON content type on purpose: that keeps it a "simple" cross-origin request,
@@ -173,6 +193,32 @@ function remember(id, title, isAdmin) {
 }
 function forgetEvent(id) { store.set(K_LIST, (store.get(K_LIST) || []).filter((e) => e && e.id !== id)); }
 
+/* ---------- a burst of confetti (skipped when the system asks for reduced motion) ---------- */
+function confetti(x, y) {
+  if (reduced) return;
+  const cv = $('fx'), ctx = cv.getContext && cv.getContext('2d');
+  if (!ctx) return;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; cv.hidden = false; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const colors = ['#b8203a', '#f2c14e', '#2f8a66', '#ffffff', '#e8495e', '#dcbf93'];
+  const bits = Array.from({ length: 90 }, () => {
+    const a = -Math.PI / 2 + (Math.random() - .5) * 1.6, v = 380 + Math.random() * 420;
+    return { x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: 3 + Math.random() * 4, c: colors[(Math.random() * colors.length) | 0], spin: Math.random() * 6.28, w: 6 + Math.random() * 6 };
+  });
+  let last = 0, t0 = 0;
+  const step = (now) => {
+    if (!t0) t0 = now; const dt = last ? Math.min(.04, (now - last) / 1000) : 0; last = now;
+    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    for (const b of bits) {
+      b.vy += 900 * dt; b.vx *= .985; b.x += b.vx * dt; b.y += b.vy * dt; b.spin += dt * 8;
+      ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(b.spin); ctx.fillStyle = b.c; ctx.globalAlpha = Math.max(0, 1 - (now - t0) / 1600);
+      ctx.fillRect(-b.w / 2, -b.r / 2, b.w, b.r); ctx.restore();
+    }
+    if (now - t0 < 1600) requestAnimationFrame(step); else { ctx.clearRect(0, 0, innerWidth, innerHeight); cv.hidden = true; }
+  };
+  requestAnimationFrame(step);
+}
+
 /* ---------- the gift tag ---------- */
 const PAW = '<svg class="paw" viewBox="0 0 40 40" aria-hidden="true"><ellipse cx="20" cy="26" rx="9" ry="7.5"/><ellipse cx="8.5" cy="16" rx="3.6" ry="4.6"/><ellipse cx="16" cy="9.5" rx="3.6" ry="4.8"/><ellipse cx="24" cy="9.5" rx="3.6" ry="4.8"/><ellipse cx="31.5" cy="16" rx="3.6" ry="4.6"/></svg>';
 function buildTag(a) {
@@ -197,7 +243,7 @@ function buildTag(a) {
     inner.classList.add('fold');
     setTimeout(() => { swap(); inner.classList.remove('fold'); }, 200);
   };
-  back.addEventListener('click', () => flip(true));
+  back.addEventListener('click', () => { const r = back.getBoundingClientRect(); confetti(r.left + r.width / 2, r.top + r.height / 2); flip(true); });
   hide.addEventListener('click', () => flip(false));
   return tag;
 }
@@ -213,12 +259,13 @@ function renderMine() {
     const li = el('li'); const who = el('div', 'who');
     const a = el('a', '', e.title || 'Secret Santa'); a.href = eventUrl(e.id);
     const b = el('b'); b.append(a); who.append(b, el('small', '', e.admin ? t('iOrganize') : t('iJoined')));
-    li.append(who); $('mineList').append(li);
+    li.append(avatar(e.title || 'S'), who); $('mineList').append(li);
   }
 }
 function startHome() {
   const now = new Date();
   const year = now.getMonth() === 11 && now.getDate() > 24 ? now.getFullYear() + 1 : now.getFullYear();
+  $('skeleton').hidden = true;
   $('homeFields').hidden = false;
   $('createCard').hidden = false;
   $('newTitle').value = 'Secret Santa ' + year;
@@ -260,22 +307,23 @@ const S = {
 function render() {
   const st = S.state;
   $('goneCard').hidden = !S.gone;
-  const note = S.gone ? '' : (st ? (S.loadError ? t('staleNote') : '') : (S.loadError ? t('offlineNote') : t('loading')));
+  const note = S.gone ? '' : (st ? (S.loadError ? t('staleNote') : '') : (S.loadError ? t('offlineNote') : ''));
   $('notice').textContent = note; $('notice').hidden = !note;
+  $('skeleton').hidden = S.gone || !!st || S.loadError;          // grey bars stand in for the cards until the first answer arrives
   for (const id of ['meCard', 'joinCard', 'rosterCard', 'adminCard']) if (S.gone || !st) $(id).hidden = true;
   $('eventFields').hidden = S.gone || !st;
   if (S.gone || !st) { $('statusPill').hidden = true; $('deadline').hidden = true; $('retention').textContent = ''; return; }
 
   const drawn = st.status === 'drawn';
   $('title').textContent = st.title; document.title = st.title;
-  $('title').classList.toggle('plain', beyondPlainLatin(st.title) || !/^Secret Santa(?: \d{4})?$/i.test(st.title));
+  $('title').classList.toggle('plain', titleNeedsPlain(st.title));
   $('fBudget').textContent = st.budget || '—';
   $('fDate').textContent = dayText(st.exchangeOn);
   const pill = $('statusPill'); pill.hidden = false;
   pill.textContent = drawn ? t('pillDrawn') : t('pillOpen');
   pill.className = 'pill' + (drawn ? ' drawn' : '');
   $('deadline').hidden = drawn || !st.drawAt;
-  if (st.drawAt) $('deadline').textContent = t('deadline', timeText(st.drawAt), tzName(st.drawAt));
+  if (st.drawAt) $('deadlineText').textContent = t('deadline', timeText(st.drawAt), tzName(st.drawAt));
   $('retention').textContent = t('retention', monthDayText(st.deleteAt));
 
   const v = S.view;
@@ -295,19 +343,23 @@ function render() {
     }
     if (document.activeElement !== $('wishInput') && !S.busy) $('wishInput').value = v.me.wish;
     $('leaveBtn').hidden = drawn;
+    $('nudge').hidden = drawn;
+    $('nudgeText').textContent = t('nudge', st.people.length);
   } else if (S.tagKey) { S.tagKey = ''; $('tagSlot').replaceChildren(); }
 
   const n = st.people.length;
   $('rosterCard').hidden = n === 0;
-  $('rosterTitle').textContent = v ? t('rosterIn', n) : (drawn ? t('rosterTapDrawn') : t('rosterTapOpen'));
-  $('rosterHint').textContent = v ? '' : (drawn ? t('rosterHintDrawn') : t('rosterHintOpen', n));
+  // A first-time visitor while sign-ups are open: "Sign up" leads, the people already in come second as small chips.
+  // After the draw there is nothing to sign up for, so "tap your name" is the main thing and the chips are big.
+  const secondary = !v && !drawn;
+  $('rosterCard').classList.toggle('after-join', secondary);
+  $('rosterTitle').textContent = v || secondary ? t('rosterIn', n) : t('rosterTapDrawn');
+  $('rosterHint').textContent = v ? '' : (drawn ? t('rosterHintDrawn') : t('rosterTapOpen'));
   $('rosterHint').hidden = !!v;
   $('names').hidden = !!v; $('roster').hidden = !v;
+  $('names').classList.toggle('big', drawn);
   const box = v ? $('roster') : $('names'); box.replaceChildren();
-  for (const name of st.people) {
-    if (v) box.append(el('li', '', name));
-    else { const b = el('button', 'btn', name); b.type = 'button'; b.dataset.name = name; box.append(b); }
-  }
+  for (const name of st.people) box.append(chip(name, !v));
   renderAdmin();
 }
 function renderAdmin() {
@@ -318,7 +370,7 @@ function renderAdmin() {
   $('adminStatus').textContent = drawn ? t('adminDrawn') : (n < st.min ? t('adminNeed', n, st.min) : t('adminReady', n));
   const list = $('adminList'); list.replaceChildren();
   for (const p of a.people) {
-    const li = el('li'); const who = el('div', 'who'); who.append(el('b', '', p.name));
+    const li = el('li'); const who = el('div', 'who'); who.append(el('b', '', p.name)); li.append(avatar(p.name));
     who.append(el('small', '', (p.wish ? t('wishOf', p.wish) : t('noWish')) + (p.locked ? t('pinLocked') : '')));
     const acts = el('div', 'row');
     const pin = el('button', 'btn sm', t('resetPin')); pin.type = 'button'; pin.dataset.act = 'setPin'; pin.dataset.name = p.name;
@@ -412,6 +464,12 @@ function wireEvent() {
     S.busy = false;
     if (!r.ok) { $('wishErr').textContent = errText(r.data); return; }
     S.view = r.data; S.state = r.data.state; $('wishOk').textContent = t('saved'); $('wishInput').blur(); render();
+  });
+  $('shareBtn').addEventListener('click', async () => {
+    const url = eventUrl(EVENT_ID), title = (S.state && S.state.title) || 'Secret Santa';
+    if (navigator.share) { try { await navigator.share({ title, url }); } catch (e) { /* closed the sheet */ } return; }
+    let p; try { p = navigator.clipboard.writeText(url); } catch (e) { p = Promise.reject(e); }
+    p.then(() => toast(t('copied')), () => toast(t('copyManual')));
   });
   $('logoutBtn').addEventListener('click', () => {
     if (S.me) api('logout', Object.assign({ id: EVENT_ID }, S.me));       // cancels this device's token on the server too

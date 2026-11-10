@@ -174,18 +174,29 @@ with sync_playwright() as p:
             check(pg, f"{label} / {name}")
             if name == "open event":
                 # the first thing to do (tap your name, or sign up) must start within the first screen on a phone
-                top = pg.evaluate("[...document.querySelectorAll('main > .card:not([hidden])')][0].getBoundingClientRect().top")
+                top = pg.evaluate("Math.min(...[...document.querySelectorAll('.flow > .card:not([hidden])')].map(c => c.getBoundingClientRect().top))")
                 if top > h - 120: errors.append(f"{label}: first card starts at {top:.0f}px, too far down for a {h}px screen")
                 if w == 320: pg.screenshot(path=str(OUT / "check-320-event.png"), full_page=True)
             if name == "home" and w == 1280: pg.screenshot(path=str(OUT / "check-desktop-home.png"), full_page=False)
             pg.context.close()
+
+    # a first-time visitor sees the sign-up card above the people already in; after the draw the names lead
+    nv = phone(browser, "newcomer order", "en-US"); nv.goto(fresh); nv.wait_for_selector("#joinCard:not([hidden])")
+    tops = nv.evaluate("({ join: document.getElementById('joinCard').getBoundingClientRect().top, roster: document.getElementById('rosterCard').getBoundingClientRect().top })")
+    assert tops["join"] < tops["roster"], tops
+    assert nv.locator("#names button.chip").count() >= 1 and nv.locator("#names .avatar").first.inner_text().strip() != ""
+    dv = phone(browser, "drawn order", "en-US"); dv.goto(shares["en"]); dv.wait_for_selector("#names button")
+    assert dv.is_hidden("#joinCard") and "Tap your name" in dv.inner_text("#rosterTitle") and "big" in dv.get_attribute("#names", "class")
+    # the brand stamp links to the store, and the title keeps the festive face for any Latin title
+    assert dv.get_attribute("footer .stamp", "href") == "https://departmentofunnecessarythings.com/"
+    assert "plain" not in (dv.get_attribute("#title", "class") or "")
 
     # saved events sit above "start a new event" once this device has any
     home = phone(browser, "home order", "en-US"); home.goto(SITE); home.wait_for_selector("#createCard:not([hidden])")
     assert home.is_hidden("#mineCard"), "no saved events yet, so the list should be hidden"
     home.fill("#newDate", "2026-12-24"); home.click("#createBtn"); home.wait_for_selector("#createdCard:not([hidden])")
     home.goto(SITE); home.wait_for_selector("#mineCard:not([hidden])")
-    order = home.evaluate("[...document.querySelectorAll('main > .card:not([hidden])')].map(c => c.id)")
+    order = home.evaluate("[...document.querySelectorAll('.flow > .card:not([hidden])')].map(c => c.id)")
     assert order.index("mineCard") < order.index("createCard"), order
     assert home.is_visible("#createCard"), "starting a new event must stay available underneath"
 
