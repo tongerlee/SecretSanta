@@ -14,9 +14,18 @@ for tool in sam aws zip curl perl; do
 done
 
 echo "== 1/3  API, table and the Amplify app"
+# SAM keeps a stack's previous parameter values unless they are passed again, so the CustomDomain default in
+# template.yaml is read out and passed explicitly: edit it there and the next deploy applies it everywhere.
+CUSTOM_DOMAIN="$(python3 -c "
+import re
+t=open('template.yaml').read()
+m=re.search(r'CustomDomain:\s*\n(?:.*\n)*?\s*Default:\s*(\S+)',t)
+print(m.group(1) if m else '')")"
+echo "Custom domain from template.yaml: ${CUSTOM_DOMAIN:-(none)}"
 sam deploy \
   --template-file template.yaml \
   --stack-name "$STACK" \
+  --parameter-overrides "CustomDomain=$CUSTOM_DOMAIN" \
   --resolve-s3 \
   --capabilities CAPABILITY_IAM \
   --no-confirm-changeset \
