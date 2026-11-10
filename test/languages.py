@@ -63,19 +63,28 @@ def walk(browser, lang, c):
     shot(org, lang, "1-home")
     org.click("#createBtn"); org.wait_for_selector("#createdCard:not([hidden])")
     share = org.input_value("#newShare")
+    assert org.get_attribute("#newAdmin", "type") == "password" and org.get_attribute("#newAdminMail", "href").startswith("mailto:?subject=")   # the organizer link starts masked
     shot(org, lang, "2-created")
     org.click("#newOpen"); org.wait_for_selector("#adminCard:not([hidden])")
     assert org.inner_text("#joinCard h2") == c["join"] and org.inner_text("#fDate") == c["day"], (org.inner_text("#joinCard h2"), org.inner_text("#fDate"))
     org.fill("#joinName", me); org.fill("#joinPin", "1111"); org.fill("#joinWish", c["wish"]); org.click("#joinBtn")
     org.wait_for_selector("#meCard:not([hidden])")
+    # the confirmation is written in the card (no PIN on screen), focus moves to the heading, and the organizer's controls now lead
+    assert org.inner_text("#joinedNote").strip() and "1111" not in org.inner_text("#meCard") and org.is_hidden("#toast")
+    assert org.evaluate("document.activeElement.id") == "meTitle"
+    tops = org.evaluate("({ admin: document.getElementById('adminCard').getBoundingClientRect().top, me: document.getElementById('meCard').getBoundingClientRect().top })")
+    assert tops["admin"] < tops["me"], tops
+    assert "primary" in org.get_attribute("#copyShareBtn", "class") and "primary" not in org.get_attribute("#drawBtn", "class")   # one person in: inviting is the red button
     eid = share.split("?e=")[1]
     post("join", {"id": eid, "name": a, "pin": "2222", "wish": c["wish"]})
     post("join", {"id": eid, "name": b, "pin": "3333", "wish": ""})
     org.click("#settings summary"); org.fill("#cfgDrawAt", "2026-12-20T20:00"); org.click("#cfgSave")
     org.wait_for_selector("#deadline:not([hidden])"); org.wait_for_selector("#adminOk:not(:empty)")
+    assert ":00" in org.inner_text("#meStatus"), org.inner_text("#meStatus")                                                    # waiting text now carries the draw time
     assert not org.evaluate("document.getElementById('manage').open"), "participant management should start collapsed"
     org.evaluate("document.getElementById('manage').open = true")
     org.wait_for_selector("#adminList li >> nth=2")
+    assert "primary" in org.get_attribute("#drawBtn", "class") and "primary" not in org.get_attribute("#copyShareBtn", "class")   # three in: drawing is the red button
     shot(org, lang, "3-organizer")
 
     # someone who has not signed up yet, then a wrong PIN on a name
@@ -92,6 +101,7 @@ def walk(browser, lang, c):
     org.click("#drawBtn"); org.wait_for_selector("#dlg[open]")
     shot(org, lang, "6-draw-dialog", full=False)
     org.click("#dlgOk"); org.wait_for_selector("#reopenBtn:not([hidden])")
+    assert org.is_hidden("#invite") and org.inner_text("#adminStatusDrawn").strip() and org.inner_text("#joinedNote") == ""   # nothing left to invite to
     org.wait_for_selector("#tagSlot .tag-back")
     org.locator("#tagSlot").scroll_into_view_if_needed(); org.evaluate("window.scrollBy(0, -140)")
     shot(org, lang, "7-tag-back", full=False)

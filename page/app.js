@@ -80,8 +80,9 @@ const titleNeedsPlain = (text) => Array.from(String(text || '')).some((ch) => {
   const c = ch.codePointAt(0);
   return c > 0x7F && !/[\p{P}\p{S}\p{Z}]/u.test(ch);
 });
-/** A colored circle with the first letter of a name, so a list of names reads as people, not as form controls. */
-const AVATAR_COLORS = ['#b8203a', '#1c7450', '#c77d12', '#2b6cb0', '#7a3e9d', '#566e64'];
+/** A colored circle with the first letter of a name, so a list of names reads as people, not as form controls.
+    Muted berry, pine, ochre, slate, plum and moss; every one keeps white text above 4.5:1 contrast. */
+const AVATAR_COLORS = ['#9b2a3f', '#2f6b52', '#8f6219', '#3d6a9a', '#6f4f8f', '#5d6f66'];
 function avatar(name) {
   const s = String(name || '');
   let first = s;
@@ -139,7 +140,7 @@ function tzName(ms) {
   const off = -new Date(ms || Date.now()).getTimezoneOffset(), sign = off < 0 ? '-' : '+', abs = Math.abs(off);
   return 'GMT' + sign + Math.floor(abs / 60) + (abs % 60 ? ':' + String(abs % 60).padStart(2, '0') : '');
 }
-const monthDayText = (ms) => { const d = new Date(ms); return t('fmtMd', d.getMonth() + 1, d.getDate()); };
+const dateText = (ms) => { const d = new Date(ms); return t('fmtMdY', d.getMonth() + 1, d.getDate(), d.getFullYear()); };
 function localInputValue(ms) {
   if (!ms) return '';
   return new Date(ms - new Date(ms).getTimezoneOffset() * 60000).toISOString().slice(0, 16);
@@ -184,6 +185,18 @@ document.addEventListener('click', (ev) => {
   let p; try { p = navigator.clipboard.writeText(input.value); } catch (e) { p = Promise.reject(e); }
   p.then(() => toast(t('copied')), () => { input.focus(); input.select(); toast(t('copyManual')); });
 });
+/** The phone's own share sheet where there is one (most phones); otherwise the link goes to the clipboard. */
+async function shareLink(url, title) {
+  if (navigator.share) { try { await navigator.share({ title, url }); } catch (e) { /* closed the sheet */ } return; }
+  let p; try { p = navigator.clipboard.writeText(url); } catch (e) { p = Promise.reject(e); }
+  p.then(() => toast(t('copied')), () => toast(t('copyManual')));
+}
+// "Share" buttons next to a "Copy" button only make sense where a share sheet exists; elsewhere they would just copy twice.
+const canShare = !!navigator.share;
+for (const id of ['newShareBtn', 'adminShareBtn']) $(id).hidden = !canShare;
+/** Wish boxes grow with what is typed (two lines to start) instead of scrolling inside themselves. */
+function fitTextarea(ta) { ta.style.height = 'auto'; ta.style.height = Math.min(220, ta.scrollHeight + 3) + 'px'; }
+for (const ta of document.querySelectorAll('textarea')) ta.addEventListener('input', () => fitTextarea(ta));
 /** Remember that this device has to do with an event, so the home page can list it. */
 function remember(id, title, isAdmin) {
   const list = (store.get(K_LIST) || []).filter((e) => e && e.id !== id);
@@ -261,6 +274,21 @@ function renderMine() {
     const b = el('b'); b.append(a); who.append(b, el('small', '', e.admin ? t('iOrganize') : t('iJoined')));
     li.append(avatar(e.title || 'S'), who); $('mineList').append(li);
   }
+  renderCreated();
+}
+/* The "you're all set" screen: two hand-offs. The group link is for everyone; the organizer link is for one person only,
+   so it starts masked (like a password) and offers a mail-to-self, which is the one place most people never lose a link. */
+let created = null;                                // { id, adminKey, title, shown } after a successful create
+function renderCreated() {
+  if (!created) return;
+  const share = eventUrl(created.id), adminLink = share + '#admin=' + created.adminKey;
+  $('newShare').value = share;
+  $('newAdmin').value = adminLink;
+  $('newAdmin').type = created.shown ? 'text' : 'password';
+  $('newAdminShow').textContent = created.shown ? t('conceal') : t('reveal');
+  $('newAdminShow').setAttribute('aria-pressed', String(created.shown));
+  $('newAdminMail').href = 'mailto:?subject=' + encodeURIComponent(t('mailSubject', created.title)) + '&body=' + encodeURIComponent(t('mailBody', created.title, adminLink));
+  $('newOpen').href = share;
 }
 function startHome() {
   const now = new Date();
@@ -285,12 +313,13 @@ function startHome() {
     const { id, adminKey, state } = r.data;
     store.set('santa:' + id + ':admin', adminKey);
     remember(id, state.title, true);
-    $('newShare').value = eventUrl(id);
-    $('newAdmin').value = eventUrl(id) + '#admin=' + adminKey;
-    $('newOpen').href = eventUrl(id);
+    created = { id, adminKey, title: state.title, shown: false };
+    renderCreated();
     $('createCard').hidden = true; $('mineCard').hidden = true; $('createdCard').hidden = false;
     $('createdCard').scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' });
   });
+  $('newAdminShow').addEventListener('click', () => { if (created) { created.shown = !created.shown; renderCreated(); } });
+  $('newShareBtn').addEventListener('click', () => { if (created) shareLink(eventUrl(created.id), created.title); });
 }
 
 /* =====================================================================================
@@ -302,6 +331,7 @@ const S = {
   view: null,               // my personal view from the server: { me, giftTo, missed }
   adminKey: null, admin: null,
   gone: false, loadError: false, busy: false, tagKey: '', note: '',
+  justJoined: false,        // signed up a moment ago on this page: show the "remember your PIN" line until the draw
 };
 
 function render() {
@@ -317,6 +347,7 @@ function render() {
   const drawn = st.status === 'drawn';
   $('title').textContent = st.title; document.title = st.title;
   $('title').classList.toggle('plain', titleNeedsPlain(st.title));
+  $('title').classList.toggle('long', Array.from(st.title).length > 16);      // same festive face, a size down so it wraps in two lines
   $('fBudget').textContent = st.budget || '—';
   $('fDate').textContent = dayText(st.exchangeOn);
   const pill = $('statusPill'); pill.hidden = false;
@@ -324,14 +355,16 @@ function render() {
   pill.className = 'pill' + (drawn ? ' drawn' : '');
   $('deadline').hidden = drawn || !st.drawAt;
   if (st.drawAt) $('deadlineText').textContent = t('deadline', timeText(st.drawAt), tzName(st.drawAt));
-  $('retention').textContent = t('retention', monthDayText(st.deleteAt));
+  $('retention').textContent = t('retention', dateText(st.deleteAt));
 
   const v = S.view;
   $('meCard').hidden = !v;
   $('joinCard').hidden = !!v || drawn;
   if (v) {
     $('meTitle').textContent = drawn ? t('meDrawn', v.me.name) : t('meJoined', v.me.name);
-    $('meStatus').textContent = v.giftTo ? '' : (v.missed ? t('missed') : t('waitDraw'));
+    $('joinedNote').textContent = S.justJoined && !drawn ? t('joinedNote') : '';
+    const waiting = st.drawAt ? t('waitDrawAt', timeText(st.drawAt), tzName(st.drawAt)) : t('waitDraw');
+    $('meStatus').textContent = v.giftTo ? '' : (v.missed ? t('missed') : waiting);
     $('meStatus').hidden = !!v.giftTo;
     $('resetNote').hidden = !v.me.pinResetAt;
     if (v.me.pinResetAt) $('resetNote').textContent = t('pinWasReset', timeText(v.me.pinResetAt));
@@ -341,11 +374,14 @@ function render() {
       S.tagKey = key; $('tagSlot').replaceChildren();
       if (v.giftTo) $('tagSlot').append(buildTag({ g: v.me.name, r: v.giftTo.name, w: v.giftTo.wish, b: st.budget, d: dayText(st.exchangeOn) }));
     }
-    if (document.activeElement !== $('wishInput') && !S.busy) $('wishInput').value = v.me.wish;
+    if (document.activeElement !== $('wishInput') && !S.busy) { $('wishInput').value = v.me.wish; fitTextarea($('wishInput')); }
     $('leaveBtn').hidden = drawn;
-    $('nudge').hidden = drawn;
+    $('nudge').hidden = drawn || !!S.admin;             // the organizer has the invite block for this
     $('nudgeText').textContent = t('nudge', st.people.length);
   } else if (S.tagKey) { S.tagKey = ''; $('tagSlot').replaceChildren(); }
+  // The organizer's next move (invite, then draw) leads once they have signed up themselves; after the draw their own
+  // result comes first again and the controls drop back below the names.
+  $('adminCard').classList.toggle('lead', !!S.admin && !!v && !drawn);
 
   const n = st.people.length;
   $('rosterCard').hidden = n === 0;
@@ -367,7 +403,13 @@ function renderAdmin() {
   $('adminCard').hidden = !a;
   if (!a) return;
   const drawn = st.status === 'drawn', n = a.people.length;
-  $('adminStatus').textContent = drawn ? t('adminDrawn') : (n < st.min ? t('adminNeed', n, st.min) : t('adminReady', n));
+  // While sign-ups are open the invite block leads and "copy the group link" is the red button, until there are enough
+  // people; then "draw names" takes the red. After the draw there is nothing to invite to, so the block goes away.
+  $('invite').hidden = drawn;
+  $('adminStatus').textContent = n < st.min ? t('adminNeed', n, st.min) : t('adminReady', n);
+  $('copyShareBtn').classList.toggle('primary', n < st.min);
+  $('adminStatusDrawn').hidden = !drawn;
+  $('adminStatusDrawn').textContent = drawn ? t('adminDrawn') : '';
   const list = $('adminList'); list.replaceChildren();
   for (const p of a.people) {
     const li = el('li'); const who = el('div', 'who'); who.append(el('b', '', p.name)); li.append(avatar(p.name));
@@ -380,6 +422,7 @@ function renderAdmin() {
   }
   $('drawBtn').hidden = drawn; $('reopenBtn').hidden = !drawn;
   $('drawBtn').disabled = S.busy || n < st.min;
+  $('drawBtn').classList.toggle('primary', n >= st.min);
   $('drawBtn').textContent = n < st.min ? t('drawBtnMin', st.min) : t('drawBtnN', n);
   $('manageSummary').textContent = t('managePeople', n);
   $('cfgDrawAtHint').textContent = t('cfgDrawAtHint', tzName(st.drawAt || Date.now()));
@@ -391,7 +434,7 @@ function renderAdmin() {
 }
 
 /* ---------- loading and refreshing ---------- */
-function forget() { S.me = null; S.view = null; store.set(K_ME, null); }
+function forget() { S.me = null; S.view = null; S.justJoined = false; store.set(K_ME, null); }
 function gone() { S.gone = true; S.state = null; S.view = null; S.admin = null; forgetEvent(EVENT_ID); }
 async function refresh() {
   if (S.gone) return;
@@ -437,9 +480,11 @@ function wireEvent() {
     const r = await api('join', { id: EVENT_ID, name, pin, wish });
     S.busy = false; $('joinBtn').disabled = false; $('joinBtn').textContent = t('joinBtn'); $('joinForm').removeAttribute('aria-busy');
     if (!r.ok) { if (r.data.error === 'not_found') { gone(); render(); } else $('joinErr').textContent = errText(r.data); return; }
-    $('joinName').value = ''; $('joinPin').value = ''; $('joinWish').value = '';
+    $('joinName').value = ''; $('joinPin').value = ''; $('joinWish').value = ''; fitTextarea($('joinWish'));
+    S.justJoined = true;                      // the confirmation sits in the card itself (no PIN on screen), and focus moves to it
     signedIn(r.data);
-    toast(t('joinedToast', pin), 5000);
+    $('meTitle').focus({ preventScroll: true });
+    $('meCard').scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' });
     if (S.adminKey) refresh();
   });
   $('names').addEventListener('click', async (ev) => {
@@ -465,12 +510,9 @@ function wireEvent() {
     if (!r.ok) { $('wishErr').textContent = errText(r.data); return; }
     S.view = r.data; S.state = r.data.state; $('wishOk').textContent = t('saved'); $('wishInput').blur(); render();
   });
-  $('shareBtn').addEventListener('click', async () => {
-    const url = eventUrl(EVENT_ID), title = (S.state && S.state.title) || 'Secret Santa';
-    if (navigator.share) { try { await navigator.share({ title, url }); } catch (e) { /* closed the sheet */ } return; }
-    let p; try { p = navigator.clipboard.writeText(url); } catch (e) { p = Promise.reject(e); }
-    p.then(() => toast(t('copied')), () => toast(t('copyManual')));
-  });
+  const shareThis = () => shareLink(eventUrl(EVENT_ID), (S.state && S.state.title) || 'Secret Santa');
+  $('shareBtn').addEventListener('click', shareThis);
+  $('adminShareBtn').addEventListener('click', shareThis);
   $('logoutBtn').addEventListener('click', () => {
     if (S.me) api('logout', Object.assign({ id: EVENT_ID }, S.me));       // cancels this device's token on the server too
     forget(); render();

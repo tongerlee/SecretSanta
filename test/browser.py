@@ -72,7 +72,7 @@ with sync_playwright() as p:
     org2.wait_for_selector("#adminList li >> nth=3")
     org2.screenshot(path=str(OUT / "3-organizer.png"), full_page=True)
     org2.click("#drawBtn"); org2.click("#dlgOk"); org2.wait_for_selector("#reopenBtn:not([hidden])")
-    assert "看不到" in org2.inner_text("#adminStatus")
+    assert "看不到" in org2.inner_text("#adminStatusDrawn")
 
     gives = {}
     for page, name in ((org, "Jennifer"), (fresh, "小雪"), (mia, "Mia"), (jie, "阿杰")):

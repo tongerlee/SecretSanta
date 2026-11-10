@@ -27,7 +27,7 @@
   --on-night:#eef6f0;
   --on-night-soft:#b4cbbf;
   --card:#fbf7ef;          /* cream: an invitation, not a form */
-  --paper:#ffffff;         /* the parcel label stays white */
+  --paper:#fdfaf3;         /* the parcel label: warm paper, a shade lighter than the cards */
   --field:#f4efe3;
   --pine:#12352b;
   --moss:#5d6f66;
@@ -68,7 +68,7 @@ h2{font:700 18px/1.3 var(--font-body);text-wrap:balance}
 .stage::before{content:"";display:block;padding-top:59.72%}
 .hills{position:absolute;inset:0;width:100%;height:100%}
 .pets{position:absolute;left:0;top:12.56%;width:100%;height:auto}
-.nametag{position:absolute;top:94.5%;transform:translateX(-50%);white-space:nowrap;font:700 12px/1 var(--font-body);color:#fff;padding:5px 10px;border-radius:999px;box-shadow:0 2px 5px rgba(0,0,0,.25)}
+.nametag{position:absolute;top:94.5%;transform:translateX(-50%);white-space:nowrap;font:700 12px/1 var(--font-body);color:#fff;padding:5px 10px;border-radius:999px;box-shadow:0 1px 3px rgba(0,0,0,.18)}
 .nametag.cat{left:31.5%;background:var(--berry)}     /* a touch outward from each pet's centre so the two tags never meet */
 .nametag.dog{left:70%;background:var(--ok)}
 
@@ -78,6 +78,7 @@ h2{font:700 18px/1.3 var(--font-body);text-wrap:balance}
 .label-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:6px 10px;min-height:26px}
 .eyebrow{display:flex;align-items:center;gap:8px;min-width:0;font-size:11px;letter-spacing:.12em;color:var(--moss);font-weight:600}
 .label h1{font:700 clamp(42px,13.5vw,58px)/.95 var(--font-display);color:var(--berry);margin:8px 0 16px;text-wrap:balance;overflow-wrap:anywhere}
+.label h1.long{font-size:clamp(32px,10vw,44px);line-height:1.02}      /* a long name keeps the festive face, one size down, so it wraps in two lines */
 .fields{display:grid;grid-template-columns:1fr 1.3fr;border-top:2px solid var(--pine);margin:0 -16px}
 .fields>div{padding:8px 12px 10px;border-left:1px dashed var(--moss);min-width:0}
 .fields>div:first-child{border-left:0;padding-left:16px}
@@ -87,11 +88,12 @@ h2{font:700 18px/1.3 var(--font-body);text-wrap:balance}
 .pill.drawn{background:var(--ok);border-color:var(--ok);color:#fff}
 
 /* cards and forms */
-.card{background:var(--card);border-radius:16px;padding:18px 16px;display:flex;flex-direction:column;gap:12px;box-shadow:0 12px 30px rgba(0,0,0,.18)}
+.card{background:var(--card);border-radius:16px;padding:18px 16px;display:flex;flex-direction:column;gap:12px;box-shadow:0 8px 22px rgba(0,0,0,.13)}
 .card p,.hint{font-size:14px;color:var(--moss)}
 .stack{display:flex;flex-direction:column;gap:8px}
 label{font-size:13px;font-weight:600;color:var(--moss);margin-top:4px}
 input,textarea{font:16px/1.45 var(--font-body);color:var(--pine);background:var(--field);border:1.5px solid var(--rule);border-radius:10px;padding:11px 12px;width:100%}
+textarea{display:block;resize:vertical;min-height:70px;overflow:hidden}      /* grows with the text (app.js), two lines to start */
 input:focus-visible,textarea:focus-visible{outline:none;border-color:var(--pine);box-shadow:0 0 0 3px rgba(18,53,43,.15)}
 input::placeholder,textarea::placeholder{color:var(--moss);opacity:.7}
 .btn{font:600 16px/1.2 var(--font-body);padding:13px 16px;border-radius:12px;border:1.5px solid var(--pine);background:transparent;color:var(--pine);cursor:pointer;transition:transform .08s ease}
@@ -124,12 +126,13 @@ button.chip:active{transform:scale(.98)}
 .roster .chip{border-color:var(--rule);background:#fff}
 #rosterCard.after-join{order:1}      /* a first-time visitor: the sign-up card comes first, the people already in after it */
 #adminCard{order:2}
+#adminCard.lead{order:-1}            /* the organizer, signed up, sign-ups open: invite and draw come first */
 .flow>footer{order:9}
 .roster li{padding:0;border:0;background:none}
 
 /* the gift tag */
 .tag{width:100%;max-width:310px;margin:10px auto 6px;transform:rotate(-1.5deg)}
-.tag-inner{filter:drop-shadow(0 6px 10px rgba(0,0,0,.24));transition:transform .2s ease-out}
+.tag-inner{filter:drop-shadow(0 4px 8px rgba(0,0,0,.17));transition:transform .2s ease-out}
 .tag-inner.fold{transform:scaleX(.03);transition-timing-function:ease-in}
 .tag-side{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;width:100%;min-height:250px;padding:46px 22px 22px;border:0;text-align:center;
   clip-path:polygon(38px 0,calc(100% - 38px) 0,100% 38px,100% 100%,0 100%,0 38px)}
@@ -156,7 +159,7 @@ dialog h2{margin-bottom:8px}
 #dlgBody{font-size:15px;color:var(--moss);display:flex;flex-direction:column;gap:10px}
 #dlgBody p{overflow-wrap:anywhere}
 .dlg-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
-.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--gold);color:var(--pine);font-size:14px;font-weight:700;padding:10px 16px;border-radius:999px;max-width:88vw;text-align:center;z-index:10;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--gold);color:var(--pine);font-size:14px;font-weight:700;padding:10px 16px;border-radius:999px;max-width:88vw;text-align:center;z-index:10;box-shadow:0 5px 16px rgba(0,0,0,.28)}
 
 @media (prefers-reduced-motion:reduce){.tag-inner{transition:none}.bulb{animation:none}}
 
@@ -236,26 +239,51 @@ input::placeholder,textarea::placeholder{opacity:1}
 
 /* ---- one pause/play control, on the illustration ----
    Pauses the pets and the string lights here (CSS); the snow listens for the same switch in app.js. */
-.motion-toggle{position:absolute;top:10px;right:12px;z-index:4;width:44px;height:44px;padding:0;border-radius:50%;border:1.5px solid rgba(255,255,255,.55);
-  background:rgba(13,42,34,.62);color:#fff;cursor:pointer;pointer-events:auto;display:grid;place-items:center}
-.motion-toggle svg{fill:currentColor;grid-area:1/1}
+.motion-toggle{position:absolute;top:8px;right:10px;z-index:4;width:44px;height:44px;padding:0;border-radius:50%;border:0;
+  background:transparent;color:#fff;cursor:pointer;pointer-events:auto;display:grid;place-items:center;opacity:.7}
+.motion-toggle::before{content:"";grid-area:1/1;width:32px;height:32px;border-radius:50%;background:rgba(13,42,34,.45);border:1px solid rgba(255,255,255,.35)}   /* a quiet disc inside a 44px touch target */
+.motion-toggle:hover,.motion-toggle:focus-visible,.motion-toggle[aria-pressed="true"]{opacity:1}
+.motion-toggle svg{fill:currentColor;grid-area:1/1;width:14px;height:14px}
 .motion-toggle .ic-play,.motion-toggle[aria-pressed="true"] .ic-pause{display:none}
 .motion-toggle[aria-pressed="true"] .ic-play{display:block}
 .motion-paused .bulb,.motion-paused .stage .pets{animation-play-state:paused}
 
 /* ---- event pages: a smaller scene so the sign-up or the result is in view sooner (the landing page keeps the full one) ---- */
-html.event .stage{width:clamp(240px,58%,250px);margin-top:-12px}   /* never narrower than 240px, or the two name tags collide */
-html.event .nametag{font-size:9.5px;padding:4px 6px}
-html.event .hero{margin-bottom:-22px}
-html.event .label{padding-top:22px}
-html.event .label h1{font-size:clamp(34px,10.5vw,46px);margin:6px 0 12px}
+html.event .stage{width:clamp(222px,54%,232px);margin-top:-14px}   /* small enough that the first card is in view on a phone; tags sit a touch further apart */
+html.event .nametag{font-size:9px;padding:3px 6px}
+html.event .nametag.cat{left:29.5%}
+html.event .nametag.dog{left:71.5%}
+html.event .hero{margin-bottom:-20px}
+html.event .label{padding-top:18px}
+html.event .label h1{font-size:clamp(34px,10.5vw,46px);margin:4px 0 10px}
+html.event .label h1.long{font-size:clamp(27px,8vw,36px)}
 html.event .label h1.plain{font-size:clamp(26px,8vw,36px)}
-@media (min-width:900px){html.event .stage{width:300px}}
+html.event .label h1.plain.long{font-size:clamp(22px,6.6vw,30px)}
+html.event .fields>div{padding:6px 10px 8px}
+html.event .fields dd{font-size:14px}
+html.event .deadline{padding:7px 16px 8px;font-size:12.5px}
+html.event .langs{padding:4px 10px}
+html.event .langs button{min-height:40px;padding:5px 9px;font-size:12.5px}
+@media (min-width:900px){html.event .stage{width:300px}html.event .nametag.cat{left:31.5%}html.event .nametag.dog{left:70%}}
 
 /* ---- organizer controls look different from what participants see ---- */
 .card.admin{background:#f3f7f4;border:2px dashed var(--pine)}
 .card.admin h2{display:flex;align-items:center;gap:8px}
 .card.admin .only-you{background:var(--card);border-left:3px solid var(--pine);padding:8px 10px;border-radius:0 6px 6px 0}
+/* the organizer's first job, as its own block inside the controls */
+.invite{padding:12px 14px;border-radius:12px;background:#fff;border:1.5px solid var(--rule)}
+.invite h3,.handoff h3{margin:0;font:700 15px/1.3 var(--font-body);color:var(--pine);display:flex;align-items:center;gap:6px}
+.row2{display:flex;gap:8px}
+.row2>*{flex:1 1 0;min-width:0;white-space:normal;padding-left:10px;padding-right:10px;font-size:15px}
+@media (max-width:360px){.row2{flex-direction:column}}      /* on the smallest phones the two buttons stack instead of wrapping into three lines */
+
+/* ---- "you're all set": the link for the group, and the one link that stays with the organizer ---- */
+.handoff{display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:12px;background:#fff;border:1.5px solid var(--rule)}
+.handoff.keep{background:#f3f7f4;border:1.5px dashed var(--pine)}
+.masked{display:flex;gap:8px;align-items:center}
+.masked input{flex:1 1 auto;min-width:0}
+.masked .link{flex:none;align-self:center;min-height:44px}
+#meTitle:focus{outline:none}        /* focus lands on the heading after a sign-up so readers hear it; it is not a control */
 
 /* ---- the stamp along the tag's edge: secondary to the name, wish, budget and date ---- */
 .tag-stamp{position:absolute;left:-76px;top:50%;width:176px;transform:translateY(-50%) rotate(-90deg);font:700 7.5px/1.2 var(--font-body);letter-spacing:.12em;text-transform:uppercase;
@@ -298,7 +326,10 @@ html.event .label h1.plain{font-size:clamp(26px,8vw,36px)}
 .why[open]>summary{margin-bottom:4px}
 
 /* ---- the brand, as a rubber stamp ---- */
-footer{display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 8px 4px}
+footer{display:flex;flex-direction:column;align-items:center;gap:8px;padding:10px 8px 4px}
+.foot-line{margin:0;line-height:1.5;max-width:36em}
+.foot-line:empty{display:none}
+footer .stamp{margin-bottom:6px}
 .stamp{display:inline-flex;flex-direction:column;align-items:center;gap:1px;padding:7px 14px 8px;border:2px solid var(--on-night-soft);border-radius:8px;color:var(--on-night-soft);text-decoration:none;transform:rotate(-2.5deg);opacity:.85;
   mask-image:radial-gradient(circle at 30% 40%,#000 94%,transparent 95%),linear-gradient(#000,#000);-webkit-mask-image:linear-gradient(#000,#000)}
 .stamp:hover,.stamp:focus-visible{opacity:1;color:var(--gold);border-color:var(--gold)}
@@ -404,16 +435,28 @@ footer{display:flex;flex-direction:column;align-items:center;gap:10px;padding:10
   <!-- home page: create an event -->
   <section class="card" id="createdCard" hidden>
     <h2 data-i18n="createdTitle"></h2>
-    <div class="stack">
-      <label for="newShare" data-i18n="shareLabel"></label>
-      <input id="newShare" readonly>
-      <button type="button" class="btn" data-copy="newShare" data-i18n="copyShare"></button>
-      <label for="newAdmin" data-i18n="adminLinkLabel"></label>
-      <input id="newAdmin" readonly>
-      <button type="button" class="btn" data-copy="newAdmin" data-i18n="copyAdmin"></button>
-      <p class="hint"><b data-i18n="keepB"></b><span data-i18n="keepRest"></span></p>
-      <a class="btn primary" id="newOpen" href="#" data-i18n="openEvent"></a>
-    </div>
+    <section class="handoff group" aria-labelledby="groupHead">
+      <h3 id="groupHead" data-i18n="forGroup"></h3>
+      <p class="hint" data-i18n="forGroupBody"></p>
+      <input id="newShare" readonly data-i18n-aria="shareLabel">
+      <div class="row2">
+        <button type="button" class="btn primary" data-copy="newShare" data-i18n="copyShare"></button>
+        <button type="button" class="btn" id="newShareBtn" data-i18n="share"></button>
+      </div>
+    </section>
+    <section class="handoff keep" aria-labelledby="keepHead">
+      <h3 id="keepHead"><svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><rect x="3" y="8.5" width="14" height="9.5" rx="2" fill="currentColor"/><path d="M6.5 8.5V6a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg> <span data-i18n="forYou"></span></h3>
+      <p class="hint" data-i18n="forYouBody"></p>
+      <div class="masked">
+        <input id="newAdmin" type="password" readonly data-i18n-aria="adminLinkLabel">
+        <button type="button" class="link" id="newAdminShow" data-i18n="reveal"></button>
+      </div>
+      <div class="row2">
+        <button type="button" class="btn" data-copy="newAdmin" data-i18n="copyAdmin"></button>
+        <a class="btn" id="newAdminMail" href="#" data-i18n="mailMe"></a>
+      </div>
+    </section>
+    <a class="btn primary" id="newOpen" href="#" data-i18n="openEvent"></a>
   </section>
 
   <section class="card" id="mineCard" hidden>
@@ -433,7 +476,8 @@ footer{display:flex;flex-direction:column;align-items:center;gap:10px;padding:10
       <button class="btn primary" id="createBtn" data-i18n="createBtn"></button>
       <p class="err" id="createErr" role="alert"></p>
     </form>
-    <p class="hint" data-i18n="privacyHint"></p>
+    <p class="hint" data-i18n="privacyShort"></p>
+    <details class="why"><summary data-i18n="privacyMore"></summary><p class="hint" data-i18n="privacyDetails"></p></details>
   </section>
 
   <!-- event page -->
@@ -444,7 +488,8 @@ footer{display:flex;flex-direction:column;align-items:center;gap:10px;padding:10
   </section>
 
   <section class="card" id="meCard" hidden>
-    <h2 id="meTitle"></h2>
+    <h2 id="meTitle" tabindex="-1"></h2>
+    <p class="okmsg" id="joinedNote" role="status"></p>
     <p id="meStatus"></p>
     <p class="hint" id="resetNote" hidden></p>
     <div id="tagSlot"></div>
@@ -454,7 +499,7 @@ footer{display:flex;flex-direction:column;align-items:center;gap:10px;padding:10
     </div>
     <form id="wishForm" class="stack inset">
       <label for="wishInput" data-i18n="wishLabel"></label>
-      <input id="wishInput" aria-describedby="wishHelp" maxlength="100" autocomplete="off">
+      <textarea id="wishInput" rows="2" aria-describedby="wishHelp" maxlength="100" autocomplete="off"></textarea>
       <p class="hint" id="wishHelp" data-i18n="wishHelp"></p>
       <button class="btn" data-i18n="saveWish"></button>
       <p class="okmsg" id="wishOk" role="status"></p>
@@ -484,7 +529,7 @@ footer{display:flex;flex-direction:column;align-items:center;gap:10px;padding:10
       <p class="hint" id="pinShort" data-i18n="pinShort"></p>
       <details class="why"><summary data-i18n="pinWhy"></summary><p class="hint" data-i18n="pinWhyBody"></p></details>
       <label for="joinWish" data-i18n="joinWishLabel"></label>
-      <input id="joinWish" aria-describedby="wishPrivacy" maxlength="100" autocomplete="off" data-i18n-ph="joinWishPh">
+      <textarea id="joinWish" rows="2" aria-describedby="wishPrivacy" maxlength="100" autocomplete="off" data-i18n-ph="joinWishPh"></textarea>
       <p class="hint" id="wishPrivacy" data-i18n="wishPrivacy"></p>
       <button class="btn primary" id="joinBtn" data-i18n="joinBtn"></button>
       <p class="err" id="joinErr" role="alert"></p>
@@ -495,16 +540,20 @@ footer{display:flex;flex-direction:column;align-items:center;gap:10px;padding:10
   <section class="card admin" id="adminCard" aria-labelledby="adminTitle" hidden>
     <h2 id="adminTitle"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><rect x="3" y="8.5" width="14" height="9.5" rx="2" fill="currentColor"/><path d="M6.5 8.5V6a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg> <span data-i18n="organizer"></span></h2>
     <p class="hint only-you" data-i18n="adminOnlyYou"></p>
-    <p class="hint" id="adminStatus"></p>
-    <button type="button" class="btn primary" id="drawBtn"></button>
+    <div class="stack invite" id="invite">
+      <h3 data-i18n="inviteTitle"></h3>
+      <p class="hint" id="adminStatus"></p>
+      <input id="shareUrl" readonly data-i18n-aria="shareLabel">
+      <div class="row2">
+        <button type="button" class="btn" id="copyShareBtn" data-copy="shareUrl" data-i18n="copyShare"></button>
+        <button type="button" class="btn" id="adminShareBtn" data-i18n="share"></button>
+      </div>
+    </div>
+    <p class="hint" id="adminStatusDrawn" hidden></p>
+    <button type="button" class="btn" id="drawBtn"></button>
     <button type="button" class="link danger" id="reopenBtn" data-i18n="reopen" hidden></button>
     <p class="okmsg" id="adminOk" role="status"></p>
     <p class="err" id="adminErr" role="alert"></p>
-    <div class="stack inset">
-      <label for="shareUrl" data-i18n="shareLabel"></label>
-      <input id="shareUrl" readonly>
-      <button type="button" class="btn" data-copy="shareUrl" data-i18n="copyShare"></button>
-    </div>
     <details class="inset" id="manage">
       <summary id="manageSummary"></summary>
       <ul class="people" id="adminList"></ul>
@@ -541,7 +590,9 @@ footer{display:flex;flex-direction:column;align-items:center;gap:10px;padding:10
       <span class="stamp-main">Unnecessary Things</span>
       <span class="stamp-sub">★ Gift Division ★</span>
     </a>
-    <p><span data-i18n="merry"></span> <span id="retention"></span> <a id="homeLink" href="./" data-i18n="makeOwn" hidden></a></p>
+    <p class="foot-line" data-i18n="merry"></p>
+    <p class="foot-line" id="retention"></p>
+    <a class="foot-line" id="homeLink" href="./" data-i18n="makeOwn" hidden></a>
   </footer>
  </div>
 </main>
@@ -583,18 +634,27 @@ const SANTA_I18N = (() => {
     howTitle: '怎么玩',
     howBody: '建一个活动，把链接发到群里，大家各自报名。抽签后每个人只看得到自己的结果。',
     createdTitle: '建好了',
+    forGroup: '发到群里的',
+    forGroupBody: '把这个链接发到群里，大家点开就能报名。其他人只需要这一个。',
     shareLabel: '发到群里的链接',
     copyShare: '复制群链接',
+    forYou: '只给你自己的',
+    forYouBody: '抽签、改设置都靠这条链接，别发到群里。这里默认把它遮住了：现在就复制存好，或者发一封邮件给自己。',
     adminLinkLabel: '你的组织者链接',
     copyAdmin: '复制组织者链接',
-    keepB: '组织者链接只给你自己。',
-    keepRest: '抽签、改设置都靠它，弄丢了就没法管理这个活动，建议现在就存一份。',
+    reveal: '显示链接',
+    conceal: '遮住',
+    mailMe: '发邮件给自己',
+    mailSubject: (title) => `${title} · 组织者链接`,
+    mailBody: (title, link) => `这是「${title}」的组织者链接，只给自己留着，别转发：\n\n${link}\n\n换设备管理活动时，用它打开就行。`,
     openEvent: '打开活动，自己先报名',
     createTitle: '新建一个活动',
     eventName: '活动名称',
     budgetPh: '比如 $50 以内',
     createBtn: '创建活动',
-    privacyHint: '不用注册。我们只存参加的人自己填的名字和心愿，以及 PIN 的加密哈希；活动在交换日 7 天后自动删除。',
+    privacyShort: '不用注册。只存名字、心愿和 PIN 的哈希，交换日一周后整个活动自动删除。',
+    privacyMore: '具体存了什么？',
+    privacyDetails: '只有参加的人自己填的名字和心愿，以及 PIN 的加密哈希（不是 PIN 本身）。抽签结果只有本人凭 PIN 能看，组织者也看不到谁抽到谁。活动在交换日 7 天后自动删除，组织者也可以提前手动删除。',
     mineTitle: '这台设备上的活动',
     iOrganize: '我组织的',
     iJoined: '我参加的',
@@ -620,6 +680,7 @@ const SANTA_I18N = (() => {
     joinBtn: '报名',
     organizer: '组织者操作区',
     adminOnlyYou: '只有你在这台设备上看得到：浏览器记住了你的组织者链接。打开群链接的人看到的是参与者页面。',
+    inviteTitle: '邀请大家报名',
     managePeople: (n) => `管理参加的人（${n}）`,
     reopen: '作废这次结果，重新开放报名',
     settingsSummary: '活动设置和自动抽签时间',
@@ -656,7 +717,7 @@ const SANTA_I18N = (() => {
     movedText: (host) => `这个页面搬到了 ${host}。在新地址上要重新输入 PIN；组织者点下面的链接，组织者权限会一起带过去。`,
     movedLink: '去新地址打开',
 
-    fmtMd: (m, d) => `${m}/${d}`,
+    fmtMdY: (m, d, y) => `${y}/${m}/${d}`,
     fmtDay: (m, d, wd) => `${m}/${d} ${zhW[wd]}`,
     fmtTime: (m, d, wd, h, min) => `${m}/${d} ${zhW[wd]} ${two(h)}:${two(min)}`,
     listSep: '、',
@@ -682,7 +743,8 @@ const SANTA_I18N = (() => {
     meDrawn: (name) => `${name}，这是你的抽签结果`,
     meJoined: (name) => `${name}，你报上名了`,
     missed: '这次抽签没有包含你。找组织者说一声，让 TA 重新抽。',
-    waitDraw: '等大家都报完名，抽签后再打开这个页面，就能看到你要给谁准备礼物。',
+    waitDraw: '等组织者抽签后，再点开这个链接：点你的名字、输入 PIN，就能看到你要给谁准备礼物。',
+    waitDrawAt: (time, tz) => `报名到 ${time}（${tz}）为止。之后再点开这个链接：点你的名字、输入 PIN，就能看到你要给谁准备礼物。`,
     pinWasReset: (time) => `组织者在 ${time} 帮你重设过 PIN。不是你要求的话，在群里问一声。`,
     rosterIn: (n) => `已经报名的人（${n}）`,
     rosterTapDrawn: '点你的名字，输入 PIN 看结果',
@@ -700,7 +762,7 @@ const SANTA_I18N = (() => {
     drawBtnN: (n) => `给这 ${n} 个人抽签`,
     removedNote: '你已经不在名单里了。',
     reenterPin: '需要重新输入 PIN。',
-    joinedToast: (pin) => `报上名了。记住你的 PIN：${pin}`,
+    joinedNote: '报上名了。记住你刚设的 PIN，换手机看结果时要用。',
     pinDlgTitle: (name) => `${name}，输入你的 PIN`,
     pinDlgBody: '报名时你自己设的那串数字。这台设备只用输这一次。',
     enter: '进入',
@@ -747,18 +809,27 @@ const SANTA_I18N = (() => {
     howTitle: 'How it works',
     howBody: 'Create an event, drop the link in your group chat, and everyone signs up on their own. After the draw, each person sees only their own match.',
     createdTitle: 'You’re all set',
+    forGroup: 'For the group',
+    forGroupBody: 'Drop this in the group chat. It’s the only link anyone else needs.',
     shareLabel: 'Link for the group chat',
     copyShare: 'Copy group link',
+    forYou: 'For you only',
+    forYouBody: 'This one runs the draw and changes settings, so keep it out of the group chat. It’s hidden here by default: copy it somewhere safe or email it to yourself now.',
     adminLinkLabel: 'Your organizer link',
     copyAdmin: 'Copy organizer link',
-    keepB: 'Keep the organizer link to yourself.',
-    keepRest: ' It’s how you run the draw and change settings. Lose it and there’s no way to manage this event, so save it somewhere now.',
+    reveal: 'Show link',
+    conceal: 'Hide',
+    mailMe: 'Email it to me',
+    mailSubject: (title) => `${title} · organizer link`,
+    mailBody: (title, link) => `Organizer link for “${title}”. Keep it to yourself and don’t forward it:\n\n${link}\n\nOpen it on any device to manage the event from there.`,
     openEvent: 'Open the event and sign yourself up',
     createTitle: 'Start a new event',
     eventName: 'Event name',
     budgetPh: 'e.g. under $50',
     createBtn: 'Create event',
-    privacyHint: 'No account needed. We only keep the names and wishes people type in, plus a scrambled (hashed) copy of each PIN. The whole event deletes itself 7 days after exchange day.',
+    privacyShort: 'No account needed. Just names, wishes and a hashed PIN, and the whole event deletes itself a week after exchange day.',
+    privacyMore: 'What exactly is stored?',
+    privacyDetails: 'Only the names and wishes people type in, plus a scrambled (hashed) copy of each PIN, never the PIN itself. Each match is visible only to that person with their PIN; not even the organizer can see who got whom. The event deletes itself 7 days after exchange day, and the organizer can delete it any time before that.',
     mineTitle: 'Events on this device',
     iOrganize: 'You’re the organizer',
     iJoined: 'You’re in',
@@ -784,6 +855,7 @@ const SANTA_I18N = (() => {
     joinBtn: 'Sign up',
     organizer: 'Organizer controls',
     adminOnlyYou: 'Only visible to you on this device: your browser remembers the organizer link. Anyone opening the group link sees the participant view.',
+    inviteTitle: 'Invite people',
     managePeople: (n) => `Manage participants (${n})`,
     reopen: 'Scrap this draw and reopen sign-ups',
     settingsSummary: 'Event settings and auto-draw time',
@@ -820,7 +892,7 @@ const SANTA_I18N = (() => {
     movedText: (host) => `This page has moved to ${host}. You’ll enter your PIN again there; organizers, the link below carries your organizer access across.`,
     movedLink: 'Open it at the new address',
 
-    fmtMd: (m, d) => `${enM[m - 1]} ${d}`,
+    fmtMdY: (m, d, y) => `${enM[m - 1]} ${d}, ${y}`,
     fmtDay: (m, d, wd) => `${enW[wd]}, ${enM[m - 1]} ${d}`,
     fmtTime: (m, d, wd, h, min) => `${enW[wd]}, ${enM[m - 1]} ${d}, ${h12(h)}:${two(min)} ${h < 12 ? 'AM' : 'PM'}`,
     listSep: ', ',
@@ -846,7 +918,8 @@ const SANTA_I18N = (() => {
     meDrawn: (name) => `${name}, here’s your match`,
     meJoined: (name) => `${name}, you’re in!`,
     missed: 'You weren’t part of this draw. Let the organizer know so they can redo it.',
-    waitDraw: 'Once everyone has signed up and names are drawn, come back to this page to see who you’re getting a gift for.',
+    waitDraw: 'Once the organizer draws names, come back to this link, tap your name and enter your PIN to see who you’re getting a gift for.',
+    waitDrawAt: (time, tz) => `Sign-ups close ${time} (${tz}). After that, come back to this link, tap your name and enter your PIN to see who you’re getting a gift for.`,
     pinWasReset: (time) => `The organizer reset your PIN (${time}). If you didn’t ask for that, check with the group.`,
     rosterIn: (n) => `Who’s in (${n})`,
     rosterTapDrawn: 'Tap your name and enter your PIN to see your match',
@@ -864,7 +937,7 @@ const SANTA_I18N = (() => {
     drawBtnN: (n) => `Draw names for these ${n} people`,
     removedNote: 'You’re no longer on the list.',
     reenterPin: 'Please enter your PIN again.',
-    joinedToast: (pin) => `You’re in! Remember your PIN: ${pin}`,
+    joinedNote: 'You’re in. Remember the PIN you just picked: it’s your key to your match from another phone.',
     pinDlgTitle: (name) => `${name}, enter your PIN`,
     pinDlgBody: 'The number you picked when you signed up. You only need to enter it once on this device.',
     enter: 'Continue',
@@ -911,18 +984,27 @@ const SANTA_I18N = (() => {
     howTitle: '이렇게 해요',
     howBody: '마니또처럼 서로 몰래 선물을 주고받는 게임이에요. 이벤트를 만들어 링크를 단톡방에 올리면 각자 참가하고, 뽑기가 끝나면 내가 누구에게 선물할지는 나만 볼 수 있어요.',
     createdTitle: '다 만들었어요!',
+    forGroup: '단톡방에 올릴 링크',
+    forGroupBody: '이 링크를 단톡방에 올리면 각자 들어와서 참가할 수 있어요. 다른 사람에게는 이 링크 하나면 돼요.',
     shareLabel: '단톡방에 올릴 링크',
     copyShare: '참가 링크 복사',
+    forYou: '나만 쓰는 링크',
+    forYouBody: '뽑기와 설정 변경은 이 링크로만 할 수 있으니 단톡방에는 올리지 마세요. 여기서는 가려 두었어요. 지금 복사해서 안전한 곳에 저장하거나, 내 메일로 보내 두세요.',
     adminLinkLabel: '내 주최자 링크',
     copyAdmin: '주최자 링크 복사',
-    keepB: '주최자 링크는 혼자만 간직하세요.',
-    keepRest: ' 뽑기를 하거나 설정을 바꿀 때 꼭 필요해요. 잃어버리면 이 이벤트를 관리할 수 없으니 지금 바로 저장해 두세요.',
+    reveal: '링크 보기',
+    conceal: '가리기',
+    mailMe: '내 메일로 보내기',
+    mailSubject: (title) => `${title} · 주최자 링크`,
+    mailBody: (title, link) => `“${title}” 주최자 링크예요. 혼자만 간직하고 다른 사람에게 전달하지 마세요.\n\n${link}\n\n다른 기기에서 이 링크를 열면 거기서도 이벤트를 관리할 수 있어요.`,
     openEvent: '이벤트 열고 나부터 참가하기',
     createTitle: '새 이벤트 만들기',
     eventName: '이벤트 이름',
     budgetPh: '예: $50 이하',
     createBtn: '이벤트 만들기',
-    privacyHint: '회원가입은 필요 없어요. 참가자가 직접 적은 이름과 받고 싶은 선물, 암호화(해시)된 PIN만 저장하고, 이벤트는 교환 날짜 7일 뒤에 자동으로 삭제돼요.',
+    privacyShort: '회원가입 없이 써요. 이름, 받고 싶은 선물, 암호화된 PIN만 저장하고, 교환 날짜 일주일 뒤에 이벤트 전체가 자동 삭제돼요.',
+    privacyMore: '정확히 무엇을 저장하나요?',
+    privacyDetails: '참가자가 직접 적은 이름과 받고 싶은 선물, 그리고 PIN의 해시값만 저장해요. PIN 자체는 저장하지 않아요. 뽑기 결과는 본인이 PIN으로만 볼 수 있고, 주최자도 누가 누구를 뽑았는지 볼 수 없어요. 이벤트는 교환 날짜 7일 뒤에 자동으로 삭제되고, 그 전에 주최자가 직접 삭제할 수도 있어요.',
     mineTitle: '이 기기에서 연 이벤트',
     iOrganize: '내가 주최',
     iJoined: '참가 중',
@@ -948,6 +1030,7 @@ const SANTA_I18N = (() => {
     joinBtn: '참가하기',
     organizer: '주최자 메뉴',
     adminOnlyYou: '이 기기에서 주최자인 당신에게만 보여요. 브라우저가 주최자 링크를 기억하고 있거든요. 참가 링크로 들어온 사람에게는 참가자 화면만 보여요.',
+    inviteTitle: '참가자 모으기',
     managePeople: (n) => `참가자 관리 (${n}명)`,
     reopen: '이번 결과 취소하고 다시 참가 받기',
     settingsSummary: '이벤트 설정 · 자동 뽑기 시간',
@@ -984,7 +1067,7 @@ const SANTA_I18N = (() => {
     movedText: (host) => `이 페이지는 ${host}(으)로 옮겨졌어요. 새 주소에서는 PIN을 다시 입력해 주세요. 주최자라면 아래 링크로 열면 주최자 권한도 함께 넘어가요.`,
     movedLink: '새 주소에서 열기',
 
-    fmtMd: (m, d) => `${m}월 ${d}일`,
+    fmtMdY: (m, d, y) => `${y}년 ${m}월 ${d}일`,
     fmtDay: (m, d, wd) => `${m}월 ${d}일 (${koW[wd]})`,
     fmtTime: (m, d, wd, h, min) => `${m}월 ${d}일 (${koW[wd]}) ${koAmPm(h)} ${h12(h)}:${two(min)}`,
     listSep: ', ',
@@ -1010,7 +1093,8 @@ const SANTA_I18N = (() => {
     meDrawn: (name) => `${name} 님의 뽑기 결과예요`,
     meJoined: (name) => `${name} 님, 참가 완료!`,
     missed: '이번 뽑기에 포함되지 않았어요. 주최자에게 다시 뽑아 달라고 말해 주세요.',
-    waitDraw: '모두 참가하고 뽑기가 끝난 뒤에 이 페이지를 다시 열면, 누구에게 선물할지 확인할 수 있어요.',
+    waitDraw: '주최자가 뽑기를 마치면 이 링크를 다시 열고, 이름을 누른 뒤 PIN을 입력하면 누구에게 선물할지 볼 수 있어요.',
+    waitDrawAt: (time, tz) => `참가 마감은 ${time} (${tz})이에요. 그 뒤에 이 링크를 다시 열고, 이름을 누른 뒤 PIN을 입력하면 누구에게 선물할지 볼 수 있어요.`,
     pinWasReset: (time) => `${time}에 주최자가 PIN을 재설정했어요. 직접 부탁한 게 아니라면 단톡방에 물어보세요.`,
     rosterIn: (n) => `참가한 사람 (${n}명)`,
     rosterTapDrawn: '이름을 누르고 PIN을 입력하면 결과를 볼 수 있어요',
@@ -1028,7 +1112,7 @@ const SANTA_I18N = (() => {
     drawBtnN: (n) => `${n}명으로 뽑기`,
     removedNote: '명단에서 빠졌어요.',
     reenterPin: 'PIN을 다시 입력해 주세요.',
-    joinedToast: (pin) => `참가 완료! PIN ${pin}, 꼭 기억해 두세요.`,
+    joinedNote: '참가 완료! 방금 정한 PIN을 꼭 기억해 두세요. 다른 휴대폰에서 결과를 볼 때 필요해요.',
     pinDlgTitle: (name) => `${name} 님, PIN을 입력해 주세요`,
     pinDlgBody: '참가할 때 직접 정한 숫자예요. 이 기기에서는 한 번만 입력하면 돼요.',
     enter: '들어가기',
@@ -1074,18 +1158,27 @@ const SANTA_I18N = (() => {
     howTitle: 'Cách chơi',
     howBody: 'Trò tặng quà bí mật dịp Giáng sinh. Bạn tạo sự kiện, gửi link vào nhóm chat, mọi người tự đăng ký. Bốc thăm xong, mỗi người chỉ xem được mình sẽ tặng quà cho ai.',
     createdTitle: 'Xong rồi!',
+    forGroup: 'Gửi cho cả nhóm',
+    forGroupBody: 'Gửi link này vào nhóm chat là mọi người tự đăng ký được. Người khác chỉ cần đúng link này thôi.',
     shareLabel: 'Link gửi vào nhóm',
     copyShare: 'Sao chép link nhóm',
+    forYou: 'Chỉ dành cho bạn',
+    forYouBody: 'Bốc thăm và đổi cài đặt đều cần link này, nên đừng gửi vào nhóm. Ở đây link được che sẵn: bạn sao chép cất đi hoặc gửi email cho chính mình ngay nhé.',
     adminLinkLabel: 'Link quản lý của bạn',
     copyAdmin: 'Sao chép link quản lý',
-    keepB: 'Link quản lý chỉ dành cho riêng bạn.',
-    keepRest: ' Bạn cần nó để bốc thăm và đổi cài đặt. Mất link là không quản lý được sự kiện nữa, nên lưu lại ngay nhé.',
+    reveal: 'Hiện link',
+    conceal: 'Che đi',
+    mailMe: 'Gửi email cho tôi',
+    mailSubject: (title) => `${title} · link quản lý`,
+    mailBody: (title, link) => `Đây là link quản lý của “${title}”. Bạn giữ riêng, đừng chuyển tiếp cho ai:\n\n${link}\n\nMở link này trên thiết bị khác là quản lý được sự kiện ở đó.`,
     openEvent: 'Mở sự kiện và đăng ký cho mình trước',
     createTitle: 'Tạo sự kiện mới',
     eventName: 'Tên sự kiện',
     budgetPh: 'Ví dụ: dưới $50',
     createBtn: 'Tạo sự kiện',
-    privacyHint: 'Không cần tạo tài khoản. Trang này chỉ lưu tên và gợi ý quà mà mọi người tự điền, cùng mã PIN đã được mã hóa (hash). Sự kiện sẽ tự xóa sau ngày đổi quà 7 ngày.',
+    privacyShort: 'Không cần tài khoản. Chỉ lưu tên, gợi ý quà và mã PIN đã mã hóa; cả sự kiện tự xóa một tuần sau ngày đổi quà.',
+    privacyMore: 'Lưu chính xác những gì?',
+    privacyDetails: 'Chỉ có tên và gợi ý quà mọi người tự điền, cùng bản mã hóa (hash) của mã PIN, không phải mã PIN thật. Kết quả bốc thăm chỉ chính người đó xem được bằng mã PIN của mình; ngay cả người tổ chức cũng không biết ai bốc trúng ai. Sự kiện tự xóa 7 ngày sau ngày đổi quà, và người tổ chức có thể xóa sớm hơn bất cứ lúc nào.',
     mineTitle: 'Sự kiện trên thiết bị này',
     iOrganize: 'Bạn tổ chức',
     iJoined: 'Bạn tham gia',
@@ -1111,6 +1204,7 @@ const SANTA_I18N = (() => {
     joinBtn: 'Đăng ký',
     organizer: 'Khu vực người tổ chức',
     adminOnlyYou: 'Chỉ bạn thấy phần này trên thiết bị này, vì trình duyệt đã ghi nhớ link quản lý. Người mở link nhóm chỉ thấy trang của người tham gia.',
+    inviteTitle: 'Mời mọi người tham gia',
     managePeople: (n) => `Quản lý người tham gia (${n})`,
     reopen: 'Hủy kết quả lần này và mở đăng ký lại',
     settingsSummary: 'Cài đặt sự kiện và giờ tự bốc thăm',
@@ -1147,7 +1241,7 @@ const SANTA_I18N = (() => {
     movedText: (host) => `Trang này đã chuyển sang ${host}. Ở địa chỉ mới bạn nhập lại mã PIN nhé; nếu bạn là người tổ chức, link bên dưới sẽ mang theo quyền quản lý.`,
     movedLink: 'Mở ở địa chỉ mới',
 
-    fmtMd: (m, d) => `${d}/${m}`,
+    fmtMdY: (m, d, y) => `${d}/${m}/${y}`,
     fmtDay: (m, d, wd) => `${viW[wd]}, ${d}/${m}`,
     fmtTime: (m, d, wd, h, min) => `${two(h)}:${two(min)} ${viW[wd]}, ${d}/${m}`,
     listSep: ', ',
@@ -1173,7 +1267,8 @@ const SANTA_I18N = (() => {
     meDrawn: (name) => `${name} ơi, đây là kết quả của bạn`,
     meJoined: (name) => `${name} ơi, bạn đăng ký xong rồi!`,
     missed: 'Lần bốc thăm này chưa có bạn. Bạn báo người tổ chức để bốc lại nhé.',
-    waitDraw: 'Khi mọi người đăng ký xong và đã bốc thăm, bạn mở lại trang này để xem mình sẽ tặng quà cho ai.',
+    waitDraw: 'Khi người tổ chức bốc thăm xong, bạn mở lại link này, bấm vào tên mình rồi nhập mã PIN để xem mình sẽ tặng quà cho ai.',
+    waitDrawAt: (time, tz) => `Hạn đăng ký là ${time} (${tz}). Sau đó bạn mở lại link này, bấm vào tên mình rồi nhập mã PIN để xem mình sẽ tặng quà cho ai.`,
     pinWasReset: (time) => `Người tổ chức đã đặt lại mã PIN cho bạn lúc ${time}. Nếu bạn không nhờ thì hỏi lại trong nhóm nhé.`,
     rosterIn: (n) => `Đã đăng ký (${n} người)`,
     rosterTapDrawn: 'Bấm vào tên bạn rồi nhập mã PIN để xem kết quả',
@@ -1191,7 +1286,7 @@ const SANTA_I18N = (() => {
     drawBtnN: (n) => `Bốc thăm cho ${n} người này`,
     removedNote: 'Bạn không còn trong danh sách nữa.',
     reenterPin: 'Bạn cần nhập lại mã PIN.',
-    joinedToast: (pin) => `Đăng ký xong! Nhớ mã PIN của bạn: ${pin}`,
+    joinedNote: 'Bạn đăng ký xong rồi. Nhớ kỹ mã PIN vừa đặt nhé, đó là chìa khóa để xem kết quả trên điện thoại khác.',
     pinDlgTitle: (name) => `${name} ơi, nhập mã PIN của bạn`,
     pinDlgBody: 'Là dãy số bạn tự đặt lúc đăng ký. Trên thiết bị này chỉ cần nhập một lần.',
     enter: 'Vào xem',
@@ -1314,8 +1409,9 @@ const titleNeedsPlain = (text) => Array.from(String(text || '')).some((ch) => {
   const c = ch.codePointAt(0);
   return c > 0x7F && !/[\p{P}\p{S}\p{Z}]/u.test(ch);
 });
-/** A colored circle with the first letter of a name, so a list of names reads as people, not as form controls. */
-const AVATAR_COLORS = ['#b8203a', '#1c7450', '#c77d12', '#2b6cb0', '#7a3e9d', '#566e64'];
+/** A colored circle with the first letter of a name, so a list of names reads as people, not as form controls.
+    Muted berry, pine, ochre, slate, plum and moss; every one keeps white text above 4.5:1 contrast. */
+const AVATAR_COLORS = ['#9b2a3f', '#2f6b52', '#8f6219', '#3d6a9a', '#6f4f8f', '#5d6f66'];
 function avatar(name) {
   const s = String(name || '');
   let first = s;
@@ -1373,7 +1469,7 @@ function tzName(ms) {
   const off = -new Date(ms || Date.now()).getTimezoneOffset(), sign = off < 0 ? '-' : '+', abs = Math.abs(off);
   return 'GMT' + sign + Math.floor(abs / 60) + (abs % 60 ? ':' + String(abs % 60).padStart(2, '0') : '');
 }
-const monthDayText = (ms) => { const d = new Date(ms); return t('fmtMd', d.getMonth() + 1, d.getDate()); };
+const dateText = (ms) => { const d = new Date(ms); return t('fmtMdY', d.getMonth() + 1, d.getDate(), d.getFullYear()); };
 function localInputValue(ms) {
   if (!ms) return '';
   return new Date(ms - new Date(ms).getTimezoneOffset() * 60000).toISOString().slice(0, 16);
@@ -1418,6 +1514,18 @@ document.addEventListener('click', (ev) => {
   let p; try { p = navigator.clipboard.writeText(input.value); } catch (e) { p = Promise.reject(e); }
   p.then(() => toast(t('copied')), () => { input.focus(); input.select(); toast(t('copyManual')); });
 });
+/** The phone's own share sheet where there is one (most phones); otherwise the link goes to the clipboard. */
+async function shareLink(url, title) {
+  if (navigator.share) { try { await navigator.share({ title, url }); } catch (e) { /* closed the sheet */ } return; }
+  let p; try { p = navigator.clipboard.writeText(url); } catch (e) { p = Promise.reject(e); }
+  p.then(() => toast(t('copied')), () => toast(t('copyManual')));
+}
+// "Share" buttons next to a "Copy" button only make sense where a share sheet exists; elsewhere they would just copy twice.
+const canShare = !!navigator.share;
+for (const id of ['newShareBtn', 'adminShareBtn']) $(id).hidden = !canShare;
+/** Wish boxes grow with what is typed (two lines to start) instead of scrolling inside themselves. */
+function fitTextarea(ta) { ta.style.height = 'auto'; ta.style.height = Math.min(220, ta.scrollHeight + 3) + 'px'; }
+for (const ta of document.querySelectorAll('textarea')) ta.addEventListener('input', () => fitTextarea(ta));
 /** Remember that this device has to do with an event, so the home page can list it. */
 function remember(id, title, isAdmin) {
   const list = (store.get(K_LIST) || []).filter((e) => e && e.id !== id);
@@ -1495,6 +1603,21 @@ function renderMine() {
     const b = el('b'); b.append(a); who.append(b, el('small', '', e.admin ? t('iOrganize') : t('iJoined')));
     li.append(avatar(e.title || 'S'), who); $('mineList').append(li);
   }
+  renderCreated();
+}
+/* The "you're all set" screen: two hand-offs. The group link is for everyone; the organizer link is for one person only,
+   so it starts masked (like a password) and offers a mail-to-self, which is the one place most people never lose a link. */
+let created = null;                                // { id, adminKey, title, shown } after a successful create
+function renderCreated() {
+  if (!created) return;
+  const share = eventUrl(created.id), adminLink = share + '#admin=' + created.adminKey;
+  $('newShare').value = share;
+  $('newAdmin').value = adminLink;
+  $('newAdmin').type = created.shown ? 'text' : 'password';
+  $('newAdminShow').textContent = created.shown ? t('conceal') : t('reveal');
+  $('newAdminShow').setAttribute('aria-pressed', String(created.shown));
+  $('newAdminMail').href = 'mailto:?subject=' + encodeURIComponent(t('mailSubject', created.title)) + '&body=' + encodeURIComponent(t('mailBody', created.title, adminLink));
+  $('newOpen').href = share;
 }
 function startHome() {
   const now = new Date();
@@ -1519,12 +1642,13 @@ function startHome() {
     const { id, adminKey, state } = r.data;
     store.set('santa:' + id + ':admin', adminKey);
     remember(id, state.title, true);
-    $('newShare').value = eventUrl(id);
-    $('newAdmin').value = eventUrl(id) + '#admin=' + adminKey;
-    $('newOpen').href = eventUrl(id);
+    created = { id, adminKey, title: state.title, shown: false };
+    renderCreated();
     $('createCard').hidden = true; $('mineCard').hidden = true; $('createdCard').hidden = false;
     $('createdCard').scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' });
   });
+  $('newAdminShow').addEventListener('click', () => { if (created) { created.shown = !created.shown; renderCreated(); } });
+  $('newShareBtn').addEventListener('click', () => { if (created) shareLink(eventUrl(created.id), created.title); });
 }
 
 /* =====================================================================================
@@ -1536,6 +1660,7 @@ const S = {
   view: null,               // my personal view from the server: { me, giftTo, missed }
   adminKey: null, admin: null,
   gone: false, loadError: false, busy: false, tagKey: '', note: '',
+  justJoined: false,        // signed up a moment ago on this page: show the "remember your PIN" line until the draw
 };
 
 function render() {
@@ -1551,6 +1676,7 @@ function render() {
   const drawn = st.status === 'drawn';
   $('title').textContent = st.title; document.title = st.title;
   $('title').classList.toggle('plain', titleNeedsPlain(st.title));
+  $('title').classList.toggle('long', Array.from(st.title).length > 16);      // same festive face, a size down so it wraps in two lines
   $('fBudget').textContent = st.budget || '—';
   $('fDate').textContent = dayText(st.exchangeOn);
   const pill = $('statusPill'); pill.hidden = false;
@@ -1558,14 +1684,16 @@ function render() {
   pill.className = 'pill' + (drawn ? ' drawn' : '');
   $('deadline').hidden = drawn || !st.drawAt;
   if (st.drawAt) $('deadlineText').textContent = t('deadline', timeText(st.drawAt), tzName(st.drawAt));
-  $('retention').textContent = t('retention', monthDayText(st.deleteAt));
+  $('retention').textContent = t('retention', dateText(st.deleteAt));
 
   const v = S.view;
   $('meCard').hidden = !v;
   $('joinCard').hidden = !!v || drawn;
   if (v) {
     $('meTitle').textContent = drawn ? t('meDrawn', v.me.name) : t('meJoined', v.me.name);
-    $('meStatus').textContent = v.giftTo ? '' : (v.missed ? t('missed') : t('waitDraw'));
+    $('joinedNote').textContent = S.justJoined && !drawn ? t('joinedNote') : '';
+    const waiting = st.drawAt ? t('waitDrawAt', timeText(st.drawAt), tzName(st.drawAt)) : t('waitDraw');
+    $('meStatus').textContent = v.giftTo ? '' : (v.missed ? t('missed') : waiting);
     $('meStatus').hidden = !!v.giftTo;
     $('resetNote').hidden = !v.me.pinResetAt;
     if (v.me.pinResetAt) $('resetNote').textContent = t('pinWasReset', timeText(v.me.pinResetAt));
@@ -1575,11 +1703,14 @@ function render() {
       S.tagKey = key; $('tagSlot').replaceChildren();
       if (v.giftTo) $('tagSlot').append(buildTag({ g: v.me.name, r: v.giftTo.name, w: v.giftTo.wish, b: st.budget, d: dayText(st.exchangeOn) }));
     }
-    if (document.activeElement !== $('wishInput') && !S.busy) $('wishInput').value = v.me.wish;
+    if (document.activeElement !== $('wishInput') && !S.busy) { $('wishInput').value = v.me.wish; fitTextarea($('wishInput')); }
     $('leaveBtn').hidden = drawn;
-    $('nudge').hidden = drawn;
+    $('nudge').hidden = drawn || !!S.admin;             // the organizer has the invite block for this
     $('nudgeText').textContent = t('nudge', st.people.length);
   } else if (S.tagKey) { S.tagKey = ''; $('tagSlot').replaceChildren(); }
+  // The organizer's next move (invite, then draw) leads once they have signed up themselves; after the draw their own
+  // result comes first again and the controls drop back below the names.
+  $('adminCard').classList.toggle('lead', !!S.admin && !!v && !drawn);
 
   const n = st.people.length;
   $('rosterCard').hidden = n === 0;
@@ -1601,7 +1732,13 @@ function renderAdmin() {
   $('adminCard').hidden = !a;
   if (!a) return;
   const drawn = st.status === 'drawn', n = a.people.length;
-  $('adminStatus').textContent = drawn ? t('adminDrawn') : (n < st.min ? t('adminNeed', n, st.min) : t('adminReady', n));
+  // While sign-ups are open the invite block leads and "copy the group link" is the red button, until there are enough
+  // people; then "draw names" takes the red. After the draw there is nothing to invite to, so the block goes away.
+  $('invite').hidden = drawn;
+  $('adminStatus').textContent = n < st.min ? t('adminNeed', n, st.min) : t('adminReady', n);
+  $('copyShareBtn').classList.toggle('primary', n < st.min);
+  $('adminStatusDrawn').hidden = !drawn;
+  $('adminStatusDrawn').textContent = drawn ? t('adminDrawn') : '';
   const list = $('adminList'); list.replaceChildren();
   for (const p of a.people) {
     const li = el('li'); const who = el('div', 'who'); who.append(el('b', '', p.name)); li.append(avatar(p.name));
@@ -1614,6 +1751,7 @@ function renderAdmin() {
   }
   $('drawBtn').hidden = drawn; $('reopenBtn').hidden = !drawn;
   $('drawBtn').disabled = S.busy || n < st.min;
+  $('drawBtn').classList.toggle('primary', n >= st.min);
   $('drawBtn').textContent = n < st.min ? t('drawBtnMin', st.min) : t('drawBtnN', n);
   $('manageSummary').textContent = t('managePeople', n);
   $('cfgDrawAtHint').textContent = t('cfgDrawAtHint', tzName(st.drawAt || Date.now()));
@@ -1625,7 +1763,7 @@ function renderAdmin() {
 }
 
 /* ---------- loading and refreshing ---------- */
-function forget() { S.me = null; S.view = null; store.set(K_ME, null); }
+function forget() { S.me = null; S.view = null; S.justJoined = false; store.set(K_ME, null); }
 function gone() { S.gone = true; S.state = null; S.view = null; S.admin = null; forgetEvent(EVENT_ID); }
 async function refresh() {
   if (S.gone) return;
@@ -1671,9 +1809,11 @@ function wireEvent() {
     const r = await api('join', { id: EVENT_ID, name, pin, wish });
     S.busy = false; $('joinBtn').disabled = false; $('joinBtn').textContent = t('joinBtn'); $('joinForm').removeAttribute('aria-busy');
     if (!r.ok) { if (r.data.error === 'not_found') { gone(); render(); } else $('joinErr').textContent = errText(r.data); return; }
-    $('joinName').value = ''; $('joinPin').value = ''; $('joinWish').value = '';
+    $('joinName').value = ''; $('joinPin').value = ''; $('joinWish').value = ''; fitTextarea($('joinWish'));
+    S.justJoined = true;                      // the confirmation sits in the card itself (no PIN on screen), and focus moves to it
     signedIn(r.data);
-    toast(t('joinedToast', pin), 5000);
+    $('meTitle').focus({ preventScroll: true });
+    $('meCard').scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' });
     if (S.adminKey) refresh();
   });
   $('names').addEventListener('click', async (ev) => {
@@ -1699,12 +1839,9 @@ function wireEvent() {
     if (!r.ok) { $('wishErr').textContent = errText(r.data); return; }
     S.view = r.data; S.state = r.data.state; $('wishOk').textContent = t('saved'); $('wishInput').blur(); render();
   });
-  $('shareBtn').addEventListener('click', async () => {
-    const url = eventUrl(EVENT_ID), title = (S.state && S.state.title) || 'Secret Santa';
-    if (navigator.share) { try { await navigator.share({ title, url }); } catch (e) { /* closed the sheet */ } return; }
-    let p; try { p = navigator.clipboard.writeText(url); } catch (e) { p = Promise.reject(e); }
-    p.then(() => toast(t('copied')), () => toast(t('copyManual')));
-  });
+  const shareThis = () => shareLink(eventUrl(EVENT_ID), (S.state && S.state.title) || 'Secret Santa');
+  $('shareBtn').addEventListener('click', shareThis);
+  $('adminShareBtn').addEventListener('click', shareThis);
   $('logoutBtn').addEventListener('click', () => {
     if (S.me) api('logout', Object.assign({ id: EVENT_ID }, S.me));       // cancels this device's token on the server too
     forget(); render();

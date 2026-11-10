@@ -57,9 +57,10 @@ test('plural and clock forms', () => {
   assert.equal(ko.fmtTime(12, 20, 0, 20, 5), '12월 20일 (일) 오후 8:05');
   assert.equal(ko.fmtTime(12, 20, 0, 0, 30), '12월 20일 (일) 오전 12:30');
   assert.equal(vi.fmtTime(12, 20, 0, 20, 5), '20:05 Chủ Nhật, 20/12');
-  assert.equal(en.fmtMd(12, 31), 'Dec 31');
-  assert.equal(ko.fmtMd(12, 31), '12월 31일');
-  assert.equal(vi.fmtMd(12, 31), '31/12');
+  assert.equal(zh.fmtMdY(12, 31, 2026), '2026/12/31');
+  assert.equal(en.fmtMdY(12, 31, 2026), 'Dec 31, 2026');
+  assert.equal(ko.fmtMdY(12, 31, 2026), '2026년 12월 31일');
+  assert.equal(vi.fmtMdY(12, 31, 2026), '31/12/2026');
 });
 
 test('the page only asks for words that exist, and no word is left unused', () => {

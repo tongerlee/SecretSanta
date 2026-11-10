@@ -69,16 +69,28 @@
   <!-- home page: create an event -->
   <section class="card" id="createdCard" hidden>
     <h2 data-i18n="createdTitle"></h2>
-    <div class="stack">
-      <label for="newShare" data-i18n="shareLabel"></label>
-      <input id="newShare" readonly>
-      <button type="button" class="btn" data-copy="newShare" data-i18n="copyShare"></button>
-      <label for="newAdmin" data-i18n="adminLinkLabel"></label>
-      <input id="newAdmin" readonly>
-      <button type="button" class="btn" data-copy="newAdmin" data-i18n="copyAdmin"></button>
-      <p class="hint"><b data-i18n="keepB"></b><span data-i18n="keepRest"></span></p>
-      <a class="btn primary" id="newOpen" href="#" data-i18n="openEvent"></a>
-    </div>
+    <section class="handoff group" aria-labelledby="groupHead">
+      <h3 id="groupHead" data-i18n="forGroup"></h3>
+      <p class="hint" data-i18n="forGroupBody"></p>
+      <input id="newShare" readonly data-i18n-aria="shareLabel">
+      <div class="row2">
+        <button type="button" class="btn primary" data-copy="newShare" data-i18n="copyShare"></button>
+        <button type="button" class="btn" id="newShareBtn" data-i18n="share"></button>
+      </div>
+    </section>
+    <section class="handoff keep" aria-labelledby="keepHead">
+      <h3 id="keepHead"><svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><rect x="3" y="8.5" width="14" height="9.5" rx="2" fill="currentColor"/><path d="M6.5 8.5V6a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg> <span data-i18n="forYou"></span></h3>
+      <p class="hint" data-i18n="forYouBody"></p>
+      <div class="masked">
+        <input id="newAdmin" type="password" readonly data-i18n-aria="adminLinkLabel">
+        <button type="button" class="link" id="newAdminShow" data-i18n="reveal"></button>
+      </div>
+      <div class="row2">
+        <button type="button" class="btn" data-copy="newAdmin" data-i18n="copyAdmin"></button>
+        <a class="btn" id="newAdminMail" href="#" data-i18n="mailMe"></a>
+      </div>
+    </section>
+    <a class="btn primary" id="newOpen" href="#" data-i18n="openEvent"></a>
   </section>
 
   <section class="card" id="mineCard" hidden>
@@ -98,7 +110,8 @@
       <button class="btn primary" id="createBtn" data-i18n="createBtn"></button>
       <p class="err" id="createErr" role="alert"></p>
     </form>
-    <p class="hint" data-i18n="privacyHint"></p>
+    <p class="hint" data-i18n="privacyShort"></p>
+    <details class="why"><summary data-i18n="privacyMore"></summary><p class="hint" data-i18n="privacyDetails"></p></details>
   </section>
 
   <!-- event page -->
@@ -109,7 +122,8 @@
   </section>
 
   <section class="card" id="meCard" hidden>
-    <h2 id="meTitle"></h2>
+    <h2 id="meTitle" tabindex="-1"></h2>
+    <p class="okmsg" id="joinedNote" role="status"></p>
     <p id="meStatus"></p>
     <p class="hint" id="resetNote" hidden></p>
     <div id="tagSlot"></div>
@@ -119,7 +133,7 @@
     </div>
     <form id="wishForm" class="stack inset">
       <label for="wishInput" data-i18n="wishLabel"></label>
-      <input id="wishInput" aria-describedby="wishHelp" maxlength="100" autocomplete="off">
+      <textarea id="wishInput" rows="2" aria-describedby="wishHelp" maxlength="100" autocomplete="off"></textarea>
       <p class="hint" id="wishHelp" data-i18n="wishHelp"></p>
       <button class="btn" data-i18n="saveWish"></button>
       <p class="okmsg" id="wishOk" role="status"></p>
@@ -149,7 +163,7 @@
       <p class="hint" id="pinShort" data-i18n="pinShort"></p>
       <details class="why"><summary data-i18n="pinWhy"></summary><p class="hint" data-i18n="pinWhyBody"></p></details>
       <label for="joinWish" data-i18n="joinWishLabel"></label>
-      <input id="joinWish" aria-describedby="wishPrivacy" maxlength="100" autocomplete="off" data-i18n-ph="joinWishPh">
+      <textarea id="joinWish" rows="2" aria-describedby="wishPrivacy" maxlength="100" autocomplete="off" data-i18n-ph="joinWishPh"></textarea>
       <p class="hint" id="wishPrivacy" data-i18n="wishPrivacy"></p>
       <button class="btn primary" id="joinBtn" data-i18n="joinBtn"></button>
       <p class="err" id="joinErr" role="alert"></p>
@@ -160,16 +174,20 @@
   <section class="card admin" id="adminCard" aria-labelledby="adminTitle" hidden>
     <h2 id="adminTitle"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><rect x="3" y="8.5" width="14" height="9.5" rx="2" fill="currentColor"/><path d="M6.5 8.5V6a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg> <span data-i18n="organizer"></span></h2>
     <p class="hint only-you" data-i18n="adminOnlyYou"></p>
-    <p class="hint" id="adminStatus"></p>
-    <button type="button" class="btn primary" id="drawBtn"></button>
+    <div class="stack invite" id="invite">
+      <h3 data-i18n="inviteTitle"></h3>
+      <p class="hint" id="adminStatus"></p>
+      <input id="shareUrl" readonly data-i18n-aria="shareLabel">
+      <div class="row2">
+        <button type="button" class="btn" id="copyShareBtn" data-copy="shareUrl" data-i18n="copyShare"></button>
+        <button type="button" class="btn" id="adminShareBtn" data-i18n="share"></button>
+      </div>
+    </div>
+    <p class="hint" id="adminStatusDrawn" hidden></p>
+    <button type="button" class="btn" id="drawBtn"></button>
     <button type="button" class="link danger" id="reopenBtn" data-i18n="reopen" hidden></button>
     <p class="okmsg" id="adminOk" role="status"></p>
     <p class="err" id="adminErr" role="alert"></p>
-    <div class="stack inset">
-      <label for="shareUrl" data-i18n="shareLabel"></label>
-      <input id="shareUrl" readonly>
-      <button type="button" class="btn" data-copy="shareUrl" data-i18n="copyShare"></button>
-    </div>
     <details class="inset" id="manage">
       <summary id="manageSummary"></summary>
       <ul class="people" id="adminList"></ul>
@@ -206,7 +224,9 @@
       <span class="stamp-main">Unnecessary Things</span>
       <span class="stamp-sub">★ Gift Division ★</span>
     </a>
-    <p><span data-i18n="merry"></span> <span id="retention"></span> <a id="homeLink" href="./" data-i18n="makeOwn" hidden></a></p>
+    <p class="foot-line" data-i18n="merry"></p>
+    <p class="foot-line" id="retention"></p>
+    <a class="foot-line" id="homeLink" href="./" data-i18n="makeOwn" hidden></a>
   </footer>
  </div>
 </main>

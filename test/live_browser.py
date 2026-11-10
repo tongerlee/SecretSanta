@@ -209,7 +209,7 @@ def run(p):
         org.click("#drawBtn"); org.wait_for_selector("#dlg[open]")
         listed = org.inner_text("#dlgBody")
         org.click("#dlgOk"); org.wait_for_selector("#reopenBtn:not([hidden])", timeout=20000)
-        return ("Nguyễn Thị Hương" in listed and "Jennifer" in listed and "Not even you" in org.inner_text("#adminStatus"), listed)
+        return ("Nguyễn Thị Hương" in listed and "Jennifer" in listed and "Not even you" in org.inner_text("#adminStatusDrawn"), listed)
     step("organizer confirms the list and draws", draw)
     roster = [n for n, _ in crowd if n != '"><script>1</script>'] + ["Jennifer"] + (["사파리"] if wk else [])
     def org_result():
