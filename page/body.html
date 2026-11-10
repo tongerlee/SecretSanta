@@ -1,0 +1,191 @@
+<!-- Text lives in i18n.js. data-i18n="key" fills an element's text, data-i18n-ph a placeholder,
+     data-i18n-aria an aria-label and data-i18n-alt an image description, in whichever language is chosen. -->
+<canvas id="snow" aria-hidden="true"></canvas>
+<main class="wrap" id="main">
+
+  <div class="hero">
+    @@LIGHTS@@
+    <div class="stage">
+      <svg class="hills" viewBox="0 0 360 215" aria-hidden="true">
+        <path d="M16 190 C18 110 36 34 100 22 C140 14 172 30 204 24 C244 16 296 10 322 50 C340 80 346 150 348 190Z" fill="#dbe8f0"/>
+        <path d="M60 60 C74 40 92 30 112 27 M214 28 C250 22 292 22 312 52" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity=".8"/>
+        <path d="M4 215 C4 190 34 170 100 168 C160 166 210 164 262 166 C322 168 356 190 356 215Z" fill="#ffffff"/>
+        <ellipse cx="118" cy="198" rx="52" ry="5.5" fill="#d5e2ea"/>
+        <ellipse cx="246" cy="198.5" rx="58" ry="6" fill="#d5e2ea"/>
+        <ellipse cx="31" cy="196.5" rx="24" ry="3.5" fill="#d5e2ea"/>
+        <ellipse cx="333" cy="198" rx="25" ry="3.5" fill="#d5e2ea"/>
+        <g transform="translate(-7.6 108) scale(.62)">
+@@TREE@@
+        </g>
+        <g transform="translate(312 149) scale(.7)">
+          <rect x="4" y="40" width="52" height="28" rx="2" fill="#c62f45"/><rect x="26" y="40" width="8" height="28" fill="#ffffff"/>
+          <rect x="2" y="35" width="56" height="8" rx="2" fill="#a8233a"/><rect x="26" y="35" width="8" height="8" fill="#ffffff"/>
+          <rect x="16" y="14" width="30" height="21" rx="2" fill="#2f8a66"/><rect x="28" y="14" width="6" height="21" fill="#f2c14e"/>
+          <rect x="14" y="10" width="34" height="7" rx="2" fill="#26795a"/><rect x="28" y="10" width="6" height="7" fill="#f2c14e"/>
+          <path d="M31 10 C22 -1 18 8 31 10 C44 8 40 -1 31 10Z" fill="#f2c14e"/>
+        </g>
+      </svg>
+      <img class="pets" src="pets.png" alt="" data-i18n-alt="petsAlt" width="1774" height="887">
+      <span class="nametag cat" lang="zh-CN">蛋饼 · Eggs Benedict</span>
+      <span class="nametag dog" lang="en">Waffle</span>
+    </div>
+  </div>
+
+  <header class="label">
+    <div class="label-top">
+      <span class="eyebrow">
+        <svg viewBox="0 0 28 20" width="28" height="20" aria-hidden="true"><path d="M13 11 C8 3 3 5 1 2 C1 8 3 13 13 12Z" fill="#2f8a66"/><path d="M15 11 C20 3 25 5 27 2 C27 8 25 13 15 12Z" fill="#1f6b4a"/><circle cx="11.6" cy="14.6" r="3" fill="#d42a43"/><circle cx="16.6" cy="15" r="3" fill="#b8203a"/><circle cx="14" cy="10.8" r="2.6" fill="#e8495e"/></svg>
+        <span data-i18n="eyebrow"></span>
+      </span>
+      <span class="pill" id="statusPill" hidden></span>
+    </div>
+    <h1 id="title">Secret Santa</h1>
+    <dl class="fields" id="eventFields" hidden>
+      <div><dt data-i18n="budget"></dt><dd id="fBudget">—</dd></div>
+      <div><dt data-i18n="exchangeDay"></dt><dd id="fDate">—</dd></div>
+    </dl>
+    <dl class="fields one" id="homeFields" hidden>
+      <div><dt data-i18n="howTitle"></dt><dd data-i18n="howBody"></dd></div>
+    </dl>
+    <p class="deadline" id="deadline" hidden></p>
+    <!-- language buttons, filled in by app.js from the list in i18n.js -->
+    <nav class="langs" id="langs" data-i18n-aria="langLabel"></nav>
+  </header>
+
+  <p class="notice" id="notice" role="status" hidden></p>
+
+  <!-- home page: create an event -->
+  <section class="card" id="createdCard" hidden>
+    <h2 data-i18n="createdTitle"></h2>
+    <div class="stack">
+      <label for="newShare" data-i18n="shareLabel"></label>
+      <input id="newShare" readonly>
+      <button type="button" class="btn" data-copy="newShare" data-i18n="copyShare"></button>
+      <label for="newAdmin" data-i18n="adminLinkLabel"></label>
+      <input id="newAdmin" readonly>
+      <button type="button" class="btn" data-copy="newAdmin" data-i18n="copyAdmin"></button>
+      <p class="hint"><b data-i18n="keepB"></b><span data-i18n="keepRest"></span></p>
+      <a class="btn primary" id="newOpen" href="#" data-i18n="openEvent"></a>
+    </div>
+  </section>
+
+  <section class="card" id="createCard" hidden>
+    <h2 data-i18n="createTitle"></h2>
+    <form id="createForm" class="stack">
+      <label for="newTitle" data-i18n="eventName"></label>
+      <input id="newTitle" maxlength="30" autocomplete="off">
+      <label for="newBudget" data-i18n="budget"></label>
+      <input id="newBudget" maxlength="20" autocomplete="off" data-i18n-ph="budgetPh">
+      <label for="newDate" data-i18n="exchangeDay"></label>
+      <input id="newDate" type="date">
+      <button class="btn primary" id="createBtn" data-i18n="createBtn"></button>
+      <p class="err" id="createErr" role="alert"></p>
+    </form>
+    <p class="hint" data-i18n="privacyHint"></p>
+  </section>
+
+  <section class="card" id="mineCard" hidden>
+    <h2 data-i18n="mineTitle"></h2>
+    <ul class="people" id="mineList"></ul>
+  </section>
+
+  <!-- event page -->
+  <section class="card" id="goneCard" hidden>
+    <h2 data-i18n="goneTitle"></h2>
+    <p data-i18n="goneBody"></p>
+    <a class="btn" href="./" data-i18n="goneNew"></a>
+  </section>
+
+  <section class="card" id="meCard" hidden>
+    <h2 id="meTitle"></h2>
+    <p id="meStatus"></p>
+    <p class="hint" id="resetNote" hidden></p>
+    <div id="tagSlot"></div>
+    <form id="wishForm" class="stack inset">
+      <label for="wishInput" data-i18n="wishLabel"></label>
+      <input id="wishInput" maxlength="100" autocomplete="off">
+      <button class="btn" data-i18n="saveWish"></button>
+      <p class="okmsg" id="wishOk" role="status"></p>
+      <p class="err" id="wishErr" role="alert"></p>
+    </form>
+    <div class="row">
+      <button type="button" class="link" id="logoutBtn" data-i18n="notMe"></button>
+      <button type="button" class="link danger" id="leaveBtn" data-i18n="leave"></button>
+    </div>
+  </section>
+
+  <section class="card" id="joinCard" hidden>
+    <h2 data-i18n="joinTitle"></h2>
+    <form id="joinForm" class="stack">
+      <label for="joinName" data-i18n="yourName"></label>
+      <input id="joinName" maxlength="24" autocomplete="off">
+      <label for="joinPin" data-i18n="pinLabel"></label>
+      <input id="joinPin" class="pin" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off">
+      <p class="hint"><span data-i18n="pinHint"></span><b data-i18n="pinWarn"></b></p>
+      <label for="joinWish" data-i18n="joinWishLabel"></label>
+      <input id="joinWish" maxlength="100" autocomplete="off" data-i18n-ph="joinWishPh">
+      <button class="btn primary" id="joinBtn" data-i18n="joinBtn"></button>
+      <p class="err" id="joinErr" role="alert"></p>
+    </form>
+  </section>
+
+  <section class="card" id="rosterCard" hidden>
+    <h2 id="rosterTitle"></h2>
+    <p class="hint" id="rosterHint"></p>
+    <div class="names" id="names"></div>
+    <ul class="roster" id="roster"></ul>
+  </section>
+
+  <section class="card" id="adminCard" hidden>
+    <h2 data-i18n="organizer"></h2>
+    <p class="hint" id="adminStatus"></p>
+    <ul class="people" id="adminList"></ul>
+    <button type="button" class="btn primary" id="drawBtn"></button>
+    <button type="button" class="link danger" id="reopenBtn" data-i18n="reopen" hidden></button>
+    <p class="okmsg" id="adminOk" role="status"></p>
+    <p class="err" id="adminErr" role="alert"></p>
+    <div class="stack inset">
+      <label for="shareUrl" data-i18n="shareLabel"></label>
+      <input id="shareUrl" readonly>
+      <button type="button" class="btn" data-copy="shareUrl" data-i18n="copyShare"></button>
+    </div>
+    <details class="inset" id="settings">
+      <summary data-i18n="settingsSummary"></summary>
+      <form id="cfgForm" class="stack">
+        <label for="cfgTitle" data-i18n="eventName"></label>
+        <input id="cfgTitle" maxlength="30" autocomplete="off">
+        <label for="cfgBudget" data-i18n="budget"></label>
+        <input id="cfgBudget" maxlength="20" autocomplete="off">
+        <label for="cfgExchangeOn" data-i18n="cfgDateLabel"></label>
+        <input id="cfgExchangeOn" type="date">
+        <label for="cfgDrawAt" data-i18n="cfgDrawAtLabel"></label>
+        <input id="cfgDrawAt" type="datetime-local">
+        <p class="hint" data-i18n="cfgDrawAtHint"></p>
+        <button class="btn" id="cfgSave" data-i18n="saveSettings"></button>
+      </form>
+    </details>
+    <details class="inset" id="adminLinkBox">
+      <summary data-i18n="myAdminLink"></summary>
+      <div class="stack">
+        <p class="hint" data-i18n="myAdminHint"></p>
+        <input id="adminUrl" readonly data-i18n-aria="adminLinkAria">
+        <button type="button" class="btn" data-copy="adminUrl" data-i18n="copyAdmin"></button>
+        <button type="button" class="link danger" id="destroyBtn" data-i18n="destroyNow"></button>
+      </div>
+    </details>
+  </section>
+
+  <footer><span data-i18n="merry"></span> <span id="retention"></span> <a id="homeLink" href="./" data-i18n="makeOwn" hidden></a></footer>
+</main>
+
+<dialog id="dlg" aria-labelledby="dlgTitle">
+  <form id="dlgForm" method="dialog">
+    <h2 id="dlgTitle"></h2>
+    <div id="dlgBody"></div>
+    <div class="dlg-actions">
+      <button type="button" class="btn" id="dlgCancel"></button>
+      <button class="btn primary" id="dlgOk"></button>
+    </div>
+  </form>
+</dialog>
+<div class="toast" id="toast" role="status" hidden></div>

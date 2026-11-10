@@ -1,0 +1,9 @@
+      <rect x="57" y="128" width="10" height="14" fill="#7a4a2a"/>
+      <path d="M62 70 L22 132 H102Z" fill="#1f6b4a"/>
+      <path d="M62 48 L30 104 H94Z" fill="#26795a"/>
+      <path d="M62 26 L40 76 H84Z" fill="#2f8a66"/>
+      <path d="M44 68 Q62 78 80 68 M35 96 Q62 110 89 96 M28 124 Q62 140 96 124" fill="none" stroke="#f2c14e" stroke-width="1.6" stroke-linecap="round"/>
+      <circle cx="54" cy="58" r="3.2" fill="#ff5468"/><circle cx="70" cy="64" r="3.2" fill="#6ec3f5"/>
+      <circle cx="46" cy="88" r="3.4" fill="#f2c14e"/><circle cx="64" cy="92" r="3.4" fill="#ff5468"/><circle cx="80" cy="86" r="3.4" fill="#ffffff"/>
+      <circle cx="38" cy="116" r="3.6" fill="#6ec3f5"/><circle cx="58" cy="120" r="3.6" fill="#ffffff"/><circle cx="78" cy="118" r="3.6" fill="#f2c14e"/><circle cx="92" cy="112" r="3.2" fill="#ff5468"/>
+      <path d="M62 11 64.23 16.93 70.56 17.22 65.61 21.17 67.29 27.28 62 23.8 56.71 27.28 58.39 21.17 53.44 17.22 59.77 16.93Z" fill="#f2c14e"/>

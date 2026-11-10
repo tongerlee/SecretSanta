@@ -1,0 +1,1 @@
+window.SANTA_API = "";

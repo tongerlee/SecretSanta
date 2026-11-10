@@ -1,0 +1,9 @@
+# installed packages and build output
+node_modules/
+.aws-sam/
+__pycache__/
+# screenshots from the browser walk-throughs
+test/shots/
+# local machine noise
+.DS_Store
+*.zip

@@ -1,0 +1,96 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Secret Santa - static site on Amplify Hosting, API on Lambda (Function URL), one DynamoDB table
+
+Resources:
+  # One item per event (pk = E#<id>), plus short-lived counters that limit how fast events can be created.
+  Table:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+      # the API stamps `ttl` a week after an event's exchange date; DynamoDB then deletes the record on its own
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+
+  # The front of house: static files. Not connected to a repository; deploy.sh uploads web/ as a zip.
+  Site:
+    Type: AWS::Amplify::App
+    Properties:
+      Name: !Ref AWS::StackName
+      Description: Secret Santa static site
+      Platform: WEB
+
+  SiteBranch:
+    Type: AWS::Amplify::Branch
+    Properties:
+      AppId: !GetAtt Site.AppId
+      BranchName: main
+      Stage: PRODUCTION
+      EnableAutoBuild: false
+
+  # The kitchen: the JSON API.
+  ApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Secret Santa API
+      CodeUri: api/
+      Handler: index.handler
+      Runtime: nodejs22.x
+      Architectures:
+        - arm64
+      MemorySize: 1024      # CPU scales with memory: this halves the PIN check (the slow step) compared with 512
+      Timeout: 10
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref Table
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:PutItem
+                - dynamodb:UpdateItem
+                - dynamodb:DeleteItem
+              Resource: !GetAtt Table.Arn
+      FunctionUrlConfig:
+        AuthType: NONE
+        # Only pages served from the Amplify site may call the API from a browser.
+        # If you attach your own domain to the site, add it to AllowOrigins.
+        Cors:
+          AllowOrigins:
+            - !Sub 'https://main.${Site.DefaultDomain}'
+          AllowMethods:
+            - POST
+          AllowHeaders:
+            - content-type
+          MaxAge: 86400
+
+  # Function URLs created since October 2025 need lambda:InvokeFunction as well as
+  # lambda:InvokeFunctionUrl. SAM adds the pair for AuthType NONE; this spells out the second
+  # one so the API is reachable whichever way the template is deployed.
+  ApiFunctionUrlInvoke:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref ApiFunction
+      Action: lambda:InvokeFunction
+      Principal: '*'
+      InvokedViaFunctionUrl: true
+
+Outputs:
+  SiteUrl:
+    Description: The website. Create events here.
+    Value: !Sub 'https://main.${Site.DefaultDomain}/'
+  ApiEndpoint:
+    Description: Where the site sends its API calls (deploy.sh writes this into config.js)
+    Value: !GetAtt ApiFunctionUrl.FunctionUrl
+  AmplifyAppId:
+    Description: Used by deploy.sh to upload the static files
+    Value: !GetAtt Site.AppId

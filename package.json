@@ -1,0 +1,16 @@
+{
+  "name": "secret-santa",
+  "private": true,
+  "type": "module",
+  "description": "Secret Santa: static site on Amplify, API on Lambda, one DynamoDB item per event",
+  "scripts": {
+    "build": "python3 page/build.py",
+    "test": "node --test test/api.test.mjs test/i18n.test.mjs",
+    "dev": "node test/server.mjs"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-dynamodb": "^3.0.0",
+    "@aws-sdk/lib-dynamodb": "^3.0.0",
+    "dynalite": "^4.0.0"
+  }
+}

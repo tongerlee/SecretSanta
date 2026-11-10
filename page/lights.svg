@@ -1,0 +1,17 @@
+<svg class="lights" viewBox="0 0 360 40" aria-hidden="true">
+      <path d="M-5 4 Q40 26 90 8 Q135 26 180 8 Q225 26 270 8 Q315 26 365 4" fill="none" stroke="#08201a" stroke-width="1.6"/>
+      <g fill="currentColor">
+        <g class="bulb" style="color:#ff5468"><rect x="11.4" y="10" width="3.6" height="4" rx="1" fill="#08201a"/><ellipse cx="13.2" cy="19.5" rx="4" ry="6"/></g>
+        <g class="bulb" style="color:#f2c14e"><rect x="39.4" y="15" width="3.6" height="4" rx="1" fill="#08201a"/><ellipse cx="41.2" cy="24.5" rx="4" ry="6"/></g>
+        <g class="bulb" style="color:#5fd08b"><rect x="68.4" y="12.5" width="3.6" height="4" rx="1" fill="#08201a"/><ellipse cx="70.2" cy="22" rx="4" ry="6"/></g>
+        <g class="bulb" style="color:#6ec3f5"><rect x="106.2" y="12.6" width="3.6" height="4" rx="1" fill="#08201a"/><ellipse cx="108" cy="22.2" rx="4" ry="6"/></g>
+        <g class="bulb" style="color:#ff5468"><rect x="133.2" y="16" width="3.6" height="4" rx="1" fill="#08201a"/><ellipse cx="135" cy="25.5" rx="4" ry="6"/></g>
+        <g class="bulb" style="color:#f2c14e"><rect x="160.2" y="12.6" width="3.6" height="4" rx="1" fill="#08201a"/><ellipse cx="162" cy="22.2" rx="4" ry="6"/></g>
+        <g class="bulb" style="color:#5fd08b"><rect x="196.2" y="12.6" width="3.6" height="4" rx="1" fill="#08201a"/><ellipse cx="198" cy="22.2" rx="4" ry="6"/></g>
+        <g class="bulb" style="color:#6ec3f5"><rect x="223.2" y="16" width="3.6" height="4" rx="1" fill="#08201a"/><ellipse cx="225" cy="25.5" rx="4" ry="6"/></g>
+        <g class="bulb" style="color:#ff5468"><rect x="250.2" y="12.6" width="3.6" height="4" rx="1" fill="#08201a"/><ellipse cx="252" cy="22.2" rx="4" ry="6"/></g>
+        <g class="bulb" style="color:#f2c14e"><rect x="286.4" y="12.5" width="3.6" height="4" rx="1" fill="#08201a"/><ellipse cx="288.2" cy="22" rx="4" ry="6"/></g>
+        <g class="bulb" style="color:#5fd08b"><rect x="314.4" y="15" width="3.6" height="4" rx="1" fill="#08201a"/><ellipse cx="316.2" cy="24.5" rx="4" ry="6"/></g>
+        <g class="bulb" style="color:#6ec3f5"><rect x="343.4" y="10" width="3.6" height="4" rx="1" fill="#08201a"/><ellipse cx="345.2" cy="19.5" rx="4" ry="6"/></g>
+      </g>
+    </svg>

@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#0d2a22">
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https: http://127.0.0.1:*; base-uri 'none'; form-action 'none'">
+<title>Secret Santa</title>
+<meta property="og:title" content="Secret Santa">
+<meta property="og:description" content="Sign up · 报名 · 참가하기 · Đăng ký">
+<meta property="og:image" content="@@ORIGIN@@/pets.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d2a22'/%3E%3Cpath d='M16 5 6 22h20z' fill='%232f8a66'/%3E%3Crect x='14' y='22' width='4' height='5' fill='%237a4a2a'/%3E%3Ccircle cx='16' cy='6' r='2.4' fill='%23f2c14e'/%3E%3Ccircle cx='13' cy='15' r='1.6' fill='%23ff5468'/%3E%3Ccircle cx='19' cy='18' r='1.6' fill='%23f2c14e'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Ma+Shan+Zheng&family=Mountains+of+Christmas:wght@700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Patrick+Hand&display=swap" media="print" onload="this.media='all'">
+<style>
+:root{
+  /* One world, on purpose: a snowy pine-green night. String lights on top, the two pets
+     sitting on a snow hill, a candy-striped parcel label under them, plain white cards,
+     and one kraft gift tag that flips over for the reveal. Single theme by choice. */
+  --night:#0d2a22;
+  --night-glow:#1c5641;
+  --on-night:#eef6f0;
+  --on-night-soft:#b4cbbf;
+  --card:#ffffff;
+  --field:#f0f4f0;
+  --pine:#12352b;
+  --moss:#566e64;
+  --rule:#d3ddd6;
+  --berry:#b8203a;
+  --berry-deep:#93182d;
+  --on-berry:#ffffff;
+  --gold:#f2c14e;
+  --kraft:#dcbf93;
+  --kraft-ink:#33240f;
+  --ok:#1c7450;
+  --focus:#1d6fd6;
+  --font-display:"Mountains of Christmas","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  --font-body:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei","Segoe UI",sans-serif;
+  --font-hand:"Caveat","Ma Shan Zheng","Gaegu","Kaiti SC","KaiTi",cursive;
+  color-scheme:light;
+}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;color:var(--pine);font:16px/1.55 var(--font-body);
+  background:var(--night) radial-gradient(130% 460px at 50% 0,var(--night-glow) 0,rgba(28,86,65,0) 100%) no-repeat}
+#snow{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:0 16px 56px;display:flex;flex-direction:column;gap:14px}
+h1,h2,p,dl,dd,ul{margin:0}
+h2{font:700 18px/1.3 var(--font-body);text-wrap:balance}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+
+/* string lights, then the pets on their snow hill */
+.hero{position:relative;z-index:2;margin:0 -16px -32px;pointer-events:none}
+.lights{display:block;width:100%;height:auto}
+.bulb{animation:twinkle 2.6s ease-in-out infinite;filter:drop-shadow(0 0 3px currentColor)}
+.bulb:nth-of-type(3n+1){animation-delay:-.9s}
+.bulb:nth-of-type(3n+2){animation-delay:-1.7s}
+@keyframes twinkle{0%,100%{opacity:1}50%{opacity:.4}}
+.stage{position:relative;width:min(100%,430px);margin:-8px auto 0}
+.stage::before{content:"";display:block;padding-top:59.72%}
+.hills{position:absolute;inset:0;width:100%;height:100%}
+.pets{position:absolute;left:0;top:12.56%;width:100%;height:auto}
+.nametag{position:absolute;top:94.5%;transform:translateX(-50%);white-space:nowrap;font:700 12px/1 var(--font-body);color:#fff;padding:5px 10px;border-radius:999px;box-shadow:0 2px 5px rgba(0,0,0,.25)}
+.nametag.cat{left:32.9%;background:var(--berry)}
+.nametag.dog{left:68.3%;background:var(--ok)}
+
+/* parcel label with a candy-stripe edge */
+.label{position:relative;background:var(--card);padding:30px 16px 0;border:7px solid var(--berry);
+  border-image:repeating-linear-gradient(135deg,var(--berry) 0 9px,#fff 9px 18px,var(--ok) 18px 27px,#fff 27px 36px) 7}
+.label-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:6px 10px;min-height:26px}
+.eyebrow{display:flex;align-items:center;gap:8px;min-width:0;font-size:11px;letter-spacing:.12em;color:var(--moss);font-weight:600}
+.label h1{font:700 clamp(42px,13.5vw,58px)/.95 var(--font-display);color:var(--berry);margin:8px 0 16px;text-wrap:balance;overflow-wrap:anywhere}
+.fields{display:grid;grid-template-columns:1fr 1.3fr;border-top:2px solid var(--pine);margin:0 -16px}
+.fields>div{padding:8px 12px 10px;border-left:1px dashed var(--moss);min-width:0}
+.fields>div:first-child{border-left:0;padding-left:16px}
+.fields dt{font-size:11px;letter-spacing:.08em;color:var(--moss)}
+.fields dd{font-weight:600;font-size:15px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.pill{font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;border:1.5px solid var(--moss);color:var(--moss);white-space:nowrap}
+.pill.drawn{background:var(--ok);border-color:var(--ok);color:#fff}
+
+/* cards and forms */
+.card{background:var(--card);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:0 8px 22px rgba(0,0,0,.22)}
+.card p,.hint{font-size:14px;color:var(--moss)}
+.stack{display:flex;flex-direction:column;gap:8px}
+label{font-size:13px;font-weight:600;color:var(--moss);margin-top:4px}
+input,textarea{font:16px/1.45 var(--font-body);color:var(--pine);background:var(--field);border:1.5px solid var(--rule);border-radius:8px;padding:10px 12px;width:100%}
+input::placeholder,textarea::placeholder{color:var(--moss);opacity:.7}
+.btn{font:600 16px/1.2 var(--font-body);padding:13px 16px;border-radius:8px;border:1.5px solid var(--pine);background:transparent;color:var(--pine);cursor:pointer}
+.btn.primary{background:var(--berry);border-color:var(--berry);color:var(--on-berry)}
+.btn.primary:active{background:var(--berry-deep)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.link{font:600 14px/1.2 var(--font-body);background:none;border:0;padding:6px 2px;color:var(--moss);text-decoration:underline;text-underline-offset:3px;cursor:pointer;align-self:flex-start}
+.link.danger{color:var(--berry)}
+.card p.err,.err{font-size:14px;color:var(--berry);font-weight:600}
+.card p.okmsg,.okmsg{font-size:14px;color:var(--ok);font-weight:600}
+.err:empty,.okmsg:empty{display:none}
+details>summary{cursor:pointer;font-weight:600;font-size:15px;padding:2px 0}
+details[open]>summary{margin-bottom:10px}
+.inset{border-top:1px solid var(--rule);padding-top:12px}
+
+/* who is in, and the name buttons */
+.roster{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.roster li{font-size:14px;padding:4px 11px;border:1px solid var(--rule);border-radius:999px;background:var(--field);overflow-wrap:anywhere}
+.names{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:8px}
+.names .btn{overflow-wrap:anywhere}
+
+/* the gift tag */
+.tag{width:100%;max-width:310px;margin:10px auto 6px;transform:rotate(-1.5deg)}
+.tag-inner{filter:drop-shadow(0 6px 10px rgba(0,0,0,.24));transition:transform .2s ease-out}
+.tag-inner.fold{transform:scaleX(.03);transition-timing-function:ease-in}
+.tag-side{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;width:100%;min-height:250px;padding:46px 22px 22px;border:0;text-align:center;
+  clip-path:polygon(38px 0,calc(100% - 38px) 0,100% 38px,100% 100%,0 100%,0 38px)}
+.hole{position:absolute;top:15px;left:50%;width:15px;height:15px;margin-left:-7.5px;border-radius:50%;background:var(--card);box-shadow:inset 0 1px 2px rgba(0,0,0,.35)}
+.tag-back{cursor:pointer;color:#fff;font:inherit;
+  background:repeating-linear-gradient(135deg,var(--berry) 0 16px,var(--berry-deep) 16px 32px)}
+.tag-back .for{font-size:14px;font-weight:600;letter-spacing:.04em;background:rgba(0,0,0,.3);padding:4px 12px;border-radius:999px;overflow-wrap:anywhere;max-width:100%}
+.tag-back .cta{font:700 34px/1.1 var(--font-display);margin-top:6px}
+.tag-back .peek{font-size:13px;opacity:.92}
+.tag-front{background:var(--kraft);color:var(--kraft-ink)}
+.card .tag-front p{color:var(--kraft-ink)}
+.tag-k{font-size:11px;letter-spacing:.16em;font-weight:700;opacity:.72}
+.card .tag-front .tag-name,.tag-name{font:600 46px/1.05 var(--font-hand);overflow-wrap:anywhere;max-width:100%;margin:2px 0 4px}
+.tag-wish{font-size:14px;line-height:1.45;overflow-wrap:anywhere;max-width:100%}
+.tag-meta{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;border-top:1px dashed currentColor;padding-top:8px;margin-top:6px;width:100%;overflow-wrap:anywhere}
+.tag-front .link{color:var(--kraft-ink);align-self:center;margin-top:4px}
+.paw{position:absolute;right:14px;bottom:12px;width:34px;height:34px;fill:var(--kraft-ink);opacity:.16;transform:rotate(18deg)}
+
+/* dialog + toast */
+dialog{border:0;border-radius:14px;background:var(--card);color:var(--pine);padding:18px;width:min(92vw,400px);max-height:90vh;overflow:auto}
+dialog::backdrop{background:rgba(4,16,12,.72)}
+dialog h2{margin-bottom:8px}
+#dlgBody{font-size:15px;color:var(--moss);display:flex;flex-direction:column;gap:10px}
+#dlgBody p{overflow-wrap:anywhere}
+.dlg-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--gold);color:var(--pine);font-size:14px;font-weight:700;padding:10px 16px;border-radius:999px;max-width:88vw;text-align:center;z-index:10;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+
+@media (prefers-reduced-motion:reduce){.tag-inner{transition:none}.bulb{animation:none}}
+
+/* page chrome that only this hosted version has */
+.notice{font-size:14px;color:var(--on-night-soft);padding:0 2px}
+.deadline{font-size:13px;font-weight:600;color:var(--berry);padding:8px 0 10px;border-top:1px dashed var(--moss);margin:0 -16px;padding-left:16px;padding-right:16px}
+.row{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center}
+.people{list-style:none;padding:0;display:flex;flex-direction:column}
+.people li{display:flex;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--rule);flex-wrap:wrap}
+.people li:first-child{border-top:0;padding-top:0}
+.who{flex:1 1 120px;min-width:0}
+.who b{display:block;font-size:16px;overflow-wrap:anywhere}
+.who small{display:block;font-size:13px;color:var(--moss);overflow-wrap:anywhere}
+.btn.sm{font-size:14px;padding:8px 11px;white-space:nowrap}
+.pin{letter-spacing:.3em;font-variant-numeric:tabular-nums;font-size:20px;text-align:center}
+footer{font-size:12.5px;color:var(--on-night-soft);text-align:center;padding:4px 8px}
+
+/* multi-event additions */
+a.btn{display:block;text-align:center;text-decoration:none}
+.fields.one{grid-template-columns:1fr}
+.fields.one dd{font-weight:500;font-size:14px;line-height:1.5}
+.who a{color:inherit}
+footer a{color:var(--on-night-soft)}
+
+/* ---- languages ----
+   Buttons at the foot of the label, each written in its own language so anyone can spot theirs. */
+.langs{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 6px;margin:0 -16px;padding:8px 10px;border-top:1px dashed var(--moss)}
+.langs button{font:600 13px/1.2 var(--font-body);color:var(--moss);background:none;border:1.5px solid transparent;border-radius:999px;padding:8px 11px;cursor:pointer}
+.langs button[aria-pressed="true"]{color:var(--pine);border-color:var(--pine);background:var(--field)}
+@media (max-width:360px){.langs{gap:2px;padding:8px 4px}.langs button{padding:8px 8px;font-size:12.5px}}   /* all four on one row on the smallest phones */
+
+/* Each language reads in fonts made for it. Korean must never break a line in the middle of a word. */
+html:lang(en),html:lang(vi){--font-body:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"PingFang SC","Noto Sans SC",sans-serif}
+html:lang(ko){--font-body:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR","Segoe UI",sans-serif;
+  --font-display:"Mountains of Christmas","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;word-break:keep-all}
+
+/* The Christmas title face and the handwriting face only have plain Latin letters. Vietnamese (ơ ư ễ ...) would come
+   out half in one font and half in another, so those words switch to a face that has every letter. */
+html:lang(vi) .tag-back .cta{font:800 28px/1.15 var(--font-body)}
+.label h1.plain{font-family:var(--font-body);font-weight:800;font-size:clamp(32px,10vw,44px);line-height:1.08}
+.card .tag-front .tag-name.plain,.tag-name.plain{font-family:"Patrick Hand","Caveat",var(--font-body);font-weight:400;font-size:40px}
+</style>
+</head>
+<body>
+<!-- Text lives in i18n.js. data-i18n="key" fills an element's text, data-i18n-ph a placeholder,
+     data-i18n-aria an aria-label and data-i18n-alt an image description, in whichever language is chosen. -->
+<canvas id="snow" aria-hidden="true"></canvas>
+<main class="wrap" id="main">
+
+  <div class="hero">
+    <svg class="lights" viewBox="0 0 360 40" aria-hidden="true">
+      <path d="M-5 4 Q40 26 90 8 Q135 26 180 8 Q225 26 270 8 Q315 26 365 4" fill="none" stroke="#08201a" stroke-width="1.6"/>
+      <g fill="currentColor">
+        <g class="bulb" style="color:#ff5468"><rect x="11.4" y="10" width="3.6" height="4" rx="1" fill="#08201a"/><ellipse cx="13.2" cy="19.5" rx="4" ry="6"/></g>
+        <g class="bulb" style="color:#f2c14e"><rect x="39.4" y="15" width="3.6" height="4" rx="1" fill="#08201a"/><ellipse cx="41.2" cy="24.5" rx="4" ry="6"/></g>
+        <g class="bulb" style="color:#5fd08b"><rect x="68.4" y="12.5" width="3.6" height="4" rx="1" fill="#08201a"/><ellipse cx="70.2" cy="22" rx="4" ry="6"/></g>
+        <g class="bulb" style="color:#6ec3f5"><rect x="106.2" y="12.6" width="3.6" height="4" rx="1" fill="#08201a"/><ellipse cx="108" cy="22.2" rx="4" ry="6"/></g>
+        <g class="bulb" style="color:#ff5468"><rect x="133.2" y="16" width="3.6" height="4" rx="1" fill="#08201a"/><ellipse cx="135" cy="25.5" rx="4" ry="6"/></g>
+        <g class="bulb" style="color:#f2c14e"><rect x="160.2" y="12.6" width="3.6" height="4" rx="1" fill="#08201a"/><ellipse cx="162" cy="22.2" rx="4" ry="6"/></g>
+        <g class="bulb" style="color:#5fd08b"><rect x="196.2" y="12.6" width="3.6" height="4" rx="1" fill="#08201a"/><ellipse cx="198" cy="22.2" rx="4" ry="6"/></g>
+        <g class="bulb" style="color:#6ec3f5"><rect x="223.2" y="16" width="3.6" height="4" rx="1" fill="#08201a"/><ellipse cx="225" cy="25.5" rx="4" ry="6"/></g>
+        <g class="bulb" style="color:#ff5468"><rect x="250.2" y="12.6" width="3.6" height="4" rx="1" fill="#08201a"/><ellipse cx="252" cy="22.2" rx="4" ry="6"/></g>
+        <g class="bulb" style="color:#f2c14e"><rect x="286.4" y="12.5" width="3.6" height="4" rx="1" fill="#08201a"/><ellipse cx="288.2" cy="22" rx="4" ry="6"/></g>
+        <g class="bulb" style="color:#5fd08b"><rect x="314.4" y="15" width="3.6" height="4" rx="1" fill="#08201a"/><ellipse cx="316.2" cy="24.5" rx="4" ry="6"/></g>
+        <g class="bulb" style="color:#6ec3f5"><rect x="343.4" y="10" width="3.6" height="4" rx="1" fill="#08201a"/><ellipse cx="345.2" cy="19.5" rx="4" ry="6"/></g>
+      </g>
+    </svg>
+    <div class="stage">
+      <svg class="hills" viewBox="0 0 360 215" aria-hidden="true">
+        <path d="M16 190 C18 110 36 34 100 22 C140 14 172 30 204 24 C244 16 296 10 322 50 C340 80 346 150 348 190Z" fill="#dbe8f0"/>
+        <path d="M60 60 C74 40 92 30 112 27 M214 28 C250 22 292 22 312 52" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity=".8"/>
+        <path d="M4 215 C4 190 34 170 100 168 C160 166 210 164 262 166 C322 168 356 190 356 215Z" fill="#ffffff"/>
+        <ellipse cx="118" cy="198" rx="52" ry="5.5" fill="#d5e2ea"/>
+        <ellipse cx="246" cy="198.5" rx="58" ry="6" fill="#d5e2ea"/>
+        <ellipse cx="31" cy="196.5" rx="24" ry="3.5" fill="#d5e2ea"/>
+        <ellipse cx="333" cy="198" rx="25" ry="3.5" fill="#d5e2ea"/>
+        <g transform="translate(-7.6 108) scale(.62)">
+      <rect x="57" y="128" width="10" height="14" fill="#7a4a2a"/>
+      <path d="M62 70 L22 132 H102Z" fill="#1f6b4a"/>
+      <path d="M62 48 L30 104 H94Z" fill="#26795a"/>
+      <path d="M62 26 L40 76 H84Z" fill="#2f8a66"/>
+      <path d="M44 68 Q62 78 80 68 M35 96 Q62 110 89 96 M28 124 Q62 140 96 124" fill="none" stroke="#f2c14e" stroke-width="1.6" stroke-linecap="round"/>
+      <circle cx="54" cy="58" r="3.2" fill="#ff5468"/><circle cx="70" cy="64" r="3.2" fill="#6ec3f5"/>
+      <circle cx="46" cy="88" r="3.4" fill="#f2c14e"/><circle cx="64" cy="92" r="3.4" fill="#ff5468"/><circle cx="80" cy="86" r="3.4" fill="#ffffff"/>
+      <circle cx="38" cy="116" r="3.6" fill="#6ec3f5"/><circle cx="58" cy="120" r="3.6" fill="#ffffff"/><circle cx="78" cy="118" r="3.6" fill="#f2c14e"/><circle cx="92" cy="112" r="3.2" fill="#ff5468"/>
+      <path d="M62 11 64.23 16.93 70.56 17.22 65.61 21.17 67.29 27.28 62 23.8 56.71 27.28 58.39 21.17 53.44 17.22 59.77 16.93Z" fill="#f2c14e"/>
+        </g>
+        <g transform="translate(312 149) scale(.7)">
+          <rect x="4" y="40" width="52" height="28" rx="2" fill="#c62f45"/><rect x="26" y="40" width="8" height="28" fill="#ffffff"/>
+          <rect x="2" y="35" width="56" height="8" rx="2" fill="#a8233a"/><rect x="26" y="35" width="8" height="8" fill="#ffffff"/>
+          <rect x="16" y="14" width="30" height="21" rx="2" fill="#2f8a66"/><rect x="28" y="14" width="6" height="21" fill="#f2c14e"/>
+          <rect x="14" y="10" width="34" height="7" rx="2" fill="#26795a"/><rect x="28" y="10" width="6" height="7" fill="#f2c14e"/>
+          <path d="M31 10 C22 -1 18 8 31 10 C44 8 40 -1 31 10Z" fill="#f2c14e"/>
+        </g>
+      </svg>
+      <img class="pets" src="pets.png" alt="" data-i18n-alt="petsAlt" width="1774" height="887">
+      <span class="nametag cat" lang="zh-CN">蛋饼 · Eggs Benedict</span>
+      <span class="nametag dog" lang="en">Waffle</span>
+    </div>
+  </div>
+
+  <header class="label">
+    <div class="label-top">
+      <span class="eyebrow">
+        <svg viewBox="0 0 28 20" width="28" height="20" aria-hidden="true"><path d="M13 11 C8 3 3 5 1 2 C1 8 3 13 13 12Z" fill="#2f8a66"/><path d="M15 11 C20 3 25 5 27 2 C27 8 25 13 15 12Z" fill="#1f6b4a"/><circle cx="11.6" cy="14.6" r="3" fill="#d42a43"/><circle cx="16.6" cy="15" r="3" fill="#b8203a"/><circle cx="14" cy="10.8" r="2.6" fill="#e8495e"/></svg>
+        <span data-i18n="eyebrow"></span>
+      </span>
+      <span class="pill" id="statusPill" hidden></span>
+    </div>
+    <h1 id="title">Secret Santa</h1>
+    <dl class="fields" id="eventFields" hidden>
+      <div><dt data-i18n="budget"></dt><dd id="fBudget">—</dd></div>
+      <div><dt data-i18n="exchangeDay"></dt><dd id="fDate">—</dd></div>
+    </dl>
+    <dl class="fields one" id="homeFields" hidden>
+      <div><dt data-i18n="howTitle"></dt><dd data-i18n="howBody"></dd></div>
+    </dl>
+    <p class="deadline" id="deadline" hidden></p>
+    <!-- language buttons, filled in by app.js from the list in i18n.js -->
+    <nav class="langs" id="langs" data-i18n-aria="langLabel"></nav>
+  </header>
+
+  <p class="notice" id="notice" role="status" hidden></p>
+
+  <!-- home page: create an event -->
+  <section class="card" id="createdCard" hidden>
+    <h2 data-i18n="createdTitle"></h2>
+    <div class="stack">
+      <label for="newShare" data-i18n="shareLabel"></label>
+      <input id="newShare" readonly>
+      <button type="button" class="btn" data-copy="newShare" data-i18n="copyShare"></button>
+      <label for="newAdmin" data-i18n="adminLinkLabel"></label>
+      <input id="newAdmin" readonly>
+      <button type="button" class="btn" data-copy="newAdmin" data-i18n="copyAdmin"></button>
+      <p class="hint"><b data-i18n="keepB"></b><span data-i18n="keepRest"></span></p>
+      <a class="btn primary" id="newOpen" href="#" data-i18n="openEvent"></a>
+    </div>
+  </section>
+
+  <section class="card" id="createCard" hidden>
+    <h2 data-i18n="createTitle"></h2>
+    <form id="createForm" class="stack">
+      <label for="newTitle" data-i18n="eventName"></label>
+      <input id="newTitle" maxlength="30" autocomplete="off">
+      <label for="newBudget" data-i18n="budget"></label>
+      <input id="newBudget" maxlength="20" autocomplete="off" data-i18n-ph="budgetPh">
+      <label for="newDate" data-i18n="exchangeDay"></label>
+      <input id="newDate" type="date">
+      <button class="btn primary" id="createBtn" data-i18n="createBtn"></button>
+      <p class="err" id="createErr" role="alert"></p>
+    </form>
+    <p class="hint" data-i18n="privacyHint"></p>
+  </section>
+
+  <section class="card" id="mineCard" hidden>
+    <h2 data-i18n="mineTitle"></h2>
+    <ul class="people" id="mineList"></ul>
+  </section>
+
+  <!-- event page -->
+  <section class="card" id="goneCard" hidden>
+    <h2 data-i18n="goneTitle"></h2>
+    <p data-i18n="goneBody"></p>
+    <a class="btn" href="./" data-i18n="goneNew"></a>
+  </section>
+
+  <section class="card" id="meCard" hidden>
+    <h2 id="meTitle"></h2>
+    <p id="meStatus"></p>
+    <p class="hint" id="resetNote" hidden></p>
+    <div id="tagSlot"></div>
+    <form id="wishForm" class="stack inset">
+      <label for="wishInput" data-i18n="wishLabel"></label>
+      <input id="wishInput" maxlength="100" autocomplete="off">
+      <button class="btn" data-i18n="saveWish"></button>
+      <p class="okmsg" id="wishOk" role="status"></p>
+      <p class="err" id="wishErr" role="alert"></p>
+    </form>
+    <div class="row">
+      <button type="button" class="link" id="logoutBtn" data-i18n="notMe"></button>
+      <button type="button" class="link danger" id="leaveBtn" data-i18n="leave"></button>
+    </div>
+  </section>
+
+  <section class="card" id="joinCard" hidden>
+    <h2 data-i18n="joinTitle"></h2>
+    <form id="joinForm" class="stack">
+      <label for="joinName" data-i18n="yourName"></label>
+      <input id="joinName" maxlength="24" autocomplete="off">
+      <label for="joinPin" data-i18n="pinLabel"></label>
+      <input id="joinPin" class="pin" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off">
+      <p class="hint"><span data-i18n="pinHint"></span><b data-i18n="pinWarn"></b></p>
+      <label for="joinWish" data-i18n="joinWishLabel"></label>
+      <input id="joinWish" maxlength="100" autocomplete="off" data-i18n-ph="joinWishPh">
+      <button class="btn primary" id="joinBtn" data-i18n="joinBtn"></button>
+      <p class="err" id="joinErr" role="alert"></p>
+    </form>
+  </section>
+
+  <section class="card" id="rosterCard" hidden>
+    <h2 id="rosterTitle"></h2>
+    <p class="hint" id="rosterHint"></p>
+    <div class="names" id="names"></div>
+    <ul class="roster" id="roster"></ul>
+  </section>
+
+  <section class="card" id="adminCard" hidden>
+    <h2 data-i18n="organizer"></h2>
+    <p class="hint" id="adminStatus"></p>
+    <ul class="people" id="adminList"></ul>
+    <button type="button" class="btn primary" id="drawBtn"></button>
+    <button type="button" class="link danger" id="reopenBtn" data-i18n="reopen" hidden></button>
+    <p class="okmsg" id="adminOk" role="status"></p>
+    <p class="err" id="adminErr" role="alert"></p>
+    <div class="stack inset">
+      <label for="shareUrl" data-i18n="shareLabel"></label>
+      <input id="shareUrl" readonly>
+      <button type="button" class="btn" data-copy="shareUrl" data-i18n="copyShare"></button>
+    </div>
+    <details class="inset" id="settings">
+      <summary data-i18n="settingsSummary"></summary>
+      <form id="cfgForm" class="stack">
+        <label for="cfgTitle" data-i18n="eventName"></label>
+        <input id="cfgTitle" maxlength="30" autocomplete="off">
+        <label for="cfgBudget" data-i18n="budget"></label>
+        <input id="cfgBudget" maxlength="20" autocomplete="off">
+        <label for="cfgExchangeOn" data-i18n="cfgDateLabel"></label>
+        <input id="cfgExchangeOn" type="date">
+        <label for="cfgDrawAt" data-i18n="cfgDrawAtLabel"></label>
+        <input id="cfgDrawAt" type="datetime-local">
+        <p class="hint" data-i18n="cfgDrawAtHint"></p>
+        <button class="btn" id="cfgSave" data-i18n="saveSettings"></button>
+      </form>
+    </details>
+    <details class="inset" id="adminLinkBox">
+      <summary data-i18n="myAdminLink"></summary>
+      <div class="stack">
+        <p class="hint" data-i18n="myAdminHint"></p>
+        <input id="adminUrl" readonly data-i18n-aria="adminLinkAria">
+        <button type="button" class="btn" data-copy="adminUrl" data-i18n="copyAdmin"></button>
+        <button type="button" class="link danger" id="destroyBtn" data-i18n="destroyNow"></button>
+      </div>
+    </details>
+  </section>
+
+  <footer><span data-i18n="merry"></span> <span id="retention"></span> <a id="homeLink" href="./" data-i18n="makeOwn" hidden></a></footer>
+</main>
+
+<dialog id="dlg" aria-labelledby="dlgTitle">
+  <form id="dlgForm" method="dialog">
+    <h2 id="dlgTitle"></h2>
+    <div id="dlgBody"></div>
+    <div class="dlg-actions">
+      <button type="button" class="btn" id="dlgCancel"></button>
+      <button class="btn primary" id="dlgOk"></button>
+    </div>
+  </form>
+</dialog>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script src="config.js"></script>
+<script>
+/* Every word the page shows, in four languages. Each language is written the way people there actually talk
+   (Korean in friendly 해요체 with 단톡방/마니또, Vietnamese with "bạn ... nhé" and "bốc thăm"), not sentence-by-sentence
+   copies of the Chinese. A value is either a plain string or a small function when a number or a name goes inside.
+   test/i18n.test.mjs checks that all four languages have exactly the same keys. */
+const SANTA_I18N = (() => {
+  const two = (n) => String(n).padStart(2, '0');
+  const h12 = (h) => (h % 12) || 12;
+
+  const zhW = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+  const zh = {
+    langLabel: '语言',
+    petsAlt: '灰白猫蛋饼和伯恩山小狗 Waffle 坐在雪地上',
+    eyebrow: '交换礼物 · GIFT EXCHANGE',
+    budget: '预算',
+    exchangeDay: '交换日',
+    howTitle: '怎么玩',
+    howBody: '建一个活动，把链接发到群里，大家各自报名。抽签后每个人只看得到自己的结果。',
+    createdTitle: '建好了',
+    shareLabel: '发到群里的链接',
+    copyShare: '复制群链接',
+    adminLinkLabel: '你的组织者链接',
+    copyAdmin: '复制组织者链接',
+    keepB: '组织者链接只给你自己。',
+    keepRest: '抽签、改设置都靠它，弄丢了就没法管理这个活动，建议现在就存一份。',
+    openEvent: '打开活动，自己先报名',
+    createTitle: '新建一个活动',
+    eventName: '活动名称',
+    budgetPh: '比如 $50 以内',
+    createBtn: '创建活动',
+    privacyHint: '不用注册。我们只存参加的人自己填的名字和心愿，以及 PIN 的加密哈希；活动在交换日 7 天后自动删除。',
+    mineTitle: '这台设备上的活动',
+    iOrganize: '我组织的',
+    iJoined: '我参加的',
+    goneTitle: '这个活动不在了',
+    goneBody: '它可能已经结束并自动删除了，也可能是链接不完整。',
+    goneNew: '建一个新的活动',
+    wishLabel: '你的心愿（抽到你的人会看到，随时可以改）',
+    saveWish: '保存心愿',
+    notMe: '我不是这个人，换一个',
+    leave: '取消报名',
+    joinTitle: '报名',
+    yourName: '你的名字',
+    pinLabel: '给自己设一个 PIN（4 位数字）',
+    pinHint: '换手机或换浏览器回来看结果时要用到它。自己定，记住它，别告诉别人。',
+    pinWarn: '别用银行卡密码、手机解锁码这类真密码。',
+    joinWishLabel: '心愿或备注（可不填）',
+    joinWishPh: '抽到你的人会看到',
+    joinBtn: '报名',
+    organizer: '组织者',
+    reopen: '作废这次结果，重新开放报名',
+    settingsSummary: '活动设置和自动抽签时间',
+    cfgDateLabel: '交换日（过后 7 天自动删除整个活动）',
+    cfgDrawAtLabel: '报名截止、自动抽签的时间（可不填）',
+    cfgDrawAtHint: '填了的话，到点后有人打开页面就会自动抽签，你不用再点。不填就由你手动点「现在抽签」。',
+    saveSettings: '保存设置',
+    myAdminLink: '我的组织者链接',
+    myAdminHint: '只给你自己。换设备管理这个活动时用它打开。',
+    adminLinkAria: '组织者链接',
+    destroyNow: '现在就删除这个活动',
+    merry: 'Merry Christmas！',
+    makeOwn: '建一个自己的活动',
+    cancel: '取消',
+    ok: '确定',
+
+    e_bad_name: '先填名字。',
+    e_bad_pin_format: 'PIN 要 4 到 8 位数字。',
+    e_name_taken: '这个名字已经有人报了。如果就是你，在下面点你的名字，输入 PIN。重名的话换个写法。',
+    e_closed: '已经抽过签了，名单不能再变。找组织者帮忙。',
+    e_full: '人数满了。',
+    e_no_such_person: '名单里没有这个名字。',
+    e_bad_pin: (left) => `PIN 不对，还可以再试 ${left} 次。`,
+    e_locked: (min) => `试错太多次，先锁 ${min} 分钟。忘了 PIN 就找组织者重设。`,
+    e_too_few: '至少要 3 个人才能抽签。',
+    e_already_drawn: '已经抽过了。',
+    e_forbidden: '组织者链接不对。请用创建活动时拿到的那个组织者链接重新打开。',
+    e_not_found: '这个活动不在了。',
+    e_bad_date: '先选交换日。',
+    e_date_past: '交换日不能选已经过去太久的日期。',
+    e_date_far: '交换日太远了，选一年以内的日期。',
+    e_slow_down: '这个网络刚刚建了好几个活动，过一小时再建。',
+    e_network: '网络不太稳，再试一次。',
+
+    fmtMd: (m, d) => `${m}/${d}`,
+    fmtDay: (m, d, wd) => `${m}/${d} ${zhW[wd]}`,
+    fmtTime: (m, d, wd, h, min) => `${m}/${d} ${zhW[wd]} ${two(h)}:${two(min)}`,
+    listSep: '、',
+
+    copied: '已复制。',
+    copyManual: '长按链接手动复制。',
+    tagFor: (name) => `${name} 的抽签结果`,
+    tapReveal: '点一下揭晓',
+    peek: '先确认旁边没人偷看',
+    tagTo: 'TO · 你要送礼物给',
+    tagWish: (wish) => `TA 的心愿：${wish}`,
+    tagNoWish: 'TA 还没写心愿，自由发挥。',
+    tagBudget: (budget) => `预算 ${budget}`,
+    tagDate: (day) => `${day} 交换`,
+    hide: '盖回去',
+    staleNote: '网络不太稳，显示的可能不是最新的。',
+    offlineNote: '页面没连上。检查一下网络，稍后再打开。',
+    loading: '正在加载…',
+    pillDrawn: '已抽签',
+    pillOpen: '报名中',
+    deadline: (time) => `报名截止：${time}，到时自动抽签`,
+    retention: (day) => `这个活动会在 ${day} 自动删除。`,
+    meDrawn: (name) => `${name}，这是你的抽签结果`,
+    meJoined: (name) => `${name}，你报上名了`,
+    missed: '这次抽签没有包含你。找组织者说一声，让 TA 重新抽。',
+    waitDraw: '等大家都报完名，抽签后再打开这个页面，就能看到你要给谁准备礼物。',
+    pinWasReset: (time) => `组织者在 ${time} 帮你重设过 PIN。不是你要求的话，在群里问一声。`,
+    rosterIn: (n) => `已经报名的人（${n}）`,
+    rosterTapDrawn: '点你的名字，输入 PIN 看结果',
+    rosterTapOpen: '已经报过名？点你的名字',
+    rosterHintDrawn: '签已经抽好了。每个人只能用自己的 PIN 看到自己的结果。',
+    rosterHintOpen: (n) => `已经报名 ${n} 人。换了设备回来时，点自己的名字，输入 PIN。`,
+    adminDrawn: '已经抽好了。每个人凭自己的 PIN 看结果，你这里也看不到谁抽到谁。',
+    adminNeed: (n, min) => `现在 ${n} 人，至少要 ${min} 人才能抽。把群链接发出去让大家报名。`,
+    adminReady: (n) => `现在 ${n} 人。人齐了就抽。`,
+    wishOf: (wish) => `心愿：${wish}`,
+    noWish: '没写心愿',
+    pinLocked: ' · PIN 试错被锁',
+    resetPin: '重设 PIN',
+    remove: '移除',
+    drawBtnMin: (min) => `现在抽签（至少 ${min} 人）`,
+    drawBtnN: (n) => `给这 ${n} 个人抽签`,
+    removedNote: '你已经不在名单里了。',
+    reenterPin: '需要重新输入 PIN。',
+    joinedToast: (pin) => `报上名了。记住你的 PIN：${pin}`,
+    pinDlgTitle: (name) => `${name}，输入你的 PIN`,
+    pinDlgBody: '报名时你自己设的那串数字。这台设备只用输这一次。',
+    enter: '进入',
+    saved: '已保存。',
+    leaveTitle: '取消报名？',
+    leaveBody: '你会从名单里移除。之后想参加可以重新报名。',
+    leaveOk: '取消报名',
+    leaveKeep: '不取消',
+    leftToast: '已取消报名。',
+    drawDlgTitle: (n) => `给这 ${n} 个人抽签？`,
+    drawDlgBody: '抽完后报名就关闭了，每个人凭自己的 PIN 看结果。',
+    draw: '抽签',
+    drawDone: '抽好了。在群里说一声，让大家回来看结果。',
+    reopenTitle: '作废这次结果？',
+    reopenBody: '所有人的抽签结果会清空，报名重新开放。之后要再抽一次，已经看过结果的人要重新看。',
+    reopenOk: '作废重来',
+    reopened: '已重新开放报名。',
+    removeTitle: (name) => `把 ${name} 移出名单？`,
+    removeBody: 'TA 之后可以自己重新报名。',
+    removed: (name) => `已移除 ${name}。`,
+    setPinTitle: (name) => `给 ${name} 设一个新 PIN`,
+    setPinBody: '4 到 8 位数字。设好后私下告诉 TA。TA 的旧设备会被登出，下次打开会看到「组织者重设过 PIN」。',
+    save: '保存',
+    newPin: (name, pin) => `${name} 的新 PIN 是 ${pin}，私下告诉 TA。`,
+    settingsSaved: '设置已保存。',
+    destroyTitle: '删除这个活动？',
+    destroyBody: '名单、心愿和抽签结果会立刻删除，不能恢复。链接也会失效。',
+    del: '删除',
+    destroyed: '活动已删除。',
+  };
+
+  const enW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const enM = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const en = {
+    langLabel: 'Language',
+    petsAlt: 'Eggs Benedict the gray and white cat and Waffle the Bernese puppy sitting in the snow',
+    eyebrow: 'GIFT EXCHANGE',
+    budget: 'Budget',
+    exchangeDay: 'Exchange day',
+    howTitle: 'How it works',
+    howBody: 'Create an event, drop the link in your group chat, and everyone signs up on their own. After the draw, each person sees only their own match.',
+    createdTitle: 'You’re all set',
+    shareLabel: 'Link for the group chat',
+    copyShare: 'Copy group link',
+    adminLinkLabel: 'Your organizer link',
+    copyAdmin: 'Copy organizer link',
+    keepB: 'Keep the organizer link to yourself.',
+    keepRest: ' It’s how you run the draw and change settings. Lose it and there’s no way to manage this event, so save it somewhere now.',
+    openEvent: 'Open the event and sign yourself up',
+    createTitle: 'Start a new event',
+    eventName: 'Event name',
+    budgetPh: 'e.g. under $50',
+    createBtn: 'Create event',
+    privacyHint: 'No account needed. We only keep the names and wishes people type in, plus a scrambled (hashed) copy of each PIN. The whole event deletes itself 7 days after exchange day.',
+    mineTitle: 'Events on this device',
+    iOrganize: 'You’re the organizer',
+    iJoined: 'You’re in',
+    goneTitle: 'This event is gone',
+    goneBody: 'It may have ended and been deleted automatically, or the link might be incomplete.',
+    goneNew: 'Start a new event',
+    wishLabel: 'Your wish (whoever draws you will see it, and you can change it anytime)',
+    saveWish: 'Save wish',
+    notMe: 'That’s not me',
+    leave: 'Cancel my sign-up',
+    joinTitle: 'Sign up',
+    yourName: 'Your name',
+    pinLabel: 'Pick a PIN (4 digits)',
+    pinHint: 'You’ll need it to see your match from another phone or browser. Make one up, remember it, and keep it to yourself. ',
+    pinWarn: 'Don’t reuse a real one like your bank PIN or phone passcode.',
+    joinWishLabel: 'Wish or note (optional)',
+    joinWishPh: 'Whoever draws you will see this',
+    joinBtn: 'Sign up',
+    organizer: 'Organizer',
+    reopen: 'Scrap this draw and reopen sign-ups',
+    settingsSummary: 'Event settings and auto-draw time',
+    cfgDateLabel: 'Exchange day (the whole event is deleted 7 days later)',
+    cfgDrawAtLabel: 'Sign-up deadline and auto-draw time (optional)',
+    cfgDrawAtHint: 'Set a time and names get drawn on their own the first time anyone opens the page after that. Leave it empty and you tap “Draw names” yourself.',
+    saveSettings: 'Save settings',
+    myAdminLink: 'My organizer link',
+    myAdminHint: 'Just for you. Open it on another device to manage this event from there.',
+    adminLinkAria: 'Organizer link',
+    destroyNow: 'Delete this event now',
+    merry: 'Merry Christmas!',
+    makeOwn: 'Start your own event',
+    cancel: 'Cancel',
+    ok: 'OK',
+
+    e_bad_name: 'Enter your name first.',
+    e_bad_pin_format: 'Your PIN needs to be 4 to 8 digits.',
+    e_name_taken: 'Someone already signed up with that name. If that’s you, tap your name below and enter your PIN. If it’s someone else, add a last initial or a nickname.',
+    e_closed: 'Names have already been drawn, so the list is locked. Ask the organizer for help.',
+    e_full: 'This event is full.',
+    e_no_such_person: 'That name isn’t on the list.',
+    e_bad_pin: (left) => (left === 1 ? 'Wrong PIN. 1 try left.' : `Wrong PIN. ${left} tries left.`),
+    e_locked: (min) => `Too many wrong tries. Locked for ${min} ${min === 1 ? 'minute' : 'minutes'}. Forgot your PIN? Ask the organizer to reset it.`,
+    e_too_few: 'You need at least 3 people to draw names.',
+    e_already_drawn: 'Names have already been drawn.',
+    e_forbidden: 'That organizer link doesn’t match. Open the organizer link you got when you created the event.',
+    e_not_found: 'This event is gone.',
+    e_bad_date: 'Pick an exchange day first.',
+    e_date_past: 'That date is too far in the past. Pick a later one.',
+    e_date_far: 'That’s too far out. Pick a date within a year.',
+    e_slow_down: 'Several events were just created from this network. Try again in an hour.',
+    e_network: 'Connection hiccup. Please try again.',
+
+    fmtMd: (m, d) => `${enM[m - 1]} ${d}`,
+    fmtDay: (m, d, wd) => `${enW[wd]}, ${enM[m - 1]} ${d}`,
+    fmtTime: (m, d, wd, h, min) => `${enW[wd]}, ${enM[m - 1]} ${d}, ${h12(h)}:${two(min)} ${h < 12 ? 'AM' : 'PM'}`,
+    listSep: ', ',
+
+    copied: 'Copied.',
+    copyManual: 'Press and hold the link to copy it.',
+    tagFor: (name) => `${name}’s match`,
+    tapReveal: 'Tap to reveal',
+    peek: 'Make sure nobody’s peeking',
+    tagTo: 'TO · You’re getting a gift for',
+    tagWish: (wish) => `Their wish: ${wish}`,
+    tagNoWish: 'No wish yet. Surprise them!',
+    tagBudget: (budget) => `Budget ${budget}`,
+    tagDate: (day) => `Exchange on ${day}`,
+    hide: 'Hide it again',
+    staleNote: 'Connection is shaky. This may not be the latest.',
+    offlineNote: 'Couldn’t connect. Check your network and try again in a bit.',
+    loading: 'Loading…',
+    pillDrawn: 'Names drawn',
+    pillOpen: 'Sign-ups open',
+    deadline: (time) => `Sign-ups close ${time}. Names are drawn automatically then.`,
+    retention: (day) => `This event deletes itself on ${day}.`,
+    meDrawn: (name) => `${name}, here’s your match`,
+    meJoined: (name) => `${name}, you’re in!`,
+    missed: 'You weren’t part of this draw. Let the organizer know so they can redo it.',
+    waitDraw: 'Once everyone has signed up and names are drawn, come back to this page to see who you’re getting a gift for.',
+    pinWasReset: (time) => `The organizer reset your PIN (${time}). If you didn’t ask for that, check with the group.`,
+    rosterIn: (n) => `Who’s in (${n})`,
+    rosterTapDrawn: 'Tap your name and enter your PIN to see your match',
+    rosterTapOpen: 'Already signed up? Tap your name',
+    rosterHintDrawn: 'Names have been drawn. Everyone can only see their own match, using their own PIN.',
+    rosterHintOpen: (n) => `${n} signed up so far. Back on a different device? Tap your name and enter your PIN.`,
+    adminDrawn: 'Names are drawn. Everyone checks their own match with their PIN. Not even you can see who got whom.',
+    adminNeed: (n, min) => `${n} signed up so far. You need at least ${min} to draw names. Share the group link so people can join.`,
+    adminReady: (n) => `${n} signed up. Draw names once everyone’s in.`,
+    wishOf: (wish) => `Wish: ${wish}`,
+    noWish: 'No wish yet',
+    pinLocked: ' · locked after wrong PINs',
+    resetPin: 'Reset PIN',
+    remove: 'Remove',
+    drawBtnMin: (min) => `Draw names (needs at least ${min})`,
+    drawBtnN: (n) => `Draw names for these ${n} people`,
+    removedNote: 'You’re no longer on the list.',
+    reenterPin: 'Please enter your PIN again.',
+    joinedToast: (pin) => `You’re in! Remember your PIN: ${pin}`,
+    pinDlgTitle: (name) => `${name}, enter your PIN`,
+    pinDlgBody: 'The number you picked when you signed up. You only need to enter it once on this device.',
+    enter: 'Continue',
+    saved: 'Saved.',
+    leaveTitle: 'Cancel your sign-up?',
+    leaveBody: 'You’ll be taken off the list. You can always sign up again later.',
+    leaveOk: 'Yes, cancel it',
+    leaveKeep: 'Stay in',
+    leftToast: 'You’re off the list.',
+    drawDlgTitle: (n) => `Draw names for these ${n} people?`,
+    drawDlgBody: 'Sign-ups close after the draw. Everyone sees their own match with their PIN.',
+    draw: 'Draw names',
+    drawDone: 'Done! Tell the group to come back and check their match.',
+    reopenTitle: 'Scrap this draw?',
+    reopenBody: 'Everyone’s match is wiped and sign-ups reopen. You’ll need to draw again, and anyone who already looked will have to check again.',
+    reopenOk: 'Scrap and redo',
+    reopened: 'Sign-ups are open again.',
+    removeTitle: (name) => `Remove ${name} from the list?`,
+    removeBody: 'They can sign up again on their own later.',
+    removed: (name) => `Removed ${name}.`,
+    setPinTitle: (name) => `Set a new PIN for ${name}`,
+    setPinBody: '4 to 8 digits. Tell them privately afterwards. Their old devices get signed out, and next time they open the page they’ll see a note that the organizer reset their PIN.',
+    save: 'Save',
+    newPin: (name, pin) => `${name}’s new PIN is ${pin}. Tell them privately.`,
+    settingsSaved: 'Settings saved.',
+    destroyTitle: 'Delete this event?',
+    destroyBody: 'The list, wishes and draw results are deleted right away and can’t be recovered. The link stops working too.',
+    del: 'Delete',
+    destroyed: 'Event deleted.',
+  };
+
+  const koW = ['일', '월', '화', '수', '목', '금', '토'];
+  const koAmPm = (h) => (h < 12 ? '오전' : '오후');
+  const ko = {
+    langLabel: '언어',
+    petsAlt: '눈밭에 앉아 있는 회색 고양이 에그 베네딕트와 버니즈 강아지 와플',
+    eyebrow: '선물 교환',
+    budget: '예산',
+    exchangeDay: '교환 날짜',
+    howTitle: '이렇게 해요',
+    howBody: '마니또처럼 서로 몰래 선물을 주고받는 게임이에요. 이벤트를 만들어 링크를 단톡방에 올리면 각자 참가하고, 뽑기가 끝나면 내가 누구에게 선물할지는 나만 볼 수 있어요.',
+    createdTitle: '다 만들었어요!',
+    shareLabel: '단톡방에 올릴 링크',
+    copyShare: '참가 링크 복사',
+    adminLinkLabel: '내 주최자 링크',
+    copyAdmin: '주최자 링크 복사',
+    keepB: '주최자 링크는 혼자만 간직하세요.',
+    keepRest: ' 뽑기를 하거나 설정을 바꿀 때 꼭 필요해요. 잃어버리면 이 이벤트를 관리할 수 없으니 지금 바로 저장해 두세요.',
+    openEvent: '이벤트 열고 나부터 참가하기',
+    createTitle: '새 이벤트 만들기',
+    eventName: '이벤트 이름',
+    budgetPh: '예: $50 이하',
+    createBtn: '이벤트 만들기',
+    privacyHint: '회원가입은 필요 없어요. 참가자가 직접 적은 이름과 받고 싶은 선물, 암호화(해시)된 PIN만 저장하고, 이벤트는 교환 날짜 7일 뒤에 자동으로 삭제돼요.',
+    mineTitle: '이 기기에서 연 이벤트',
+    iOrganize: '내가 주최',
+    iJoined: '참가 중',
+    goneTitle: '이벤트를 찾을 수 없어요',
+    goneBody: '이미 끝나서 자동으로 삭제됐거나, 링크가 잘렸을 수 있어요.',
+    goneNew: '새 이벤트 만들기',
+    wishLabel: '받고 싶은 선물 (나를 뽑은 사람에게 보여요. 언제든 바꿀 수 있어요)',
+    saveWish: '저장하기',
+    notMe: '이 사람이 아니에요',
+    leave: '참가 취소',
+    joinTitle: '참가하기',
+    yourName: '이름',
+    pinLabel: 'PIN 번호 정하기 (숫자 4자리)',
+    pinHint: '다른 휴대폰이나 브라우저에서 결과를 볼 때 필요해요. 직접 정해서 기억해 두고, 다른 사람에게는 알려 주지 마세요. ',
+    pinWarn: '은행 비밀번호나 휴대폰 잠금 번호처럼 실제로 쓰는 번호는 피해 주세요.',
+    joinWishLabel: '받고 싶은 선물이나 메모 (선택)',
+    joinWishPh: '나를 뽑은 사람에게 보여요',
+    joinBtn: '참가하기',
+    organizer: '주최자',
+    reopen: '이번 결과 취소하고 다시 참가 받기',
+    settingsSummary: '이벤트 설정 · 자동 뽑기 시간',
+    cfgDateLabel: '교환 날짜 (7일 뒤 이벤트 전체가 자동 삭제돼요)',
+    cfgDrawAtLabel: '참가 마감 · 자동 뽑기 시간 (선택)',
+    cfgDrawAtHint: '시간을 정해 두면, 그 시간이 지나고 누군가 페이지를 여는 순간 자동으로 뽑아요. 비워 두면 직접 “지금 뽑기”를 눌러 주세요.',
+    saveSettings: '설정 저장',
+    myAdminLink: '내 주최자 링크',
+    myAdminHint: '나만 쓰는 링크예요. 다른 기기에서 이 이벤트를 관리할 때 이 링크로 열어 주세요.',
+    adminLinkAria: '주최자 링크',
+    destroyNow: '지금 이 이벤트 삭제하기',
+    merry: '메리 크리스마스!',
+    makeOwn: '내 이벤트 만들기',
+    cancel: '취소',
+    ok: '확인',
+
+    e_bad_name: '이름을 먼저 입력해 주세요.',
+    e_bad_pin_format: 'PIN은 숫자 4~8자리로 입력해 주세요.',
+    e_name_taken: '이미 같은 이름으로 참가한 사람이 있어요. 본인이라면 아래에서 이름을 누르고 PIN을 입력해 주세요. 이름이 겹친 거라면 조금 다르게 적어 주세요.',
+    e_closed: '이미 뽑기가 끝나서 명단을 바꿀 수 없어요. 주최자에게 말해 주세요.',
+    e_full: '정원이 다 찼어요.',
+    e_no_such_person: '명단에 없는 이름이에요.',
+    e_bad_pin: (left) => `PIN이 맞지 않아요. ${left}번 더 시도할 수 있어요.`,
+    e_locked: (min) => `여러 번 틀려서 ${min}분 동안 잠겼어요. PIN을 잊었다면 주최자에게 재설정을 부탁해 주세요.`,
+    e_too_few: '최소 3명은 있어야 뽑을 수 있어요.',
+    e_already_drawn: '이미 뽑기가 끝났어요.',
+    e_forbidden: '주최자 링크가 맞지 않아요. 이벤트를 만들 때 받은 주최자 링크로 다시 열어 주세요.',
+    e_not_found: '이벤트를 찾을 수 없어요.',
+    e_bad_date: '교환 날짜를 먼저 골라 주세요.',
+    e_date_past: '너무 지난 날짜예요. 다른 날짜를 골라 주세요.',
+    e_date_far: '너무 먼 날짜예요. 1년 이내로 골라 주세요.',
+    e_slow_down: '이 네트워크에서 방금 이벤트를 여러 개 만들었어요. 1시간 뒤에 다시 시도해 주세요.',
+    e_network: '연결이 불안정해요. 다시 시도해 주세요.',
+
+    fmtMd: (m, d) => `${m}월 ${d}일`,
+    fmtDay: (m, d, wd) => `${m}월 ${d}일 (${koW[wd]})`,
+    fmtTime: (m, d, wd, h, min) => `${m}월 ${d}일 (${koW[wd]}) ${koAmPm(h)} ${h12(h)}:${two(min)}`,
+    listSep: ', ',
+
+    copied: '복사했어요.',
+    copyManual: '링크를 길게 눌러 직접 복사해 주세요.',
+    tagFor: (name) => `${name} 님의 뽑기 결과`,
+    tapReveal: '눌러서 확인',
+    peek: '주변에 보는 사람 없죠?',
+    tagTo: 'TO · 내가 선물할 사람',
+    tagWish: (wish) => `받고 싶은 선물: ${wish}`,
+    tagNoWish: '받고 싶은 선물을 아직 안 적었어요. 센스 있게 골라 주세요!',
+    tagBudget: (budget) => `예산 ${budget}`,
+    tagDate: (day) => `${day} 교환`,
+    hide: '다시 가리기',
+    staleNote: '연결이 불안정해서 최신 내용이 아닐 수 있어요.',
+    offlineNote: '연결하지 못했어요. 네트워크를 확인하고 잠시 후 다시 열어 주세요.',
+    loading: '불러오는 중…',
+    pillDrawn: '뽑기 완료',
+    pillOpen: '모집 중',
+    deadline: (time) => `참가 마감: ${time} · 마감되면 자동으로 뽑아요`,
+    retention: (day) => `이 이벤트는 ${day}에 자동으로 삭제돼요.`,
+    meDrawn: (name) => `${name} 님의 뽑기 결과예요`,
+    meJoined: (name) => `${name} 님, 참가 완료!`,
+    missed: '이번 뽑기에 포함되지 않았어요. 주최자에게 다시 뽑아 달라고 말해 주세요.',
+    waitDraw: '모두 참가하고 뽑기가 끝난 뒤에 이 페이지를 다시 열면, 누구에게 선물할지 확인할 수 있어요.',
+    pinWasReset: (time) => `${time}에 주최자가 PIN을 재설정했어요. 직접 부탁한 게 아니라면 단톡방에 물어보세요.`,
+    rosterIn: (n) => `참가한 사람 (${n}명)`,
+    rosterTapDrawn: '이름을 누르고 PIN을 입력하면 결과를 볼 수 있어요',
+    rosterTapOpen: '이미 참가했나요? 이름을 눌러 주세요',
+    rosterHintDrawn: '뽑기가 끝났어요. 각자 자기 PIN으로 자기 결과만 볼 수 있어요.',
+    rosterHintOpen: (n) => `지금까지 ${n}명이 참가했어요. 다른 기기로 다시 들어왔다면 이름을 누르고 PIN을 입력해 주세요.`,
+    adminDrawn: '뽑기가 끝났어요. 각자 PIN으로 자기 결과만 확인하고, 누가 누구를 뽑았는지는 주최자도 볼 수 없어요.',
+    adminNeed: (n, min) => `지금 ${n}명이에요. 최소 ${min}명이 모여야 뽑을 수 있어요. 참가 링크를 공유해 주세요.`,
+    adminReady: (n) => `지금 ${n}명이에요. 다 모이면 뽑아 주세요.`,
+    wishOf: (wish) => `받고 싶은 선물: ${wish}`,
+    noWish: '받고 싶은 선물 미작성',
+    pinLocked: ' · PIN 오류로 잠김',
+    resetPin: 'PIN 재설정',
+    remove: '내보내기',
+    drawBtnMin: (min) => `지금 뽑기 (최소 ${min}명)`,
+    drawBtnN: (n) => `${n}명으로 뽑기`,
+    removedNote: '명단에서 빠졌어요.',
+    reenterPin: 'PIN을 다시 입력해 주세요.',
+    joinedToast: (pin) => `참가 완료! PIN ${pin}, 꼭 기억해 두세요.`,
+    pinDlgTitle: (name) => `${name} 님, PIN을 입력해 주세요`,
+    pinDlgBody: '참가할 때 직접 정한 숫자예요. 이 기기에서는 한 번만 입력하면 돼요.',
+    enter: '들어가기',
+    saved: '저장했어요.',
+    leaveTitle: '참가를 취소할까요?',
+    leaveBody: '명단에서 빠져요. 나중에 다시 참가할 수 있어요.',
+    leaveOk: '참가 취소',
+    leaveKeep: '계속 참가',
+    leftToast: '참가를 취소했어요.',
+    drawDlgTitle: (n) => `${n}명으로 뽑을까요?`,
+    drawDlgBody: '뽑고 나면 참가가 마감되고, 각자 PIN으로 자기 결과를 확인해요.',
+    draw: '뽑기',
+    drawDone: '뽑기 완료! 단톡방에 결과 확인하라고 알려 주세요.',
+    reopenTitle: '이번 결과를 취소할까요?',
+    reopenBody: '모든 결과가 지워지고 다시 참가를 받아요. 나중에 다시 뽑아야 하고, 이미 결과를 본 사람도 다시 확인해야 해요.',
+    reopenOk: '취소하고 다시 하기',
+    reopened: '다시 참가를 받고 있어요.',
+    removeTitle: (name) => `${name} 님을 내보낼까요?`,
+    removeBody: '나중에 본인이 다시 참가할 수 있어요.',
+    removed: (name) => `${name} 님을 내보냈어요.`,
+    setPinTitle: (name) => `${name} 님의 새 PIN 정하기`,
+    setPinBody: '숫자 4~8자리예요. 정한 뒤 본인에게만 따로 알려 주세요. 쓰던 기기에서는 로그아웃되고, 다음에 열면 주최자가 PIN을 재설정했다는 안내가 보여요.',
+    save: '저장',
+    newPin: (name, pin) => `${name} 님의 새 PIN: ${pin} · 본인에게만 따로 알려 주세요.`,
+    settingsSaved: '설정을 저장했어요.',
+    destroyTitle: '이 이벤트를 삭제할까요?',
+    destroyBody: '명단, 받고 싶은 선물, 뽑기 결과가 바로 삭제되고 되돌릴 수 없어요. 링크도 더는 열리지 않아요.',
+    del: '삭제',
+    destroyed: '이벤트를 삭제했어요.',
+  };
+
+  const viW = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+  const vi = {
+    langLabel: 'Ngôn ngữ',
+    petsAlt: 'Bé mèo xám trắng Eggs Benedict và cún Bernese tên Waffle ngồi trên tuyết',
+    eyebrow: 'TRAO ĐỔI QUÀ',
+    budget: 'Ngân sách',
+    exchangeDay: 'Ngày đổi quà',
+    howTitle: 'Cách chơi',
+    howBody: 'Trò tặng quà bí mật dịp Giáng sinh. Bạn tạo sự kiện, gửi link vào nhóm chat, mọi người tự đăng ký. Bốc thăm xong, mỗi người chỉ xem được mình sẽ tặng quà cho ai.',
+    createdTitle: 'Xong rồi!',
+    shareLabel: 'Link gửi vào nhóm',
+    copyShare: 'Sao chép link nhóm',
+    adminLinkLabel: 'Link quản lý của bạn',
+    copyAdmin: 'Sao chép link quản lý',
+    keepB: 'Link quản lý chỉ dành cho riêng bạn.',
+    keepRest: ' Bạn cần nó để bốc thăm và đổi cài đặt. Mất link là không quản lý được sự kiện nữa, nên lưu lại ngay nhé.',
+    openEvent: 'Mở sự kiện và đăng ký cho mình trước',
+    createTitle: 'Tạo sự kiện mới',
+    eventName: 'Tên sự kiện',
+    budgetPh: 'Ví dụ: dưới $50',
+    createBtn: 'Tạo sự kiện',
+    privacyHint: 'Không cần tạo tài khoản. Trang này chỉ lưu tên và gợi ý quà mà mọi người tự điền, cùng mã PIN đã được mã hóa (hash). Sự kiện sẽ tự xóa sau ngày đổi quà 7 ngày.',
+    mineTitle: 'Sự kiện trên thiết bị này',
+    iOrganize: 'Bạn tổ chức',
+    iJoined: 'Bạn tham gia',
+    goneTitle: 'Sự kiện này không còn nữa',
+    goneBody: 'Có thể sự kiện đã kết thúc và tự xóa, hoặc link bị thiếu.',
+    goneNew: 'Tạo sự kiện mới',
+    wishLabel: 'Gợi ý quà cho bạn (người bốc trúng bạn sẽ thấy, sửa lúc nào cũng được)',
+    saveWish: 'Lưu gợi ý',
+    notMe: 'Không phải mình',
+    leave: 'Hủy đăng ký',
+    joinTitle: 'Đăng ký tham gia',
+    yourName: 'Tên của bạn',
+    pinLabel: 'Tự đặt mã PIN (4 chữ số)',
+    pinHint: 'Bạn sẽ cần mã này khi xem kết quả trên điện thoại hoặc trình duyệt khác. Tự nghĩ ra, nhớ kỹ và đừng nói cho ai biết. ',
+    pinWarn: 'Đừng dùng mật khẩu thật như mã PIN ngân hàng hay mã mở khóa điện thoại.',
+    joinWishLabel: 'Gợi ý quà hoặc ghi chú (không bắt buộc)',
+    joinWishPh: 'Người bốc trúng bạn sẽ thấy',
+    joinBtn: 'Đăng ký',
+    organizer: 'Người tổ chức',
+    reopen: 'Hủy kết quả lần này và mở đăng ký lại',
+    settingsSummary: 'Cài đặt sự kiện và giờ tự bốc thăm',
+    cfgDateLabel: 'Ngày đổi quà (sau đó 7 ngày, toàn bộ sự kiện sẽ tự xóa)',
+    cfgDrawAtLabel: 'Hạn đăng ký, cũng là giờ tự bốc thăm (không bắt buộc)',
+    cfgDrawAtHint: 'Nếu đặt giờ, tới lúc đó chỉ cần có người mở trang là hệ thống tự bốc thăm, bạn không phải bấm gì. Để trống thì bạn tự bấm “Bốc thăm ngay”.',
+    saveSettings: 'Lưu cài đặt',
+    myAdminLink: 'Link quản lý của bạn',
+    myAdminHint: 'Chỉ dành cho bạn. Mở link này khi muốn quản lý sự kiện trên thiết bị khác.',
+    adminLinkAria: 'Link quản lý',
+    destroyNow: 'Xóa sự kiện này ngay',
+    merry: 'Giáng sinh vui vẻ!',
+    makeOwn: 'Tạo sự kiện của riêng bạn',
+    cancel: 'Hủy',
+    ok: 'Đồng ý',
+
+    e_bad_name: 'Bạn điền tên trước nhé.',
+    e_bad_pin_format: 'Mã PIN phải có từ 4 đến 8 chữ số.',
+    e_name_taken: 'Tên này đã có người đăng ký. Nếu đó là bạn, hãy bấm vào tên mình bên dưới rồi nhập mã PIN. Nếu trùng tên, bạn viết khác đi một chút nhé.',
+    e_closed: 'Đã bốc thăm rồi nên không đổi danh sách được nữa. Bạn nhờ người tổ chức giúp nhé.',
+    e_full: 'Đã đủ người rồi.',
+    e_no_such_person: 'Không có tên này trong danh sách.',
+    e_bad_pin: (left) => `Sai mã PIN. Bạn còn ${left} lần thử.`,
+    e_locked: (min) => `Bạn nhập sai nhiều lần quá nên bị khóa ${min} phút. Quên mã PIN thì nhờ người tổ chức đặt lại nhé.`,
+    e_too_few: 'Cần ít nhất 3 người mới bốc thăm được.',
+    e_already_drawn: 'Đã bốc thăm rồi.',
+    e_forbidden: 'Link quản lý không đúng. Bạn mở lại bằng link quản lý nhận được lúc tạo sự kiện nhé.',
+    e_not_found: 'Sự kiện này không còn nữa.',
+    e_bad_date: 'Bạn chọn ngày đổi quà trước nhé.',
+    e_date_past: 'Ngày này qua lâu rồi. Bạn chọn ngày khác nhé.',
+    e_date_far: 'Ngày này xa quá. Bạn chọn trong vòng một năm nhé.',
+    e_slow_down: 'Mạng này vừa tạo khá nhiều sự kiện. Bạn thử lại sau một tiếng nhé.',
+    e_network: 'Mạng đang chập chờn, bạn thử lại nhé.',
+
+    fmtMd: (m, d) => `${d}/${m}`,
+    fmtDay: (m, d, wd) => `${viW[wd]}, ${d}/${m}`,
+    fmtTime: (m, d, wd, h, min) => `${two(h)}:${two(min)} ${viW[wd]}, ${d}/${m}`,
+    listSep: ', ',
+
+    copied: 'Đã sao chép.',
+    copyManual: 'Nhấn giữ vào link để tự sao chép.',
+    tagFor: (name) => `Kết quả bốc thăm của ${name}`,
+    tapReveal: 'Chạm để mở',
+    peek: 'Ngó quanh xem có ai nhìn trộm không nhé',
+    tagTo: 'TO · Bạn sẽ tặng quà cho',
+    tagWish: (wish) => `Bạn ấy thích: ${wish}`,
+    tagNoWish: 'Bạn ấy chưa gợi ý gì, bạn cứ tự do sáng tạo nhé.',
+    tagBudget: (budget) => `Ngân sách ${budget}`,
+    tagDate: (day) => `Đổi quà ${day}`,
+    hide: 'Che lại',
+    staleNote: 'Mạng đang chập chờn, nội dung có thể chưa phải mới nhất.',
+    offlineNote: 'Chưa kết nối được. Bạn kiểm tra mạng rồi mở lại sau nhé.',
+    loading: 'Đang tải…',
+    pillDrawn: 'Đã bốc thăm',
+    pillOpen: 'Đang mở đăng ký',
+    deadline: (time) => `Hạn đăng ký: ${time}. Tới giờ sẽ tự bốc thăm.`,
+    retention: (day) => `Sự kiện này sẽ tự xóa vào ngày ${day}.`,
+    meDrawn: (name) => `${name} ơi, đây là kết quả của bạn`,
+    meJoined: (name) => `${name} ơi, bạn đăng ký xong rồi!`,
+    missed: 'Lần bốc thăm này chưa có bạn. Bạn báo người tổ chức để bốc lại nhé.',
+    waitDraw: 'Khi mọi người đăng ký xong và đã bốc thăm, bạn mở lại trang này để xem mình sẽ tặng quà cho ai.',
+    pinWasReset: (time) => `Người tổ chức đã đặt lại mã PIN cho bạn lúc ${time}. Nếu bạn không nhờ thì hỏi lại trong nhóm nhé.`,
+    rosterIn: (n) => `Đã đăng ký (${n} người)`,
+    rosterTapDrawn: 'Bấm vào tên bạn rồi nhập mã PIN để xem kết quả',
+    rosterTapOpen: 'Đăng ký rồi? Bấm vào tên bạn',
+    rosterHintDrawn: 'Đã bốc thăm xong. Mỗi người chỉ xem được kết quả của mình bằng mã PIN riêng.',
+    rosterHintOpen: (n) => `Đã có ${n} người đăng ký. Nếu bạn quay lại bằng thiết bị khác, hãy bấm vào tên mình rồi nhập mã PIN.`,
+    adminDrawn: 'Đã bốc thăm xong. Mỗi người tự xem kết quả bằng mã PIN của mình, ngay cả bạn cũng không xem được ai bốc trúng ai.',
+    adminNeed: (n, min) => `Hiện có ${n} người, cần ít nhất ${min} người mới bốc thăm được. Bạn gửi link nhóm để mọi người đăng ký nhé.`,
+    adminReady: (n) => `Hiện có ${n} người. Đủ người thì bốc thăm thôi.`,
+    wishOf: (wish) => `Gợi ý quà: ${wish}`,
+    noWish: 'Chưa gợi ý quà',
+    pinLocked: ' · bị khóa vì nhập sai PIN',
+    resetPin: 'Đặt lại PIN',
+    remove: 'Xóa tên',
+    drawBtnMin: (min) => `Bốc thăm ngay (cần ít nhất ${min} người)`,
+    drawBtnN: (n) => `Bốc thăm cho ${n} người này`,
+    removedNote: 'Bạn không còn trong danh sách nữa.',
+    reenterPin: 'Bạn cần nhập lại mã PIN.',
+    joinedToast: (pin) => `Đăng ký xong! Nhớ mã PIN của bạn: ${pin}`,
+    pinDlgTitle: (name) => `${name} ơi, nhập mã PIN của bạn`,
+    pinDlgBody: 'Là dãy số bạn tự đặt lúc đăng ký. Trên thiết bị này chỉ cần nhập một lần.',
+    enter: 'Vào xem',
+    saved: 'Đã lưu.',
+    leaveTitle: 'Hủy đăng ký?',
+    leaveBody: 'Tên bạn sẽ bị xóa khỏi danh sách. Sau này muốn tham gia thì đăng ký lại.',
+    leaveOk: 'Hủy đăng ký',
+    leaveKeep: 'Ở lại',
+    leftToast: 'Đã hủy đăng ký.',
+    drawDlgTitle: (n) => `Bốc thăm cho ${n} người này?`,
+    drawDlgBody: 'Bốc thăm xong là đóng đăng ký. Mỗi người xem kết quả bằng mã PIN của mình.',
+    draw: 'Bốc thăm',
+    drawDone: 'Bốc thăm xong rồi! Bạn nhắn cả nhóm vào xem kết quả nhé.',
+    reopenTitle: 'Hủy kết quả lần này?',
+    reopenBody: 'Kết quả của mọi người sẽ bị xóa và đăng ký được mở lại. Sau đó cần bốc thăm lại, ai xem rồi cũng phải xem lại.',
+    reopenOk: 'Hủy và làm lại',
+    reopened: 'Đã mở đăng ký lại.',
+    removeTitle: (name) => `Xóa ${name} khỏi danh sách?`,
+    removeBody: 'Sau này bạn ấy có thể tự đăng ký lại.',
+    removed: (name) => `Đã xóa ${name} khỏi danh sách.`,
+    setPinTitle: (name) => `Đặt mã PIN mới cho ${name}`,
+    setPinBody: 'Từ 4 đến 8 chữ số. Đặt xong, bạn nhắn riêng cho bạn ấy. Các thiết bị cũ của bạn ấy sẽ bị đăng xuất, lần sau mở trang sẽ thấy thông báo người tổ chức đã đặt lại mã PIN.',
+    save: 'Lưu',
+    newPin: (name, pin) => `Mã PIN mới của ${name} là ${pin}. Bạn nhắn riêng cho bạn ấy nhé.`,
+    settingsSaved: 'Đã lưu cài đặt.',
+    destroyTitle: 'Xóa sự kiện này?',
+    destroyBody: 'Danh sách, gợi ý quà và kết quả bốc thăm sẽ bị xóa ngay và không khôi phục được. Link cũng hết hiệu lực.',
+    del: 'Xóa',
+    destroyed: 'Đã xóa sự kiện.',
+  };
+
+  return {
+    order: ['zh', 'en', 'ko', 'vi'],                                    // also the order of the buttons
+    names: { zh: '中文', en: 'English', ko: '한국어', vi: 'Tiếng Việt' },  // each in its own language, so anyone can spot theirs
+    html: { zh: 'zh-CN', en: 'en', ko: 'ko', vi: 'vi' },                // value for <html lang>
+    fallback: 'en',                                                     // for devices set to any other language
+    dict: { zh, en, ko, vi },
+  };
+})();
+
+(() => {
+'use strict';
+const $ = (id) => document.getElementById(id);
+const API = String(window.SANTA_API || '').replace(/\/+$/, '');      // set by config.js; empty means same origin
+const EVENT_ID = new URLSearchParams(location.search).get('e') || '';
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+const store = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } },
+  set(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* optional */ } },
+};
+const K_ME = 'santa:' + EVENT_ID + ':me';          // { name, token } - a random pass for this device, never the PIN
+const K_ADMIN = 'santa:' + EVENT_ID + ':admin';    // the organizer key, only on the organizer's device
+const K_LIST = 'santa:events';                     // events this device has touched, to find them again
+const K_LANG = 'santa:lang';                       // the language picked on this device
+const pageUrl = location.origin + location.pathname;
+const eventUrl = (id) => pageUrl + '?e=' + id;
+
+/* ---------- language ----------
+   The words are in i18n.js. Which language to show, in order: a ?lang=ko in the link, then what this device picked
+   before, then the phone's own language, then English. Tapping a language button switches on the spot, no reload. */
+const L = SANTA_I18N;
+const matchLang = (tag) => { const s = String(tag || '').toLowerCase(); return L.order.find((c) => s === c || s.startsWith(c + '-')) || null; };
+function pickLang() {
+  const params = new URLSearchParams(location.search);
+  const fromLink = matchLang(params.get('lang'));
+  if (params.has('lang')) {
+    // Remember it, then take it out of the address bar so it does not override a later choice on reload.
+    if (fromLink) store.set(K_LANG, fromLink);
+    params.delete('lang');
+    const rest = params.toString();
+    try { history.replaceState(null, '', location.pathname + (rest ? '?' + rest : '') + location.hash); } catch (e) { /* fine */ }
+  }
+  const saved = fromLink || matchLang(store.get(K_LANG));
+  if (saved) return saved;
+  const wanted = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language];
+  for (const tag of wanted) { const m = matchLang(tag); if (m) return m; }
+  return L.fallback;
+}
+let lang = pickLang();
+function t(key, ...args) {
+  let v = L.dict[lang][key];
+  if (v == null) v = L.dict[L.fallback][key];
+  return typeof v === 'function' ? v(...args) : (v == null ? key : v);
+}
+function applyLang() {
+  document.documentElement.lang = L.html[lang];
+  for (const n of document.querySelectorAll('[data-i18n]')) n.textContent = t(n.dataset.i18n);
+  for (const n of document.querySelectorAll('[data-i18n-ph]')) n.placeholder = t(n.dataset.i18nPh);
+  for (const n of document.querySelectorAll('[data-i18n-aria]')) n.setAttribute('aria-label', t(n.dataset.i18nAria));
+  for (const n of document.querySelectorAll('[data-i18n-alt]')) n.alt = t(n.dataset.i18nAlt);
+  for (const b of $('langs').children) b.setAttribute('aria-pressed', String(b.dataset.lang === lang));
+}
+let rerender = () => {};                           // set by whichever page is showing
+function setLang(next) {
+  if (!L.dict[next] || next === lang) return;
+  lang = next; store.set(K_LANG, lang);
+  // Messages already on screen were written in the old language; drop them rather than leave a mix.
+  for (const id of ['createErr', 'wishOk', 'wishErr', 'joinErr', 'adminOk', 'adminErr']) $(id).textContent = '';
+  $('toast').hidden = true;
+  applyLang(); rerender();
+}
+for (const code of L.order) {
+  const b = el('button', '', L.names[code]); b.type = 'button'; b.dataset.lang = code; b.lang = L.html[code];
+  $('langs').append(b);
+}
+$('langs').addEventListener('click', (ev) => { const b = ev.target.closest('button[data-lang]'); if (b) setLang(b.dataset.lang); });
+
+/** The decorative title and handwriting fonts only cover plain Latin. A name like "Hương" or "Nguyễn" would come out
+    half in one font, half in another, so text with those letters gets a font that has all of them. */
+const beyondPlainLatin = (text) => Array.from(String(text || '')).some((ch) => {
+  const c = ch.codePointAt(0);
+  return (c >= 0x100 && c <= 0x24F) || (c >= 0x300 && c <= 0x36F) || (c >= 0x1E00 && c <= 0x1EFF);
+});
+
+/* ---------- talking to the API ---------- */
+// The body is sent without a JSON content type on purpose: that keeps it a "simple" cross-origin request,
+// so the browser does not need a preflight round trip for every call. The server parses JSON either way.
+const pause = (ms) => new Promise((r) => setTimeout(r, ms));
+async function api(path, body) {
+  for (let attempt = 0; ; attempt++) {
+    let res, data = null;
+    try { res = await fetch(API + '/api/' + path, { method: 'POST', cache: 'no-store', body: JSON.stringify(body || {}) }); }
+    catch (e) { return { ok: false, status: 0, data: { error: 'network' } }; }
+    try { data = await res.json(); } catch (e) { /* not json */ }
+    // "Turned away at the door": when too many requests land in the same instant, AWS answers 429 before our code runs,
+    // and our own code answers 503 "busy" when it could not save. Either way nothing happened, so asking again is safe.
+    // Real answers always carry an error code (a locked PIN is 429 + "locked") and are never asked twice.
+    const turnedAway = (res.status === 429 && !(data && data.error)) || (res.status === 503 && !!data && data.error === 'busy');
+    if (!turnedAway || attempt >= 4) return { ok: res.ok, status: res.status, data: data || {} };
+    await pause(250 + Math.random() * 400 * (attempt + 1));
+  }
+}
+// Error codes the server sends that have their own sentence (key "e_<code>" in i18n.js). Anything else reads as a network hiccup.
+const ERR_CODES = ['bad_name', 'bad_pin_format', 'name_taken', 'closed', 'full', 'no_such_person', 'too_few', 'already_drawn',
+  'forbidden', 'not_found', 'bad_date', 'date_past', 'date_far', 'slow_down'];
+function errText(d) {
+  const code = d && d.error;
+  if (code === 'bad_pin') return t('e_bad_pin', d.left || 0);
+  if (code === 'locked') return t('e_locked', Math.max(1, Math.ceil((d.retryAfter || 60) / 60)));
+  return ERR_CODES.includes(code) ? t('e_' + code) : t('e_network');
+}
+
+/* ---------- small UI helpers ---------- */
+// Dates are put together by hand per language (12/24 周四 · Thu, Dec 24 · 12월 24일 (목) · Thứ Năm, 24/12) so every phone shows the same thing.
+function dayText(ymd) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd || '');
+  return m ? t('fmtDay', +m[2], +m[3], new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])).getUTCDay()) : '—';
+}
+const timeText = (ms) => { const d = new Date(ms); return t('fmtTime', d.getMonth() + 1, d.getDate(), d.getDay(), d.getHours(), d.getMinutes()); };
+const monthDayText = (ms) => { const d = new Date(ms); return t('fmtMd', d.getMonth() + 1, d.getDate()); };
+function localInputValue(ms) {
+  if (!ms) return '';
+  return new Date(ms - new Date(ms).getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+}
+let toastTimer = 0;
+function toast(text, ms) {
+  const box = $('toast'); box.textContent = text; box.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { box.hidden = true; }, ms || 2800);
+}
+const dlg = $('dlg');
+let dlgDone = null, dlgValue = null;
+function openDialog({ title, body, ok, cancel, pin }) {
+  if (dlgDone) { const prev = dlgDone; dlgDone = null; prev(null); }
+  $('dlgTitle').textContent = title;
+  const b = $('dlgBody'); b.replaceChildren();
+  for (const line of [].concat(body || [])) b.append(typeof line === 'string' ? el('p', '', line) : line);
+  dlgValue = null;
+  if (pin) {
+    const input = el('input', 'pin'); input.id = 'dlgPin'; input.setAttribute('aria-label', 'PIN');
+    input.type = pin === 'show' ? 'text' : 'password'; input.inputMode = 'numeric'; input.pattern = '[0-9]*'; input.maxLength = 8; input.autocomplete = 'off';
+    b.append(input); dlgValue = input;
+  }
+  $('dlgOk').textContent = ok || t('ok');
+  $('dlgCancel').textContent = cancel || t('cancel');
+  if (!dlg.open) { if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', ''); }
+  if (dlgValue) dlgValue.focus();
+  return new Promise((resolve) => { dlgDone = resolve; });
+}
+function closeDialog(result) {
+  const done = dlgDone; dlgDone = null;
+  if (dlg.open) { if (typeof dlg.close === 'function') dlg.close(); else dlg.removeAttribute('open'); }
+  $('dlgBody').replaceChildren();
+  if (done) done(result);
+}
+$('dlgForm').addEventListener('submit', (ev) => { ev.preventDefault(); closeDialog(dlgValue ? dlgValue.value.trim() : true); });
+$('dlgCancel').addEventListener('click', () => closeDialog(null));
+dlg.addEventListener('close', () => { if (dlgDone && !dlg.open) closeDialog(null); });
+document.addEventListener('click', (ev) => {
+  const btn = ev.target.closest('button[data-copy]');
+  if (!btn) return;
+  const input = $(btn.dataset.copy);
+  let p; try { p = navigator.clipboard.writeText(input.value); } catch (e) { p = Promise.reject(e); }
+  p.then(() => toast(t('copied')), () => { input.focus(); input.select(); toast(t('copyManual')); });
+});
+/** Remember that this device has to do with an event, so the home page can list it. */
+function remember(id, title, isAdmin) {
+  const list = (store.get(K_LIST) || []).filter((e) => e && e.id !== id);
+  const old = (store.get(K_LIST) || []).find((e) => e && e.id === id);
+  list.unshift({ id, title, admin: !!(isAdmin || (old && old.admin)) });
+  store.set(K_LIST, list.slice(0, 20));
+}
+function forgetEvent(id) { store.set(K_LIST, (store.get(K_LIST) || []).filter((e) => e && e.id !== id)); }
+
+/* ---------- the gift tag ---------- */
+const PAW = '<svg class="paw" viewBox="0 0 40 40" aria-hidden="true"><ellipse cx="20" cy="26" rx="9" ry="7.5"/><ellipse cx="8.5" cy="16" rx="3.6" ry="4.6"/><ellipse cx="16" cy="9.5" rx="3.6" ry="4.8"/><ellipse cx="24" cy="9.5" rx="3.6" ry="4.8"/><ellipse cx="31.5" cy="16" rx="3.6" ry="4.6"/></svg>';
+function buildTag(a) {
+  const tag = el('div', 'tag');
+  const inner = el('div', 'tag-inner');
+  const back = el('button', 'tag-side tag-back'); back.type = 'button';
+  back.append(el('span', 'hole'), el('span', 'for', t('tagFor', a.g)), el('span', 'cta', t('tapReveal')), el('span', 'peek', t('peek')));
+  const front = el('div', 'tag-side tag-front'); front.hidden = true;
+  front.insertAdjacentHTML('beforeend', PAW);
+  const name = el('p', 'tag-name' + (beyondPlainLatin(a.r) ? ' plain' : ''), a.r);
+  front.append(el('span', 'hole'), el('p', 'tag-k', t('tagTo')), name);
+  front.append(el('p', 'tag-wish', a.w ? t('tagWish', a.w) : t('tagNoWish')));
+  const meta = [a.b && t('tagBudget', a.b), a.d && t('tagDate', a.d)].filter(Boolean).join(' · ');
+  if (meta) front.append(el('p', 'tag-meta', meta));
+  const hide = el('button', 'link', t('hide')); hide.type = 'button';
+  front.append(hide);
+  inner.append(back, front); tag.append(inner);
+  const flip = (open) => {
+    const swap = () => { back.hidden = open; front.hidden = !open; (open ? hide : back).focus({ preventScroll: true }); };
+    if (reduced) return swap();
+    inner.classList.add('fold');
+    setTimeout(() => { swap(); inner.classList.remove('fold'); }, 200);
+  };
+  back.addEventListener('click', () => flip(true));
+  hide.addEventListener('click', () => flip(false));
+  return tag;
+}
+
+/* =====================================================================================
+   Home page (no ?e=): create an event
+   ===================================================================================== */
+function renderMine() {
+  const mine = (store.get(K_LIST) || []).filter((e) => e && typeof e.id === 'string');
+  $('mineCard').hidden = mine.length === 0 || !$('createdCard').hidden;
+  $('mineList').replaceChildren();
+  for (const e of mine) {
+    const li = el('li'); const who = el('div', 'who');
+    const a = el('a', '', e.title || 'Secret Santa'); a.href = eventUrl(e.id);
+    const b = el('b'); b.append(a); who.append(b, el('small', '', e.admin ? t('iOrganize') : t('iJoined')));
+    li.append(who); $('mineList').append(li);
+  }
+}
+function startHome() {
+  const now = new Date();
+  const year = now.getMonth() === 11 && now.getDate() > 24 ? now.getFullYear() + 1 : now.getFullYear();
+  $('homeFields').hidden = false;
+  $('createCard').hidden = false;
+  $('newTitle').value = 'Secret Santa ' + year;
+  $('newDate').value = year + '-12-24';
+  $('newDate').min = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  rerender = renderMine;
+  renderMine();
+
+  $('createForm').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    if ($('createBtn').disabled) return;
+    if (!$('newDate').value) { $('createErr').textContent = t('e_bad_date'); return; }
+    $('createBtn').disabled = true; $('createErr').textContent = '';
+    const r = await api('create', { title: $('newTitle').value, budget: $('newBudget').value, exchangeOn: $('newDate').value });
+    $('createBtn').disabled = false;
+    if (!r.ok) { $('createErr').textContent = errText(r.data); return; }
+    const { id, adminKey, state } = r.data;
+    store.set('santa:' + id + ':admin', adminKey);
+    remember(id, state.title, true);
+    $('newShare').value = eventUrl(id);
+    $('newAdmin').value = eventUrl(id) + '#admin=' + adminKey;
+    $('newOpen').href = eventUrl(id);
+    $('createCard').hidden = true; $('mineCard').hidden = true; $('createdCard').hidden = false;
+    $('createdCard').scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' });
+  });
+}
+
+/* =====================================================================================
+   Event page (?e=<id>)
+   ===================================================================================== */
+const S = {
+  state: null,              // public: title, budget, exchangeOn, status, drawAt, people[]
+  me: null,                 // { name, token } remembered on this device
+  view: null,               // my personal view from the server: { me, giftTo, missed }
+  adminKey: null, admin: null,
+  gone: false, loadError: false, busy: false, tagKey: '', note: '',
+};
+
+function render() {
+  const st = S.state;
+  $('goneCard').hidden = !S.gone;
+  const note = S.gone ? '' : (st ? (S.loadError ? t('staleNote') : '') : (S.loadError ? t('offlineNote') : t('loading')));
+  $('notice').textContent = note; $('notice').hidden = !note;
+  for (const id of ['meCard', 'joinCard', 'rosterCard', 'adminCard']) if (S.gone || !st) $(id).hidden = true;
+  $('eventFields').hidden = S.gone || !st;
+  if (S.gone || !st) { $('statusPill').hidden = true; $('deadline').hidden = true; $('retention').textContent = ''; return; }
+
+  const drawn = st.status === 'drawn';
+  $('title').textContent = st.title; document.title = st.title;
+  $('title').classList.toggle('plain', beyondPlainLatin(st.title));
+  $('fBudget').textContent = st.budget || '—';
+  $('fDate').textContent = dayText(st.exchangeOn);
+  const pill = $('statusPill'); pill.hidden = false;
+  pill.textContent = drawn ? t('pillDrawn') : t('pillOpen');
+  pill.className = 'pill' + (drawn ? ' drawn' : '');
+  $('deadline').hidden = drawn || !st.drawAt;
+  if (st.drawAt) $('deadline').textContent = t('deadline', timeText(st.drawAt));
+  $('retention').textContent = t('retention', monthDayText(st.deleteAt));
+
+  const v = S.view;
+  $('meCard').hidden = !v;
+  $('joinCard').hidden = !!v || drawn;
+  if (v) {
+    $('meTitle').textContent = drawn ? t('meDrawn', v.me.name) : t('meJoined', v.me.name);
+    $('meStatus').textContent = v.giftTo ? '' : (v.missed ? t('missed') : t('waitDraw'));
+    $('meStatus').hidden = !!v.giftTo;
+    $('resetNote').hidden = !v.me.pinResetAt;
+    if (v.me.pinResetAt) $('resetNote').textContent = t('pinWasReset', timeText(v.me.pinResetAt));
+    // The language is part of the key so that switching language rewrites the tag too (it comes back face down).
+    const key = v.giftTo ? [lang, v.me.name, v.giftTo.name, v.giftTo.wish, st.budget, st.exchangeOn].join('\n') : '';
+    if (key !== S.tagKey) {
+      S.tagKey = key; $('tagSlot').replaceChildren();
+      if (v.giftTo) $('tagSlot').append(buildTag({ g: v.me.name, r: v.giftTo.name, w: v.giftTo.wish, b: st.budget, d: dayText(st.exchangeOn) }));
+    }
+    if (document.activeElement !== $('wishInput') && !S.busy) $('wishInput').value = v.me.wish;
+    $('leaveBtn').hidden = drawn;
+  } else if (S.tagKey) { S.tagKey = ''; $('tagSlot').replaceChildren(); }
+
+  const n = st.people.length;
+  $('rosterCard').hidden = n === 0;
+  $('rosterTitle').textContent = v ? t('rosterIn', n) : (drawn ? t('rosterTapDrawn') : t('rosterTapOpen'));
+  $('rosterHint').textContent = v ? '' : (drawn ? t('rosterHintDrawn') : t('rosterHintOpen', n));
+  $('rosterHint').hidden = !!v;
+  $('names').hidden = !!v; $('roster').hidden = !v;
+  const box = v ? $('roster') : $('names'); box.replaceChildren();
+  for (const name of st.people) {
+    if (v) box.append(el('li', '', name));
+    else { const b = el('button', 'btn', name); b.type = 'button'; b.dataset.name = name; box.append(b); }
+  }
+  renderAdmin();
+}
+function renderAdmin() {
+  const a = S.admin, st = S.state;
+  $('adminCard').hidden = !a;
+  if (!a) return;
+  const drawn = st.status === 'drawn', n = a.people.length;
+  $('adminStatus').textContent = drawn ? t('adminDrawn') : (n < st.min ? t('adminNeed', n, st.min) : t('adminReady', n));
+  const list = $('adminList'); list.replaceChildren();
+  for (const p of a.people) {
+    const li = el('li'); const who = el('div', 'who'); who.append(el('b', '', p.name));
+    who.append(el('small', '', (p.wish ? t('wishOf', p.wish) : t('noWish')) + (p.locked ? t('pinLocked') : '')));
+    const acts = el('div', 'row');
+    const pin = el('button', 'btn sm', t('resetPin')); pin.type = 'button'; pin.dataset.act = 'setPin'; pin.dataset.name = p.name;
+    acts.append(pin);
+    if (!drawn) { const rm = el('button', 'btn sm', t('remove')); rm.type = 'button'; rm.dataset.act = 'remove'; rm.dataset.name = p.name; acts.append(rm); }
+    li.append(who, acts); list.append(li);
+  }
+  $('drawBtn').hidden = drawn; $('reopenBtn').hidden = !drawn;
+  $('drawBtn').disabled = S.busy || n < st.min;
+  $('drawBtn').textContent = n < st.min ? t('drawBtnMin', st.min) : t('drawBtnN', n);
+  $('shareUrl').value = eventUrl(EVENT_ID);
+  $('adminUrl').value = eventUrl(EVENT_ID) + '#admin=' + S.adminKey;
+  if (!$('settings').open) {
+    $('cfgTitle').value = st.title; $('cfgBudget').value = st.budget; $('cfgExchangeOn').value = st.exchangeOn; $('cfgDrawAt').value = localInputValue(st.drawAt);
+  }
+}
+
+/* ---------- loading and refreshing ---------- */
+function forget() { S.me = null; S.view = null; store.set(K_ME, null); }
+function gone() { S.gone = true; S.state = null; S.view = null; S.admin = null; forgetEvent(EVENT_ID); }
+async function refresh() {
+  if (S.gone) return;
+  if (S.me) {
+    const r = await api('me', Object.assign({ id: EVENT_ID }, S.me));
+    if (r.ok) { S.view = r.data; S.state = r.data.state; S.loadError = false; }
+    else if (r.data.error === 'not_found') gone();
+    else if (r.status === 401 || r.status === 404) { S.note = r.status === 404 ? t('removedNote') : t('reenterPin'); S.state = null; forget(); }
+    else S.loadError = true;
+  }
+  if (!S.gone && (!S.me || !S.state)) {
+    const r = await api('state', { id: EVENT_ID });
+    if (r.ok) { S.state = r.data; S.loadError = false; }
+    else if (r.data.error === 'not_found') gone();
+    else S.loadError = true;
+  }
+  if (!S.gone && S.adminKey) {
+    const r = await api('admin', { id: EVENT_ID, adminKey: S.adminKey, action: 'list' });
+    if (r.ok) { S.admin = r.data; S.state = r.data.state; }
+    else if (r.status === 403) { S.admin = null; S.adminKey = null; store.set(K_ADMIN, null); toast(errText(r.data), 5000); }
+  }
+  if (S.state) remember(EVENT_ID, S.state.title, !!S.admin);
+  if (S.note) { toast(S.note, 4000); S.note = ''; }
+  render();
+}
+
+/* ---------- participant actions ---------- */
+/** The server answers a join or a PIN sign-in with a random token; that token, not the PIN, is what this device keeps. */
+function signedIn(data) {
+  S.me = { name: data.me.name, token: data.token }; store.set(K_ME, S.me);
+  S.view = data; S.state = data.state;
+  render();
+}
+function wireEvent() {
+  $('joinForm').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    if (S.busy) return;
+    // normalize: "ễ" typed as one letter or as e + two marks must count as the same name
+    const name = $('joinName').value.trim().normalize('NFC'), pin = $('joinPin').value.trim(), wish = $('joinWish').value.trim();
+    if (!name) { $('joinErr').textContent = t('e_bad_name'); $('joinName').focus(); return; }
+    if (!/^\d{4,8}$/.test(pin)) { $('joinErr').textContent = t('e_bad_pin_format'); $('joinPin').focus(); return; }
+    S.busy = true; $('joinBtn').disabled = true; $('joinErr').textContent = '';
+    const r = await api('join', { id: EVENT_ID, name, pin, wish });
+    S.busy = false; $('joinBtn').disabled = false;
+    if (!r.ok) { if (r.data.error === 'not_found') { gone(); render(); } else $('joinErr').textContent = errText(r.data); return; }
+    $('joinName').value = ''; $('joinPin').value = ''; $('joinWish').value = '';
+    signedIn(r.data);
+    toast(t('joinedToast', pin), 5000);
+    if (S.adminKey) refresh();
+  });
+  $('names').addEventListener('click', async (ev) => {
+    const btn = ev.target.closest('button[data-name]');
+    if (!btn) return;
+    const name = btn.dataset.name;
+    let note = '';
+    for (;;) {
+      const pin = await openDialog({ title: t('pinDlgTitle', name), body: note ? [note] : [t('pinDlgBody')], ok: t('enter'), pin: 'hide' });
+      if (pin == null) return;
+      const r = await api('login', { id: EVENT_ID, name, pin });
+      if (r.ok) { signedIn(r.data); return; }
+      if (r.data.error === 'not_found') { gone(); render(); return; }
+      note = errText(r.data);
+    }
+  });
+  $('wishForm').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    if (!S.me || S.busy) return;
+    S.busy = true; $('wishOk').textContent = ''; $('wishErr').textContent = '';
+    const r = await api('wish', Object.assign({ id: EVENT_ID, wish: $('wishInput').value.trim() }, S.me));
+    S.busy = false;
+    if (!r.ok) { $('wishErr').textContent = errText(r.data); return; }
+    S.view = r.data; S.state = r.data.state; $('wishOk').textContent = t('saved'); $('wishInput').blur(); render();
+  });
+  $('logoutBtn').addEventListener('click', () => {
+    if (S.me) api('logout', Object.assign({ id: EVENT_ID }, S.me));       // cancels this device's token on the server too
+    forget(); render();
+  });
+  $('leaveBtn').addEventListener('click', async () => {
+    if (!S.me) return;
+    const yes = await openDialog({ title: t('leaveTitle'), body: t('leaveBody'), ok: t('leaveOk'), cancel: t('leaveKeep') });
+    if (!yes) return;
+    const r = await api('leave', Object.assign({ id: EVENT_ID }, S.me));
+    if (!r.ok) { toast(errText(r.data), 4000); return; }
+    forget(); S.state = r.data.state; toast(t('leftToast')); render();
+    if (S.adminKey) refresh();
+  });
+
+  /* organizer */
+  async function adminDo(body, okText) {
+    if (S.busy) return false;
+    S.busy = true; $('adminOk').textContent = ''; $('adminErr').textContent = ''; render();
+    const r = await api('admin', Object.assign({ id: EVENT_ID, adminKey: S.adminKey }, body));
+    S.busy = false;
+    if (r.ok && r.data.state) { S.admin = r.data; S.state = r.data.state; $('adminOk').textContent = okText; }
+    else if (!r.ok) $('adminErr').textContent = errText(r.data);
+    if (body.action !== 'destroy') await refresh();
+    return r.ok;
+  }
+  $('drawBtn').addEventListener('click', async () => {
+    const names = S.admin ? S.admin.people.map((p) => p.name) : [];
+    const yes = await openDialog({ title: t('drawDlgTitle', names.length), body: [names.join(t('listSep')), t('drawDlgBody')], ok: t('draw') });
+    if (yes) adminDo({ action: 'draw' }, t('drawDone'));
+  });
+  $('reopenBtn').addEventListener('click', async () => {
+    const yes = await openDialog({ title: t('reopenTitle'), body: t('reopenBody'), ok: t('reopenOk') });
+    if (yes) adminDo({ action: 'reopen' }, t('reopened'));
+  });
+  $('adminList').addEventListener('click', async (ev) => {
+    const btn = ev.target.closest('button[data-act]');
+    if (!btn) return;
+    const name = btn.dataset.name;
+    if (btn.dataset.act === 'remove') {
+      const yes = await openDialog({ title: t('removeTitle', name), body: t('removeBody'), ok: t('remove') });
+      if (yes) adminDo({ action: 'remove', name }, t('removed', name));
+    } else {
+      const pin = await openDialog({ title: t('setPinTitle', name), body: t('setPinBody'), ok: t('save'), pin: 'show' });
+      if (pin == null) return;
+      if (!/^\d{4,8}$/.test(pin)) { $('adminErr').textContent = t('e_bad_pin_format'); return; }
+      adminDo({ action: 'setPin', name, pin }, t('newPin', name, pin));
+    }
+  });
+  $('cfgForm').addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    const at = $('cfgDrawAt').value ? new Date($('cfgDrawAt').value).getTime() : 0;
+    adminDo({ action: 'settings', title: $('cfgTitle').value, budget: $('cfgBudget').value, exchangeOn: $('cfgExchangeOn').value, drawAt: Number.isFinite(at) ? at : 0 }, t('settingsSaved'));
+  });
+  $('destroyBtn').addEventListener('click', async () => {
+    const yes = await openDialog({ title: t('destroyTitle'), body: t('destroyBody'), ok: t('del') });
+    if (!yes) return;
+    if (await adminDo({ action: 'destroy' }, '')) { store.set(K_ADMIN, null); store.set(K_ME, null); gone(); render(); toast(t('destroyed')); }
+  });
+}
+
+function startEvent() {
+  $('homeLink').hidden = false;
+  // The organizer link carries the key after '#', so it is never sent to any server as part of the address.
+  // Keep it on this device, then tidy the address bar so a screenshot or a copied link does not leak it.
+  const m = /^#admin=([A-Za-z0-9_-]{8,128})$/.exec(location.hash);
+  if (m) { store.set(K_ADMIN, m[1]); try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* fine */ } }
+  S.adminKey = m ? m[1] : store.get(K_ADMIN);
+  if (typeof S.adminKey !== 'string') S.adminKey = null;
+  S.me = store.get(K_ME);
+  if (S.me && (typeof S.me.name !== 'string' || typeof S.me.token !== 'string')) S.me = null;
+  wireEvent();
+  rerender = render;
+  render();
+  refresh();
+  // New sign-ups and the draw show up without anyone reloading.
+  setInterval(() => { if (!document.hidden && !S.busy && !dlg.open) refresh(); }, 30000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && !S.busy && !dlg.open) refresh(); });
+}
+
+/* ---------- falling snow, behind the cards ---------- */
+(function snow() {
+  const cv = $('snow');
+  const ctx = cv.getContext && cv.getContext('2d');
+  if (!ctx) return;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  let w = 0, h = 0, flakes = [], raf = 0, last = 0;
+  const flake = (anywhere) => ({ x: Math.random() * w, y: anywhere ? Math.random() * h : -4, r: 1 + Math.random() * 2.2, v: 14 + Math.random() * 26, sway: Math.random() * 6.28, o: .4 + Math.random() * .55 });
+  function size() {
+    w = cv.clientWidth; h = cv.clientHeight;
+    cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const want = Math.round(Math.min(110, Math.max(40, (w * h) / 8000)));
+    while (flakes.length < want) flakes.push(flake(true));
+    flakes.length = want;
+    for (const f of flakes) { if (f.x > w) f.x = Math.random() * w; if (f.y > h) f.y = Math.random() * h; }
+  }
+  function draw() {
+    ctx.clearRect(0, 0, w, h); ctx.fillStyle = '#fff';
+    for (const f of flakes) { ctx.globalAlpha = f.o; ctx.beginPath(); ctx.arc(f.x + Math.sin(f.sway) * 6, f.y, f.r, 0, 6.2832); ctx.fill(); }
+  }
+  function tick(now) {
+    const dt = last ? Math.min(.05, (now - last) / 1000) : 0; last = now;
+    for (const f of flakes) { f.y += f.v * dt; f.sway += dt * .9; if (f.y > h + 4) Object.assign(f, flake(false)); }
+    draw(); raf = requestAnimationFrame(tick);
+  }
+  size(); draw();
+  addEventListener('resize', () => { size(); draw(); });
+  if (reduced) return;
+  raf = requestAnimationFrame(tick);
+  document.addEventListener('visibilitychange', () => {
+    cancelAnimationFrame(raf);
+    if (!document.hidden) { last = 0; raf = requestAnimationFrame(tick); }
+  });
+})();
+
+/* ---------- start ---------- */
+applyLang();
+if (/^[a-z0-9]{12}$/.test(EVENT_ID)) startEvent();
+else if (EVENT_ID) { $('homeLink').hidden = false; rerender = render; gone(); render(); }
+else startHome();
+})();
+</script>
+</body>
+</html>
