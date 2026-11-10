@@ -25,7 +25,10 @@
           <path d="M31 10 C22 -1 18 8 31 10 C44 8 40 -1 31 10Z" fill="#f2c14e"/>
         </g>
       </svg>
-      <img class="pets" src="pets.png" alt="" data-i18n-alt="petsAlt" width="1774" height="887">
+      <img class="pets pet-cat" src="pets.png" alt="" data-i18n-alt="petsAlt" width="1774" height="887">
+      <img class="pets pet-dog" src="pets.png" alt="" aria-hidden="true" width="1774" height="887">
+      <button type="button" class="pet-touch cat-touch" data-pet="cat" data-i18n-aria="petCat"></button>
+      <button type="button" class="pet-touch dog-touch" data-pet="dog" data-i18n-aria="petDog"></button>
       <span class="nametag cat" lang="zh-CN">蛋饼 · Eggs Benedict</span>
       <span class="nametag dog" lang="en">Waffle</span>
     </div>
@@ -114,6 +117,14 @@
     </div>
   </section>
 
+  <section class="card" id="rosterCard" hidden>
+    <h2 id="rosterTitle"></h2>
+    <p class="hint" id="rosterHint"></p>
+    <div class="names" id="names"></div>
+    <ul class="roster" id="roster"></ul>
+  </section>
+
+
   <section class="card" id="joinCard" hidden>
     <h2 data-i18n="joinTitle"></h2>
     <form id="joinForm" class="stack">
@@ -123,18 +134,13 @@
       <input id="joinPin" class="pin" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off">
       <p class="hint"><span data-i18n="pinHint"></span><b data-i18n="pinWarn"></b></p>
       <label for="joinWish" data-i18n="joinWishLabel"></label>
-      <input id="joinWish" maxlength="100" autocomplete="off" data-i18n-ph="joinWishPh">
+      <input id="joinWish" aria-describedby="wishPrivacy" maxlength="100" autocomplete="off" data-i18n-ph="joinWishPh">
+      <p class="hint" id="wishPrivacy" data-i18n="wishPrivacy"></p>
       <button class="btn primary" id="joinBtn" data-i18n="joinBtn"></button>
       <p class="err" id="joinErr" role="alert"></p>
     </form>
   </section>
 
-  <section class="card" id="rosterCard" hidden>
-    <h2 id="rosterTitle"></h2>
-    <p class="hint" id="rosterHint"></p>
-    <div class="names" id="names"></div>
-    <ul class="roster" id="roster"></ul>
-  </section>
 
   <section class="card" id="adminCard" hidden>
     <h2 data-i18n="organizer"></h2>
@@ -175,7 +181,7 @@
     </details>
   </section>
 
-  <footer><span data-i18n="merry"></span> <span id="retention"></span> <a id="homeLink" href="./" data-i18n="makeOwn" hidden></a></footer>
+  <footer><button type="button" class="motion-toggle" id="petMotion" aria-pressed="false" data-i18n="pausePets"></button><p class="dut-stamp" lang="en">Department of Unnecessary Things · Holiday Gift Division</p><span data-i18n="merry"></span> <span id="retention"></span> <a id="homeLink" href="./" data-i18n="makeOwn" hidden></a></footer>
 </main>
 
 <dialog id="dlg" aria-labelledby="dlgTitle">

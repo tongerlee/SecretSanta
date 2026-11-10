@@ -49,8 +49,10 @@ function applyLang() {
   for (const n of document.querySelectorAll('[data-i18n-ph]')) n.placeholder = t(n.dataset.i18nPh);
   for (const n of document.querySelectorAll('[data-i18n-aria]')) n.setAttribute('aria-label', t(n.dataset.i18nAria));
   for (const n of document.querySelectorAll('[data-i18n-alt]')) n.alt = t(n.dataset.i18nAlt);
+  $('petMotion').textContent = (petsPaused ? t('playPets') : t('pausePets'));
   for (const b of $('langs').children) b.setAttribute('aria-pressed', String(b.dataset.lang === lang));
 }
+let petsPaused = false;
 let rerender = () => {};                           // set by whichever page is showing
 function setLang(next) {
   if (!L.dict[next] || next === lang) return;
@@ -219,9 +221,9 @@ function startHome() {
     ev.preventDefault();
     if ($('createBtn').disabled) return;
     if (!$('newDate').value) { $('createErr').textContent = t('e_bad_date'); return; }
-    $('createBtn').disabled = true; $('createErr').textContent = '';
+    $('createBtn').disabled = true; $('createBtn').textContent = t('loading'); $('createForm').setAttribute('aria-busy', 'true'); $('createErr').textContent = '';
     const r = await api('create', { title: $('newTitle').value, budget: $('newBudget').value, exchangeOn: $('newDate').value });
-    $('createBtn').disabled = false;
+    $('createBtn').disabled = false; $('createBtn').textContent = t('createBtn'); $('createForm').removeAttribute('aria-busy');
     if (!r.ok) { $('createErr').textContent = errText(r.data); return; }
     const { id, adminKey, state } = r.data;
     store.set('santa:' + id + ':admin', adminKey);
@@ -256,7 +258,7 @@ function render() {
 
   const drawn = st.status === 'drawn';
   $('title').textContent = st.title; document.title = st.title;
-  $('title').classList.toggle('plain', beyondPlainLatin(st.title));
+  $('title').classList.toggle('plain', beyondPlainLatin(st.title) || !/^Secret Santa(?: \d{4})?$/i.test(st.title));
   $('fBudget').textContent = st.budget || '—';
   $('fDate').textContent = dayText(st.exchangeOn);
   const pill = $('statusPill'); pill.hidden = false;
@@ -367,9 +369,9 @@ function wireEvent() {
     const name = $('joinName').value.trim().normalize('NFC'), pin = $('joinPin').value.trim(), wish = $('joinWish').value.trim();
     if (!name) { $('joinErr').textContent = t('e_bad_name'); $('joinName').focus(); return; }
     if (!/^\d{4,8}$/.test(pin)) { $('joinErr').textContent = t('e_bad_pin_format'); $('joinPin').focus(); return; }
-    S.busy = true; $('joinBtn').disabled = true; $('joinErr').textContent = '';
+    S.busy = true; $('joinBtn').disabled = true; $('joinBtn').textContent = t('loading'); $('joinForm').setAttribute('aria-busy', 'true'); $('joinErr').textContent = '';
     const r = await api('join', { id: EVENT_ID, name, pin, wish });
-    S.busy = false; $('joinBtn').disabled = false;
+    S.busy = false; $('joinBtn').disabled = false; $('joinBtn').textContent = t('joinBtn'); $('joinForm').removeAttribute('aria-busy');
     if (!r.ok) { if (r.data.error === 'not_found') { gone(); render(); } else $('joinErr').textContent = errText(r.data); return; }
     $('joinName').value = ''; $('joinPin').value = ''; $('joinWish').value = '';
     signedIn(r.data);
@@ -513,6 +515,44 @@ function startEvent() {
     if (!document.hidden) { last = 0; raf = requestAnimationFrame(tick); }
   });
 })();
+
+$('petMotion').addEventListener('click', () => {
+  petsPaused = !petsPaused;
+  document.documentElement.classList.toggle('pets-paused', petsPaused);
+  $('petMotion').setAttribute('aria-pressed', String(petsPaused));
+  $('petMotion').textContent = (petsPaused ? t('playPets') : t('pausePets'));
+});
+document.addEventListener('visibilitychange', () => {
+  document.documentElement.classList.toggle('pets-paused', petsPaused || document.hidden);
+});
+
+// Pet reactions stay independent; rapid taps restart one short reaction.
+for (const button of document.querySelectorAll('[data-pet]')) {
+  const pet = document.querySelector('.pet-' + button.dataset.pet);
+  const stage = button.closest('.stage');
+  const curious = button.dataset.pet + '-curious';
+  let reaction = 0, heartTimer = 0;
+  const greet = () => { if (!petsPaused) stage.classList.add(curious); };
+  const settle = () => stage.classList.remove(curious);
+  button.addEventListener('pointerenter', (event) => { if (event.pointerType === 'mouse') greet(); });
+  button.addEventListener('pointerleave', settle);
+  button.addEventListener('focus', greet);
+  button.addEventListener('blur', settle);
+  button.addEventListener('click', () => {
+    clearTimeout(heartTimer); cancelAnimationFrame(reaction);
+    pet.classList.remove('is-petted'); button.classList.remove('loved');
+    reaction = requestAnimationFrame(() => {
+      reaction = requestAnimationFrame(() => {
+        if (!petsPaused) pet.classList.add('is-petted');
+        button.classList.add('loved');
+        heartTimer = setTimeout(() => button.classList.remove('loved'), 1100);
+      });
+    });
+  });
+  pet.addEventListener('animationend', (event) => {
+    if (event.animationName.endsWith('-petted')) pet.classList.remove('is-petted');
+  });
+}
 
 /* ---------- start ---------- */
 applyLang();

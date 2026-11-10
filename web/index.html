@@ -181,6 +181,44 @@ html:lang(ko){--font-body:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo"
 html:lang(vi) .tag-back .cta{font:800 28px/1.15 var(--font-body)}
 .label h1.plain{font-family:var(--font-body);font-weight:800;font-size:clamp(32px,10vw,44px);line-height:1.08}
 .card .tag-front .tag-name.plain,.tag-name.plain{font-family:"Patrick Hand","Caveat",var(--font-body);font-weight:400;font-size:40px}
+
+/* Keep custom event titles legible and small controls comfortable on touchscreens. */
+.link,.btn.sm,.langs button,details>summary{min-height:44px}
+.link,details>summary{display:inline-flex;align-items:center}
+input::placeholder,textarea::placeholder{opacity:1}
+.dut-stamp{font-size:10px;line-height:1.6;letter-spacing:.08em;text-transform:uppercase;margin:8px 0;color:var(--on-night-soft)}
+@media (min-width:900px){.wrap{max-width:600px}.stage{width:390px}.label h1.plain{font-size:38px}}
+
+/* Two clipped copies of the original artwork keep each pet moving independently,
+   with paws anchored to the snow and the surrounding scene still. */
+.pet-cat{clip-path:inset(0 50% 0 0);transform-origin:30.5% 94%;animation:cat-breathe 5.8s ease-in-out infinite}
+.pet-dog{clip-path:inset(0 0 0 50%);transform-origin:68% 94%;animation:waffle-sway 4.6s ease-in-out infinite;animation-delay:-1.3s}
+@keyframes cat-breathe{0%,100%{transform:scaleY(1) rotate(0)}50%{transform:scaleY(1.014) rotate(-.45deg)}}
+@keyframes waffle-sway{0%,100%{transform:rotate(-.65deg) scaleY(1)}50%{transform:rotate(.65deg) scaleY(1.012)}}
+.pets-paused .pets{animation-play-state:paused}
+.motion-toggle{font:inherit;color:inherit;background:transparent;border:1px solid currentColor;border-radius:999px;min-height:44px;padding:8px 14px;cursor:pointer;margin-top:4px}
+@media (prefers-reduced-motion:reduce){.pets{animation:none}.motion-toggle{display:none}}
+
+/* Transparent, stable hit areas work with mouse, touch and keyboard. */
+.pet-touch{position:absolute;top:19%;height:72%;border:0;border-radius:45%;background:transparent;pointer-events:auto;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.cat-touch{left:17%;width:31%}.dog-touch{left:51%;width:35%}
+.nametag{pointer-events:none}
+.pet-touch::after{content:"♥";position:absolute;top:8%;left:50%;font-size:25px;color:var(--berry);opacity:0;pointer-events:none;text-shadow:0 1px 2px #fff}
+.pet-touch.loved::after{animation:pet-heart 1s ease-out both}
+.stage.cat-curious .pet-cat{animation:cat-perk .65s ease-in-out both}
+.stage.dog-curious .pet-dog{animation:dog-perk .65s ease-in-out both}
+.stage .pet-cat.is-petted{animation:cat-petted .85s ease-in-out both}
+.stage .pet-dog.is-petted{animation:dog-petted .85s ease-in-out both}
+@keyframes cat-perk{50%,100%{transform:rotate(-2deg) scaleY(1.025)}}
+@keyframes dog-perk{50%,100%{transform:rotate(2deg) scaleY(1.025)}}
+@keyframes cat-petted{0%,100%{transform:none}25%{transform:rotate(-3deg) scaleY(.97)}55%{transform:rotate(2deg) scaleY(1.02)}78%{transform:rotate(-1.5deg)}}
+@keyframes dog-petted{0%,100%{transform:none}20%,65%{transform:rotate(-3deg) scaleY(.97)}42%,82%{transform:rotate(3deg) scaleY(1.02)}}
+@keyframes pet-heart{0%{opacity:0;transform:translate(-50%,0) scale(.7)}20%{opacity:1}100%{opacity:0;transform:translate(-50%,-35px) scale(1.15)}}
+.pets-paused .stage .pets{animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){
+  .stage .pets,.stage .pets.is-petted{animation:none}
+  .pet-touch.loved::after{animation:none;opacity:1}
+}
 </style>
 </head>
 <body>
@@ -235,7 +273,10 @@ html:lang(vi) .tag-back .cta{font:800 28px/1.15 var(--font-body)}
           <path d="M31 10 C22 -1 18 8 31 10 C44 8 40 -1 31 10Z" fill="#f2c14e"/>
         </g>
       </svg>
-      <img class="pets" src="pets.png" alt="" data-i18n-alt="petsAlt" width="1774" height="887">
+      <img class="pets pet-cat" src="pets.png" alt="" data-i18n-alt="petsAlt" width="1774" height="887">
+      <img class="pets pet-dog" src="pets.png" alt="" aria-hidden="true" width="1774" height="887">
+      <button type="button" class="pet-touch cat-touch" data-pet="cat" data-i18n-aria="petCat"></button>
+      <button type="button" class="pet-touch dog-touch" data-pet="dog" data-i18n-aria="petDog"></button>
       <span class="nametag cat" lang="zh-CN">蛋饼 · Eggs Benedict</span>
       <span class="nametag dog" lang="en">Waffle</span>
     </div>
@@ -324,6 +365,14 @@ html:lang(vi) .tag-back .cta{font:800 28px/1.15 var(--font-body)}
     </div>
   </section>
 
+  <section class="card" id="rosterCard" hidden>
+    <h2 id="rosterTitle"></h2>
+    <p class="hint" id="rosterHint"></p>
+    <div class="names" id="names"></div>
+    <ul class="roster" id="roster"></ul>
+  </section>
+
+
   <section class="card" id="joinCard" hidden>
     <h2 data-i18n="joinTitle"></h2>
     <form id="joinForm" class="stack">
@@ -333,18 +382,13 @@ html:lang(vi) .tag-back .cta{font:800 28px/1.15 var(--font-body)}
       <input id="joinPin" class="pin" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off">
       <p class="hint"><span data-i18n="pinHint"></span><b data-i18n="pinWarn"></b></p>
       <label for="joinWish" data-i18n="joinWishLabel"></label>
-      <input id="joinWish" maxlength="100" autocomplete="off" data-i18n-ph="joinWishPh">
+      <input id="joinWish" aria-describedby="wishPrivacy" maxlength="100" autocomplete="off" data-i18n-ph="joinWishPh">
+      <p class="hint" id="wishPrivacy" data-i18n="wishPrivacy"></p>
       <button class="btn primary" id="joinBtn" data-i18n="joinBtn"></button>
       <p class="err" id="joinErr" role="alert"></p>
     </form>
   </section>
 
-  <section class="card" id="rosterCard" hidden>
-    <h2 id="rosterTitle"></h2>
-    <p class="hint" id="rosterHint"></p>
-    <div class="names" id="names"></div>
-    <ul class="roster" id="roster"></ul>
-  </section>
 
   <section class="card" id="adminCard" hidden>
     <h2 data-i18n="organizer"></h2>
@@ -385,7 +429,7 @@ html:lang(vi) .tag-back .cta{font:800 28px/1.15 var(--font-body)}
     </details>
   </section>
 
-  <footer><span data-i18n="merry"></span> <span id="retention"></span> <a id="homeLink" href="./" data-i18n="makeOwn" hidden></a></footer>
+  <footer><button type="button" class="motion-toggle" id="petMotion" aria-pressed="false" data-i18n="pausePets"></button><p class="dut-stamp" lang="en">Department of Unnecessary Things · Holiday Gift Division</p><span data-i18n="merry"></span> <span id="retention"></span> <a id="homeLink" href="./" data-i18n="makeOwn" hidden></a></footer>
 </main>
 
 <dialog id="dlg" aria-labelledby="dlgTitle">
@@ -414,6 +458,10 @@ const SANTA_I18N = (() => {
   const zh = {
     langLabel: '语言',
     petsAlt: '灰白猫蛋饼和伯恩山小狗 Waffle 坐在雪地上',
+    petCat: '摸摸蛋饼',
+    petDog: '摸摸 Waffle',
+    pausePets: '暂停动物动画',
+    playPets: '播放动物动画',
     eyebrow: '交换礼物 · GIFT EXCHANGE',
     budget: '预算',
     exchangeDay: '交换日',
@@ -438,7 +486,7 @@ const SANTA_I18N = (() => {
     goneTitle: '这个活动不在了',
     goneBody: '它可能已经结束并自动删除了，也可能是链接不完整。',
     goneNew: '建一个新的活动',
-    wishLabel: '你的心愿（抽到你的人会看到，随时可以改）',
+    wishLabel: '你的心愿（抽到你的人和组织者可见，随时可以改）',
     saveWish: '保存心愿',
     notMe: '我不是这个人，换一个',
     leave: '取消报名',
@@ -449,6 +497,7 @@ const SANTA_I18N = (() => {
     pinWarn: '别用银行卡密码、手机解锁码这类真密码。',
     joinWishLabel: '心愿或备注（可不填）',
     joinWishPh: '抽到你的人会看到',
+    wishPrivacy: '抽到你的人和组织者可见。请勿填写私密信息。',
     joinBtn: '报名',
     organizer: '组织者',
     reopen: '作废这次结果，重新开放报名',
@@ -566,6 +615,10 @@ const SANTA_I18N = (() => {
   const en = {
     langLabel: 'Language',
     petsAlt: 'Eggs Benedict the gray and white cat and Waffle the Bernese puppy sitting in the snow',
+    petCat: 'Pet Eggs Benedict',
+    petDog: 'Pet Waffle',
+    pausePets: 'Pause pet animation',
+    playPets: 'Play pet animation',
     eyebrow: 'GIFT EXCHANGE',
     budget: 'Budget',
     exchangeDay: 'Exchange day',
@@ -590,7 +643,7 @@ const SANTA_I18N = (() => {
     goneTitle: 'This event is gone',
     goneBody: 'It may have ended and been deleted automatically, or the link might be incomplete.',
     goneNew: 'Start a new event',
-    wishLabel: 'Your wish (whoever draws you will see it, and you can change it anytime)',
+    wishLabel: 'Your wish (visible to your gift giver and organizer; edit anytime)',
     saveWish: 'Save wish',
     notMe: 'That’s not me',
     leave: 'Cancel my sign-up',
@@ -601,6 +654,7 @@ const SANTA_I18N = (() => {
     pinWarn: 'Don’t reuse a real one like your bank PIN or phone passcode.',
     joinWishLabel: 'Wish or note (optional)',
     joinWishPh: 'Whoever draws you will see this',
+    wishPrivacy: 'Your gift giver and organizer can read this. Keep private details out.',
     joinBtn: 'Sign up',
     organizer: 'Organizer',
     reopen: 'Scrap this draw and reopen sign-ups',
@@ -718,6 +772,10 @@ const SANTA_I18N = (() => {
   const ko = {
     langLabel: '언어',
     petsAlt: '눈밭에 앉아 있는 회색 고양이 에그 베네딕트와 버니즈 강아지 와플',
+    petCat: 'Eggs Benedict 쓰다듬기',
+    petDog: 'Waffle 쓰다듬기',
+    pausePets: '동물 애니메이션 일시 정지',
+    playPets: '동물 애니메이션 재생',
     eyebrow: '선물 교환',
     budget: '예산',
     exchangeDay: '교환 날짜',
@@ -742,7 +800,7 @@ const SANTA_I18N = (() => {
     goneTitle: '이벤트를 찾을 수 없어요',
     goneBody: '이미 끝나서 자동으로 삭제됐거나, 링크가 잘렸을 수 있어요.',
     goneNew: '새 이벤트 만들기',
-    wishLabel: '받고 싶은 선물 (나를 뽑은 사람에게 보여요. 언제든 바꿀 수 있어요)',
+    wishLabel: '받고 싶은 선물 (나를 뽑은 사람과 주최자에게 보여요. 언제든 바꿀 수 있어요)',
     saveWish: '저장하기',
     notMe: '이 사람이 아니에요',
     leave: '참가 취소',
@@ -753,6 +811,7 @@ const SANTA_I18N = (() => {
     pinWarn: '은행 비밀번호나 휴대폰 잠금 번호처럼 실제로 쓰는 번호는 피해 주세요.',
     joinWishLabel: '받고 싶은 선물이나 메모 (선택)',
     joinWishPh: '나를 뽑은 사람에게 보여요',
+    wishPrivacy: '나를 뽑은 사람과 주최자가 볼 수 있어요. 민감한 정보는 적지 마세요.',
     joinBtn: '참가하기',
     organizer: '주최자',
     reopen: '이번 결과 취소하고 다시 참가 받기',
@@ -869,6 +928,10 @@ const SANTA_I18N = (() => {
   const vi = {
     langLabel: 'Ngôn ngữ',
     petsAlt: 'Bé mèo xám trắng Eggs Benedict và cún Bernese tên Waffle ngồi trên tuyết',
+    petCat: 'Vuốt ve Eggs Benedict',
+    petDog: 'Vuốt ve Waffle',
+    pausePets: 'Tạm dừng chuyển động thú cưng',
+    playPets: 'Phát chuyển động thú cưng',
     eyebrow: 'TRAO ĐỔI QUÀ',
     budget: 'Ngân sách',
     exchangeDay: 'Ngày đổi quà',
@@ -893,7 +956,7 @@ const SANTA_I18N = (() => {
     goneTitle: 'Sự kiện này không còn nữa',
     goneBody: 'Có thể sự kiện đã kết thúc và tự xóa, hoặc link bị thiếu.',
     goneNew: 'Tạo sự kiện mới',
-    wishLabel: 'Gợi ý quà cho bạn (người bốc trúng bạn sẽ thấy, sửa lúc nào cũng được)',
+    wishLabel: 'Gợi ý quà (người bốc trúng bạn và người tổ chức sẽ thấy; sửa lúc nào cũng được)',
     saveWish: 'Lưu gợi ý',
     notMe: 'Không phải mình',
     leave: 'Hủy đăng ký',
@@ -904,6 +967,7 @@ const SANTA_I18N = (() => {
     pinWarn: 'Đừng dùng mật khẩu thật như mã PIN ngân hàng hay mã mở khóa điện thoại.',
     joinWishLabel: 'Gợi ý quà hoặc ghi chú (không bắt buộc)',
     joinWishPh: 'Người bốc trúng bạn sẽ thấy',
+    wishPrivacy: 'Người tặng quà và người tổ chức có thể đọc. Đừng ghi thông tin riêng tư.',
     joinBtn: 'Đăng ký',
     organizer: 'Người tổ chức',
     reopen: 'Hủy kết quả lần này và mở đăng ký lại',
@@ -1076,8 +1140,10 @@ function applyLang() {
   for (const n of document.querySelectorAll('[data-i18n-ph]')) n.placeholder = t(n.dataset.i18nPh);
   for (const n of document.querySelectorAll('[data-i18n-aria]')) n.setAttribute('aria-label', t(n.dataset.i18nAria));
   for (const n of document.querySelectorAll('[data-i18n-alt]')) n.alt = t(n.dataset.i18nAlt);
+  $('petMotion').textContent = (petsPaused ? t('playPets') : t('pausePets'));
   for (const b of $('langs').children) b.setAttribute('aria-pressed', String(b.dataset.lang === lang));
 }
+let petsPaused = false;
 let rerender = () => {};                           // set by whichever page is showing
 function setLang(next) {
   if (!L.dict[next] || next === lang) return;
@@ -1246,9 +1312,9 @@ function startHome() {
     ev.preventDefault();
     if ($('createBtn').disabled) return;
     if (!$('newDate').value) { $('createErr').textContent = t('e_bad_date'); return; }
-    $('createBtn').disabled = true; $('createErr').textContent = '';
+    $('createBtn').disabled = true; $('createBtn').textContent = t('loading'); $('createForm').setAttribute('aria-busy', 'true'); $('createErr').textContent = '';
     const r = await api('create', { title: $('newTitle').value, budget: $('newBudget').value, exchangeOn: $('newDate').value });
-    $('createBtn').disabled = false;
+    $('createBtn').disabled = false; $('createBtn').textContent = t('createBtn'); $('createForm').removeAttribute('aria-busy');
     if (!r.ok) { $('createErr').textContent = errText(r.data); return; }
     const { id, adminKey, state } = r.data;
     store.set('santa:' + id + ':admin', adminKey);
@@ -1283,7 +1349,7 @@ function render() {
 
   const drawn = st.status === 'drawn';
   $('title').textContent = st.title; document.title = st.title;
-  $('title').classList.toggle('plain', beyondPlainLatin(st.title));
+  $('title').classList.toggle('plain', beyondPlainLatin(st.title) || !/^Secret Santa(?: \d{4})?$/i.test(st.title));
   $('fBudget').textContent = st.budget || '—';
   $('fDate').textContent = dayText(st.exchangeOn);
   const pill = $('statusPill'); pill.hidden = false;
@@ -1394,9 +1460,9 @@ function wireEvent() {
     const name = $('joinName').value.trim().normalize('NFC'), pin = $('joinPin').value.trim(), wish = $('joinWish').value.trim();
     if (!name) { $('joinErr').textContent = t('e_bad_name'); $('joinName').focus(); return; }
     if (!/^\d{4,8}$/.test(pin)) { $('joinErr').textContent = t('e_bad_pin_format'); $('joinPin').focus(); return; }
-    S.busy = true; $('joinBtn').disabled = true; $('joinErr').textContent = '';
+    S.busy = true; $('joinBtn').disabled = true; $('joinBtn').textContent = t('loading'); $('joinForm').setAttribute('aria-busy', 'true'); $('joinErr').textContent = '';
     const r = await api('join', { id: EVENT_ID, name, pin, wish });
-    S.busy = false; $('joinBtn').disabled = false;
+    S.busy = false; $('joinBtn').disabled = false; $('joinBtn').textContent = t('joinBtn'); $('joinForm').removeAttribute('aria-busy');
     if (!r.ok) { if (r.data.error === 'not_found') { gone(); render(); } else $('joinErr').textContent = errText(r.data); return; }
     $('joinName').value = ''; $('joinPin').value = ''; $('joinWish').value = '';
     signedIn(r.data);
@@ -1540,6 +1606,44 @@ function startEvent() {
     if (!document.hidden) { last = 0; raf = requestAnimationFrame(tick); }
   });
 })();
+
+$('petMotion').addEventListener('click', () => {
+  petsPaused = !petsPaused;
+  document.documentElement.classList.toggle('pets-paused', petsPaused);
+  $('petMotion').setAttribute('aria-pressed', String(petsPaused));
+  $('petMotion').textContent = (petsPaused ? t('playPets') : t('pausePets'));
+});
+document.addEventListener('visibilitychange', () => {
+  document.documentElement.classList.toggle('pets-paused', petsPaused || document.hidden);
+});
+
+// Pet reactions stay independent; rapid taps restart one short reaction.
+for (const button of document.querySelectorAll('[data-pet]')) {
+  const pet = document.querySelector('.pet-' + button.dataset.pet);
+  const stage = button.closest('.stage');
+  const curious = button.dataset.pet + '-curious';
+  let reaction = 0, heartTimer = 0;
+  const greet = () => { if (!petsPaused) stage.classList.add(curious); };
+  const settle = () => stage.classList.remove(curious);
+  button.addEventListener('pointerenter', (event) => { if (event.pointerType === 'mouse') greet(); });
+  button.addEventListener('pointerleave', settle);
+  button.addEventListener('focus', greet);
+  button.addEventListener('blur', settle);
+  button.addEventListener('click', () => {
+    clearTimeout(heartTimer); cancelAnimationFrame(reaction);
+    pet.classList.remove('is-petted'); button.classList.remove('loved');
+    reaction = requestAnimationFrame(() => {
+      reaction = requestAnimationFrame(() => {
+        if (!petsPaused) pet.classList.add('is-petted');
+        button.classList.add('loved');
+        heartTimer = setTimeout(() => button.classList.remove('loved'), 1100);
+      });
+    });
+  });
+  pet.addEventListener('animationend', (event) => {
+    if (event.animationName.endsWith('-petted')) pet.classList.remove('is-petted');
+  });
+}
 
 /* ---------- start ---------- */
 applyLang();

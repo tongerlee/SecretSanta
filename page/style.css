@@ -162,3 +162,41 @@ html:lang(ko){--font-body:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo"
 html:lang(vi) .tag-back .cta{font:800 28px/1.15 var(--font-body)}
 .label h1.plain{font-family:var(--font-body);font-weight:800;font-size:clamp(32px,10vw,44px);line-height:1.08}
 .card .tag-front .tag-name.plain,.tag-name.plain{font-family:"Patrick Hand","Caveat",var(--font-body);font-weight:400;font-size:40px}
+
+/* Keep custom event titles legible and small controls comfortable on touchscreens. */
+.link,.btn.sm,.langs button,details>summary{min-height:44px}
+.link,details>summary{display:inline-flex;align-items:center}
+input::placeholder,textarea::placeholder{opacity:1}
+.dut-stamp{font-size:10px;line-height:1.6;letter-spacing:.08em;text-transform:uppercase;margin:8px 0;color:var(--on-night-soft)}
+@media (min-width:900px){.wrap{max-width:600px}.stage{width:390px}.label h1.plain{font-size:38px}}
+
+/* Two clipped copies of the original artwork keep each pet moving independently,
+   with paws anchored to the snow and the surrounding scene still. */
+.pet-cat{clip-path:inset(0 50% 0 0);transform-origin:30.5% 94%;animation:cat-breathe 5.8s ease-in-out infinite}
+.pet-dog{clip-path:inset(0 0 0 50%);transform-origin:68% 94%;animation:waffle-sway 4.6s ease-in-out infinite;animation-delay:-1.3s}
+@keyframes cat-breathe{0%,100%{transform:scaleY(1) rotate(0)}50%{transform:scaleY(1.014) rotate(-.45deg)}}
+@keyframes waffle-sway{0%,100%{transform:rotate(-.65deg) scaleY(1)}50%{transform:rotate(.65deg) scaleY(1.012)}}
+.pets-paused .pets{animation-play-state:paused}
+.motion-toggle{font:inherit;color:inherit;background:transparent;border:1px solid currentColor;border-radius:999px;min-height:44px;padding:8px 14px;cursor:pointer;margin-top:4px}
+@media (prefers-reduced-motion:reduce){.pets{animation:none}.motion-toggle{display:none}}
+
+/* Transparent, stable hit areas work with mouse, touch and keyboard. */
+.pet-touch{position:absolute;top:19%;height:72%;border:0;border-radius:45%;background:transparent;pointer-events:auto;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.cat-touch{left:17%;width:31%}.dog-touch{left:51%;width:35%}
+.nametag{pointer-events:none}
+.pet-touch::after{content:"♥";position:absolute;top:8%;left:50%;font-size:25px;color:var(--berry);opacity:0;pointer-events:none;text-shadow:0 1px 2px #fff}
+.pet-touch.loved::after{animation:pet-heart 1s ease-out both}
+.stage.cat-curious .pet-cat{animation:cat-perk .65s ease-in-out both}
+.stage.dog-curious .pet-dog{animation:dog-perk .65s ease-in-out both}
+.stage .pet-cat.is-petted{animation:cat-petted .85s ease-in-out both}
+.stage .pet-dog.is-petted{animation:dog-petted .85s ease-in-out both}
+@keyframes cat-perk{50%,100%{transform:rotate(-2deg) scaleY(1.025)}}
+@keyframes dog-perk{50%,100%{transform:rotate(2deg) scaleY(1.025)}}
+@keyframes cat-petted{0%,100%{transform:none}25%{transform:rotate(-3deg) scaleY(.97)}55%{transform:rotate(2deg) scaleY(1.02)}78%{transform:rotate(-1.5deg)}}
+@keyframes dog-petted{0%,100%{transform:none}20%,65%{transform:rotate(-3deg) scaleY(.97)}42%,82%{transform:rotate(3deg) scaleY(1.02)}}
+@keyframes pet-heart{0%{opacity:0;transform:translate(-50%,0) scale(.7)}20%{opacity:1}100%{opacity:0;transform:translate(-50%,-35px) scale(1.15)}}
+.pets-paused .stage .pets{animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){
+  .stage .pets,.stage .pets.is-petted{animation:none}
+  .pet-touch.loved::after{animation:none;opacity:1}
+}
