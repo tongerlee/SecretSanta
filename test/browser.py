@@ -68,6 +68,7 @@ with sync_playwright() as p:
     # opening the organizer link on a new device gives the panel, and the key leaves the address bar
     org2 = device(browser, "org2"); org2.goto(admin_link); org2.wait_for_selector("#adminCard:not([hidden])")
     assert org2.url == share, org2.url
+    org2.evaluate("document.getElementById('manage').open = true")                      # participant management is collapsed by default
     org2.wait_for_selector("#adminList li >> nth=3")
     org2.screenshot(path=str(OUT / "3-organizer.png"), full_page=True)
     org2.click("#drawBtn"); org2.click("#dlgOk"); org2.wait_for_selector("#reopenBtn:not([hidden])")

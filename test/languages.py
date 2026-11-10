@@ -71,6 +71,8 @@ def walk(browser, lang, c):
     post("join", {"id": eid, "name": b, "pin": "3333", "wish": ""})
     org.click("#settings summary"); org.fill("#cfgDrawAt", "2026-12-20T20:00"); org.click("#cfgSave")
     org.wait_for_selector("#deadline:not([hidden])"); org.wait_for_selector("#adminOk:not(:empty)")
+    assert not org.evaluate("document.getElementById('manage').open"), "participant management should start collapsed"
+    org.evaluate("document.getElementById('manage').open = true")
     org.wait_for_selector("#adminList li >> nth=2")
     shot(org, lang, "3-organizer")
 
@@ -160,6 +162,84 @@ with sync_playwright() as p:
     other.locator("#names button", has_text="Patient").click(); other.fill("#dlgPin", "1234"); other.click("#dlgOk")
     other.wait_for_selector("#dlgBody p:has-text('Locked for 10 minutes')")
     assert hits["login"] == 1, hits
+
+    # ---- the review's checklist: desktop and the two phone widths, organizer vs participant, keyboard, reduced motion
+    drawn_share = shares["en"]
+    for label, w, h in (("320 phone", 320, 568), ("390 phone", 390, 844), ("desktop", 1280, 800)):
+        for name, url, wait in (("home", SITE, "#createCard:not([hidden])"), ("open event", fresh, "#joinCard:not([hidden])"), ("drawn event", drawn_share, "#names button")):
+            pg = phone(browser, f"{label} {name}", "en-US"); pg.set_viewport_size({"width": w, "height": h})
+            pg.goto(url); pg.wait_for_selector(wait); pg.wait_for_timeout(400)
+            check(pg, f"{label} / {name}")
+            if name == "open event":
+                # the first thing to do (tap your name, or sign up) must start within the first screen on a phone
+                top = pg.evaluate("[...document.querySelectorAll('main > .card:not([hidden])')][0].getBoundingClientRect().top")
+                if top > h - 120: errors.append(f"{label}: first card starts at {top:.0f}px, too far down for a {h}px screen")
+                if w == 320: pg.screenshot(path=str(OUT / "check-320-event.png"), full_page=True)
+            if name == "home" and w == 1280: pg.screenshot(path=str(OUT / "check-desktop-home.png"), full_page=False)
+            pg.context.close()
+
+    # saved events sit above "start a new event" once this device has any
+    home = phone(browser, "home order", "en-US"); home.goto(SITE); home.wait_for_selector("#createCard:not([hidden])")
+    assert home.is_hidden("#mineCard"), "no saved events yet, so the list should be hidden"
+    home.fill("#newDate", "2026-12-24"); home.click("#createBtn"); home.wait_for_selector("#createdCard:not([hidden])")
+    home.goto(SITE); home.wait_for_selector("#mineCard:not([hidden])")
+    order = home.evaluate("[...document.querySelectorAll('main > .card:not([hidden])')].map(c => c.id)")
+    assert order.index("mineCard") < order.index("createCard"), order
+    assert home.is_visible("#createCard"), "starting a new event must stay available underneath"
+
+    # organizer view vs participant view of the same event
+    org_view = phone(browser, "organizer view", "en-US"); org_view.goto(home.get_attribute("#mineList a", "href") + "#admin=" + home.evaluate("localStorage.getItem('santa:' + document.querySelector('#mineList a').href.split('?e=')[1] + ':admin')").strip('"'))
+    org_view.wait_for_selector("#adminCard:not([hidden])")
+    assert "Only visible to you on this device" in org_view.inner_text("#adminCard") and org_view.inner_text("#adminTitle").strip() == "Organizer controls"
+    assert not org_view.evaluate("document.getElementById('manage').open")
+    part_view = phone(browser, "participant view", "en-US"); part_view.goto(org_view.url); part_view.wait_for_selector("#joinCard:not([hidden])")
+    assert part_view.is_hidden("#adminCard") and part_view.evaluate("localStorage.length") == 0 or part_view.is_hidden("#adminCard")
+
+    # the pause control: visible on the picture, works by mouse and keyboard, stops pets, lights and snow together
+    pg = phone(browser, "motion", "en-US"); pg.goto(fresh); pg.wait_for_selector("#joinCard:not([hidden])")
+    box = pg.evaluate("(() => { const r = document.getElementById('motionBtn').getBoundingClientRect(); return [r.top, r.right, r.width, r.height]; })()")
+    assert box[0] < 120 and box[2] >= 44 and box[3] >= 44, box
+    assert pg.get_attribute("#motionBtn", "aria-label") == "Pause animations (pets, snow, lights)"
+    pg.click("#motionBtn")
+    assert pg.get_attribute("#motionBtn", "aria-pressed") == "true" and pg.get_attribute("#motionBtn", "aria-label") == "Play animations"
+    states = pg.evaluate("[...document.querySelectorAll('.bulb, .stage .pets')].map(n => getComputedStyle(n).animationPlayState)")
+    assert states and all(st == "paused" for st in states), states
+    # snow: the canvas must stop changing
+    a = pg.evaluate("document.getElementById('snow').toDataURL()"); pg.wait_for_timeout(300); b = pg.evaluate("document.getElementById('snow').toDataURL()")
+    assert a == b, "snow kept falling while paused"
+    pg.click("#motionBtn")
+    pg.wait_for_timeout(300); c = pg.evaluate("document.getElementById('snow').toDataURL()")
+    assert c != b, "snow did not resume"
+    pg.click("#langs button[data-lang=ko]")
+    assert pg.get_attribute("#motionBtn", "aria-label") == "애니메이션 멈추기 (동물, 눈, 전구)"
+    # keyboard only: the control is the first thing Tab reaches, and Enter works it
+    kb = phone(browser, "keyboard", "en-US"); kb.goto(fresh); kb.wait_for_selector("#joinCard:not([hidden])")
+    kb.keyboard.press("Tab")
+    assert kb.evaluate("document.activeElement.id") == "motionBtn"
+    kb.keyboard.press("Enter")
+    assert kb.get_attribute("#motionBtn", "aria-pressed") == "true"
+    kb.keyboard.press("Tab"); kb.keyboard.press("Tab"); kb.keyboard.press("Tab")        # past the two pets, onto the first language button
+    assert kb.evaluate("document.activeElement.closest('#langs') !== null")
+
+    # reduced motion: nothing animates and the control is not shown
+    rm = browser.new_context(viewport={"width": 390, "height": 844}, locale="en-US", reduced_motion="reduce").new_page()
+    rm.goto(fresh); rm.wait_for_selector("#joinCard:not([hidden])")
+    assert rm.is_hidden("#motionBtn")
+    assert all(n == "none" for n in rm.evaluate("[...document.querySelectorAll('.bulb, .stage .pets')].map(n => getComputedStyle(n).animationName)"))
+
+    # time zone shows next to the automatic draw time (the walk-throughs set one on every event)
+    ev = post("create", {"title": "Deadline check", "budget": "$20", "exchangeOn": "2026-12-24"})
+    post("admin", {"id": ev["id"], "adminKey": ev["adminKey"], "action": "settings", "title": "Deadline check", "budget": "$20", "exchangeOn": "2026-12-24", "drawAt": 1797897600000})
+    dl = phone(browser, "deadline", "en-US"); dl.goto(SITE + "?e=" + ev["id"]); dl.wait_for_selector("#deadline:not([hidden])")
+    assert "Sign-ups close" in dl.inner_text("#deadline") and " (" in dl.inner_text("#deadline") and ")" in dl.inner_text("#deadline"), dl.inner_text("#deadline")
+
+    # the stamp sits on the revealed tag but stays secondary (smaller than everything it must not compete with)
+    seen.click("#langs button[data-lang=en]"); seen.wait_for_selector("#tagSlot .tag-back"); seen.click("#tagSlot .tag-back"); seen.wait_for_timeout(450)
+    sizes = seen.evaluate("(() => { const f = (s) => parseFloat(getComputedStyle(document.querySelector(s)).fontSize); return [f('.tag-stamp'), f('.tag-name'), f('.tag-wish'), f('.tag-meta')]; })()")
+    assert sizes[0] < min(sizes[1:]), sizes
+    assert "approved for unnecessary thoughtfulness" in seen.inner_text("#tagSlot").lower()      # inner_text applies the uppercase styling
+    check(seen, "tag with stamp")
+    seen.screenshot(path=str(OUT / "check-tag-stamp.png"), full_page=False)
     browser.close()
 
 print("problems:", errors or "none")

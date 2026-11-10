@@ -49,10 +49,10 @@ function applyLang() {
   for (const n of document.querySelectorAll('[data-i18n-ph]')) n.placeholder = t(n.dataset.i18nPh);
   for (const n of document.querySelectorAll('[data-i18n-aria]')) n.setAttribute('aria-label', t(n.dataset.i18nAria));
   for (const n of document.querySelectorAll('[data-i18n-alt]')) n.alt = t(n.dataset.i18nAlt);
-  $('petMotion').textContent = (petsPaused ? t('playPets') : t('pausePets'));
+  $('motionBtn').setAttribute('aria-label', motionPaused ? t('playAll') : t('pauseAll'));
   for (const b of $('langs').children) b.setAttribute('aria-pressed', String(b.dataset.lang === lang));
 }
-let petsPaused = false;
+let motionPaused = false;                          // one switch for pets, snow and lights
 let rerender = () => {};                           // set by whichever page is showing
 function setLang(next) {
   if (!L.dict[next] || next === lang) return;
@@ -110,6 +110,15 @@ function dayText(ymd) {
   return m ? t('fmtDay', +m[2], +m[3], new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])).getUTCDay()) : '—';
 }
 const timeText = (ms) => { const d = new Date(ms); return t('fmtTime', d.getMonth() + 1, d.getDate(), d.getDay(), d.getHours(), d.getMinutes()); };
+/** This device's time zone, short ("PST", "GMT+9"), so a time next to it is never read in the wrong zone. */
+function tzName(ms) {
+  try {
+    const part = new Intl.DateTimeFormat(L.html[lang], { timeZoneName: 'short' }).formatToParts(new Date(ms || Date.now())).find((p) => p.type === 'timeZoneName');
+    if (part && part.value) return part.value;
+  } catch (e) { /* very old browser */ }
+  const off = -new Date(ms || Date.now()).getTimezoneOffset(), sign = off < 0 ? '-' : '+', abs = Math.abs(off);
+  return 'GMT' + sign + Math.floor(abs / 60) + (abs % 60 ? ':' + String(abs % 60).padStart(2, '0') : '');
+}
 const monthDayText = (ms) => { const d = new Date(ms); return t('fmtMd', d.getMonth() + 1, d.getDate()); };
 function localInputValue(ms) {
   if (!ms) return '';
@@ -174,7 +183,8 @@ function buildTag(a) {
   const front = el('div', 'tag-side tag-front'); front.hidden = true;
   front.insertAdjacentHTML('beforeend', PAW);
   const name = el('p', 'tag-name' + (beyondPlainLatin(a.r) ? ' plain' : ''), a.r);
-  front.append(el('span', 'hole'), el('p', 'tag-k', t('tagTo')), name);
+  const stamp = el('span', 'tag-stamp', 'Approved for unnecessary thoughtfulness'); stamp.lang = 'en'; stamp.setAttribute('aria-hidden', 'true');
+  front.append(el('span', 'hole'), stamp, el('p', 'tag-k', t('tagTo')), name);
   front.append(el('p', 'tag-wish', a.w ? t('tagWish', a.w) : t('tagNoWish')));
   const meta = [a.b && t('tagBudget', a.b), a.d && t('tagDate', a.d)].filter(Boolean).join(' · ');
   if (meta) front.append(el('p', 'tag-meta', meta));
@@ -265,7 +275,7 @@ function render() {
   pill.textContent = drawn ? t('pillDrawn') : t('pillOpen');
   pill.className = 'pill' + (drawn ? ' drawn' : '');
   $('deadline').hidden = drawn || !st.drawAt;
-  if (st.drawAt) $('deadline').textContent = t('deadline', timeText(st.drawAt));
+  if (st.drawAt) $('deadline').textContent = t('deadline', timeText(st.drawAt), tzName(st.drawAt));
   $('retention').textContent = t('retention', monthDayText(st.deleteAt));
 
   const v = S.view;
@@ -319,6 +329,8 @@ function renderAdmin() {
   $('drawBtn').hidden = drawn; $('reopenBtn').hidden = !drawn;
   $('drawBtn').disabled = S.busy || n < st.min;
   $('drawBtn').textContent = n < st.min ? t('drawBtnMin', st.min) : t('drawBtnN', n);
+  $('manageSummary').textContent = t('managePeople', n);
+  $('cfgDrawAtHint').textContent = t('cfgDrawAtHint', tzName(st.drawAt || Date.now()));
   $('shareUrl').value = eventUrl(EVENT_ID);
   $('adminUrl').value = eventUrl(EVENT_ID) + '#admin=' + S.adminKey;
   if (!$('settings').open) {
@@ -462,6 +474,7 @@ function wireEvent() {
 }
 
 function startEvent() {
+  document.documentElement.classList.add('event');      // smaller illustration: the sign-up or the result should be in view sooner
   $('homeLink').hidden = false;
   // The organizer link carries the key after '#', so it is never sent to any server as part of the address.
   // Keep it on this device, then tidy the address bar so a screenshot or a copied link does not leak it.
@@ -509,22 +522,24 @@ function startEvent() {
   size(); draw();
   addEventListener('resize', () => { size(); draw(); });
   if (reduced) return;
-  raf = requestAnimationFrame(tick);
-  document.addEventListener('visibilitychange', () => {
-    cancelAnimationFrame(raf);
-    if (!document.hidden) { last = 0; raf = requestAnimationFrame(tick); }
-  });
+  const running = () => !document.hidden && !motionPaused;
+  const restart = () => { cancelAnimationFrame(raf); if (running()) { last = 0; raf = requestAnimationFrame(tick); } };
+  restart();
+  document.addEventListener('visibilitychange', restart);
+  document.addEventListener('santa:motion', restart);
 })();
 
-$('petMotion').addEventListener('click', () => {
-  petsPaused = !petsPaused;
-  document.documentElement.classList.toggle('pets-paused', petsPaused);
-  $('petMotion').setAttribute('aria-pressed', String(petsPaused));
-  $('petMotion').textContent = (petsPaused ? t('playPets') : t('pausePets'));
-});
-document.addEventListener('visibilitychange', () => {
-  document.documentElement.classList.toggle('pets-paused', petsPaused || document.hidden);
-});
+/* One switch for everything that moves (pets, snow, lights). Keyboard and screen-reader friendly, hidden when the
+   system asks for reduced motion because nothing animates then anyway. */
+function setMotion(paused) {
+  motionPaused = paused;
+  document.documentElement.classList.toggle('motion-paused', paused);
+  $('motionBtn').setAttribute('aria-pressed', String(paused));
+  $('motionBtn').setAttribute('aria-label', paused ? t('playAll') : t('pauseAll'));
+  document.dispatchEvent(new Event('santa:motion'));
+}
+$('motionBtn').addEventListener('click', () => setMotion(!motionPaused));
+if (reduced) $('motionBtn').hidden = true;
 
 // Pet reactions stay independent; rapid taps restart one short reaction.
 for (const button of document.querySelectorAll('[data-pet]')) {
@@ -532,7 +547,7 @@ for (const button of document.querySelectorAll('[data-pet]')) {
   const stage = button.closest('.stage');
   const curious = button.dataset.pet + '-curious';
   let reaction = 0, heartTimer = 0;
-  const greet = () => { if (!petsPaused) stage.classList.add(curious); };
+  const greet = () => { if (!motionPaused) stage.classList.add(curious); };
   const settle = () => stage.classList.remove(curious);
   button.addEventListener('pointerenter', (event) => { if (event.pointerType === 'mouse') greet(); });
   button.addEventListener('pointerleave', settle);
@@ -543,7 +558,7 @@ for (const button of document.querySelectorAll('[data-pet]')) {
     pet.classList.remove('is-petted'); button.classList.remove('loved');
     reaction = requestAnimationFrame(() => {
       reaction = requestAnimationFrame(() => {
-        if (!petsPaused) pet.classList.add('is-petted');
+        if (!motionPaused) pet.classList.add('is-petted');
         button.classList.add('loved');
         heartTimer = setTimeout(() => button.classList.remove('loved'), 1100);
       });
@@ -557,6 +572,6 @@ for (const button of document.querySelectorAll('[data-pet]')) {
 /* ---------- start ---------- */
 applyLang();
 if (/^[a-z0-9]{12}$/.test(EVENT_ID)) startEvent();
-else if (EVENT_ID) { $('homeLink').hidden = false; rerender = render; gone(); render(); }
+else if (EVENT_ID) { document.documentElement.classList.add('event'); $('homeLink').hidden = false; rerender = render; gone(); render(); }
 else startHome();
 })();

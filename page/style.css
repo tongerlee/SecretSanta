@@ -176,9 +176,7 @@ input::placeholder,textarea::placeholder{opacity:1}
 .pet-dog{clip-path:inset(0 0 0 50%);transform-origin:68% 94%;animation:waffle-sway 4.6s ease-in-out infinite;animation-delay:-1.3s}
 @keyframes cat-breathe{0%,100%{transform:scaleY(1) rotate(0)}50%{transform:scaleY(1.014) rotate(-.45deg)}}
 @keyframes waffle-sway{0%,100%{transform:rotate(-.65deg) scaleY(1)}50%{transform:rotate(.65deg) scaleY(1.012)}}
-.pets-paused .pets{animation-play-state:paused}
-.motion-toggle{font:inherit;color:inherit;background:transparent;border:1px solid currentColor;border-radius:999px;min-height:44px;padding:8px 14px;cursor:pointer;margin-top:4px}
-@media (prefers-reduced-motion:reduce){.pets{animation:none}.motion-toggle{display:none}}
+@media (prefers-reduced-motion:reduce){.pets{animation:none}}
 
 /* Transparent, stable hit areas work with mouse, touch and keyboard. */
 .pet-touch{position:absolute;top:19%;height:72%;border:0;border-radius:45%;background:transparent;pointer-events:auto;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
@@ -195,8 +193,34 @@ input::placeholder,textarea::placeholder{opacity:1}
 @keyframes cat-petted{0%,100%{transform:none}25%{transform:rotate(-3deg) scaleY(.97)}55%{transform:rotate(2deg) scaleY(1.02)}78%{transform:rotate(-1.5deg)}}
 @keyframes dog-petted{0%,100%{transform:none}20%,65%{transform:rotate(-3deg) scaleY(.97)}42%,82%{transform:rotate(3deg) scaleY(1.02)}}
 @keyframes pet-heart{0%{opacity:0;transform:translate(-50%,0) scale(.7)}20%{opacity:1}100%{opacity:0;transform:translate(-50%,-35px) scale(1.15)}}
-.pets-paused .stage .pets{animation-play-state:paused}
 @media (prefers-reduced-motion:reduce){
   .stage .pets,.stage .pets.is-petted{animation:none}
   .pet-touch.loved::after{animation:none;opacity:1}
 }
+
+/* ---- one pause/play control, on the illustration ----
+   Pauses the pets and the string lights here (CSS); the snow listens for the same switch in app.js. */
+.motion-toggle{position:absolute;top:10px;right:12px;z-index:4;width:44px;height:44px;padding:0;border-radius:50%;border:1.5px solid rgba(255,255,255,.55);
+  background:rgba(13,42,34,.62);color:#fff;cursor:pointer;pointer-events:auto;display:grid;place-items:center}
+.motion-toggle svg{fill:currentColor;grid-area:1/1}
+.motion-toggle .ic-play,.motion-toggle[aria-pressed="true"] .ic-pause{display:none}
+.motion-toggle[aria-pressed="true"] .ic-play{display:block}
+.motion-paused .bulb,.motion-paused .stage .pets{animation-play-state:paused}
+
+/* ---- event pages: a smaller scene so the sign-up or the result is in view sooner (the landing page keeps the full one) ---- */
+html.event .stage{width:clamp(230px,58%,250px);margin-top:-12px}   /* never narrower than 230px, or the two name tags collide */
+html.event .nametag{font-size:10px;padding:4px 7px}
+html.event .hero{margin-bottom:-22px}
+html.event .label{padding-top:22px}
+html.event .label h1{font-size:clamp(34px,10.5vw,46px);margin:6px 0 12px}
+html.event .label h1.plain{font-size:clamp(26px,8vw,36px)}
+@media (min-width:900px){html.event .stage{width:300px}}
+
+/* ---- organizer controls look different from what participants see ---- */
+.card.admin{background:#f3f7f4;border:2px dashed var(--pine)}
+.card.admin h2{display:flex;align-items:center;gap:8px}
+.card.admin .only-you{background:var(--card);border-left:3px solid var(--pine);padding:8px 10px;border-radius:0 6px 6px 0}
+
+/* ---- the stamp along the tag's edge: secondary to the name, wish, budget and date ---- */
+.tag-stamp{position:absolute;left:-76px;top:50%;width:176px;transform:translateY(-50%) rotate(-90deg);font:700 7.5px/1.2 var(--font-body);letter-spacing:.12em;text-transform:uppercase;
+  color:var(--berry);border:1.5px solid var(--berry);border-radius:3px;padding:2px 6px;opacity:.5;text-align:center;pointer-events:none}

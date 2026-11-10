@@ -102,7 +102,7 @@ def run(p):
     for name, wish in crowd:
         s, d = post("join", {"id": eid, "name": name, "pin": "1234", "wish": wish})
         if s != 200: note(False, f"sign-up of {name!r}", (s, d))
-    org.reload(); org.wait_for_selector(f"#adminList li >> nth={len(crowd)}", timeout=20000)
+    org.reload(); org.wait_for_selector("#manage"); org.evaluate("document.getElementById('manage').open = true"); org.wait_for_selector(f"#adminList li >> nth={len(crowd)}", timeout=20000)
     def harmless():
         dom = org.evaluate("({ imgs: document.images.length, scripts: document.scripts.length, planted: document.querySelectorAll('img[src=\"x\"], main script, #adminList small b, #adminList small script, #names script').length, hit: window.__xss || 0 })")
         shown = org.inner_text("#adminList")
@@ -144,7 +144,7 @@ def run(p):
         watcher.click("#dlgCancel")
     step("five wrong PINs: the page counts down, then says the name is locked, even for the right PIN", lockout)
     def reset():
-        org.reload(); org.wait_for_selector("#adminList li:has-text('Latecomer')", timeout=20000)
+        org.reload(); org.wait_for_selector("#manage"); org.evaluate("document.getElementById('manage').open = true"); org.wait_for_selector("#adminList li:has-text('Latecomer')", timeout=20000)
         row = org.locator("#adminList li", has_text="Latecomer")
         if "locked" not in row.inner_text(): return (False, row.inner_text())
         row.locator("button[data-act=setPin]").click(); org.fill("#dlgPin", "8888"); org.click("#dlgOk")
@@ -168,7 +168,7 @@ def run(p):
     # ---------------------------------------------------------------- organizer tools from the page
     print("\n== organizer tools")
     def remove():
-        org.reload(); org.wait_for_selector("#adminList li:has-text('<script>')", timeout=20000)
+        org.reload(); org.wait_for_selector("#manage"); org.evaluate("document.getElementById('manage').open = true"); org.wait_for_selector("#adminList li:has-text('<script>')", timeout=20000)
         org.locator("#adminList li", has_text='"><script>').locator("button[data-act=remove]").click(); org.click("#dlgOk")
         org.wait_for_selector("#adminOk:has-text('Removed')", timeout=15000)
         org.locator("#adminList li", has_text='"><script>').wait_for(state="detached", timeout=15000)
