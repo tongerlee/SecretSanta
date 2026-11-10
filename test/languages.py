@@ -240,6 +240,30 @@ with sync_playwright() as p:
     assert "approved for unnecessary thoughtfulness" in seen.inner_text("#tagSlot").lower()      # inner_text applies the uppercase styling
     check(seen, "tag with stamp")
     seen.screenshot(path=str(OUT / "check-tag-stamp.png"), full_page=False)
+
+    # ---- opened at an old address: a note points to the official one; organizers get their access carried across
+    ev = post("create", {"title": "Moved check", "budget": "$20", "exchangeOn": "2026-12-24"})
+    def at_old_address(label, url, admin=None):
+        ctx = browser.new_context(viewport={"width": 390, "height": 844}, locale="en-US")
+        ctx.add_init_script("window.SANTA_HOME = 'https://gifts.example';")
+        pg = ctx.new_page(); pg.on("pageerror", lambda e: errors.append(f"{label}: {e}"))
+        if admin: pg.goto(url + "#admin=" + admin); pg.wait_for_selector("#adminCard:not([hidden])")
+        else: pg.goto(url); pg.wait_for_selector("#createCard:not([hidden]), #joinCard:not([hidden])")
+        pg.wait_for_selector("#moved:not([hidden])")
+        return pg
+    pg = at_old_address("moved home", SITE)
+    assert pg.get_attribute("#movedLink", "href") == "https://gifts.example/" and "moved to gifts.example" in pg.inner_text("#moved")
+    pg = at_old_address("moved participant", SITE + "?e=" + ev["id"])
+    assert pg.get_attribute("#movedLink", "href") == "https://gifts.example/?e=" + ev["id"]
+    pg = at_old_address("moved organizer", SITE + "?e=" + ev["id"], admin=ev["adminKey"])
+    assert pg.get_attribute("#movedLink", "href") == "https://gifts.example/?e=" + ev["id"] + "#admin=" + ev["adminKey"]
+    pg.click("#langs button[data-lang=zh]"); assert "搬到了 gifts.example" in pg.inner_text("#moved")
+    check(pg, "moved note")
+    pg.screenshot(path=str(OUT / "check-moved.png"), full_page=False)
+    same = browser.new_context(viewport={"width": 390, "height": 844}, locale="en-US")
+    same.add_init_script("window.SANTA_HOME = location.origin;")
+    sp = same.new_page(); sp.goto(SITE); sp.wait_for_selector("#createCard:not([hidden])")
+    assert sp.is_hidden("#moved"), "no note at the official address"
     browser.close()
 
 print("problems:", errors or "none")

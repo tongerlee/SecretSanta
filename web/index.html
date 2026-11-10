@@ -243,6 +243,10 @@ html.event .label h1.plain{font-size:clamp(26px,8vw,36px)}
 /* ---- the stamp along the tag's edge: secondary to the name, wish, budget and date ---- */
 .tag-stamp{position:absolute;left:-76px;top:50%;width:176px;transform:translateY(-50%) rotate(-90deg);font:700 7.5px/1.2 var(--font-body);letter-spacing:.12em;text-transform:uppercase;
   color:var(--berry);border:1.5px solid var(--berry);border-radius:3px;padding:2px 6px;opacity:.5;text-align:center;pointer-events:none}
+
+/* ---- an old address: point to the new one ---- */
+.moved{font-size:14px;color:var(--pine);background:var(--gold);border-radius:10px;padding:10px 14px;line-height:1.45}
+.moved a{color:var(--pine);font-weight:700;overflow-wrap:anywhere}
 </style>
 </head>
 <body>
@@ -332,6 +336,8 @@ html.event .label h1.plain{font-size:clamp(26px,8vw,36px)}
   </header>
 
   <p class="notice" id="notice" role="status" hidden></p>
+  <!-- shown only when this page is opened at an old address -->
+  <p class="moved" id="moved" hidden><span id="movedText"></span> <a id="movedLink" href="#"></a></p>
 
   <!-- home page: create an event -->
   <section class="card" id="createdCard" hidden>
@@ -568,6 +574,8 @@ const SANTA_I18N = (() => {
     e_date_far: '交换日太远了，选一年以内的日期。',
     e_slow_down: '这个网络刚刚建了好几个活动，过一小时再建。',
     e_network: '网络不太稳，再试一次。',
+    movedText: (host) => `这个页面搬到了 ${host}。在新地址上要重新输入 PIN；组织者点下面的链接，组织者权限会一起带过去。`,
+    movedLink: '去新地址打开',
 
     fmtMd: (m, d) => `${m}/${d}`,
     fmtDay: (m, d, wd) => `${m}/${d} ${zhW[wd]}`,
@@ -728,6 +736,8 @@ const SANTA_I18N = (() => {
     e_date_far: 'That’s too far out. Pick a date within a year.',
     e_slow_down: 'Several events were just created from this network. Try again in an hour.',
     e_network: 'Connection hiccup. Please try again.',
+    movedText: (host) => `This page has moved to ${host}. You’ll enter your PIN again there; organizers, the link below carries your organizer access across.`,
+    movedLink: 'Open it at the new address',
 
     fmtMd: (m, d) => `${enM[m - 1]} ${d}`,
     fmtDay: (m, d, wd) => `${enW[wd]}, ${enM[m - 1]} ${d}`,
@@ -888,6 +898,8 @@ const SANTA_I18N = (() => {
     e_date_far: '너무 먼 날짜예요. 1년 이내로 골라 주세요.',
     e_slow_down: '이 네트워크에서 방금 이벤트를 여러 개 만들었어요. 1시간 뒤에 다시 시도해 주세요.',
     e_network: '연결이 불안정해요. 다시 시도해 주세요.',
+    movedText: (host) => `이 페이지는 ${host}(으)로 옮겨졌어요. 새 주소에서는 PIN을 다시 입력해 주세요. 주최자라면 아래 링크로 열면 주최자 권한도 함께 넘어가요.`,
+    movedLink: '새 주소에서 열기',
 
     fmtMd: (m, d) => `${m}월 ${d}일`,
     fmtDay: (m, d, wd) => `${m}월 ${d}일 (${koW[wd]})`,
@@ -1047,6 +1059,8 @@ const SANTA_I18N = (() => {
     e_date_far: 'Ngày này xa quá. Bạn chọn trong vòng một năm nhé.',
     e_slow_down: 'Mạng này vừa tạo khá nhiều sự kiện. Bạn thử lại sau một tiếng nhé.',
     e_network: 'Mạng đang chập chờn, bạn thử lại nhé.',
+    movedText: (host) => `Trang này đã chuyển sang ${host}. Ở địa chỉ mới bạn nhập lại mã PIN nhé; nếu bạn là người tổ chức, link bên dưới sẽ mang theo quyền quản lý.`,
+    movedLink: 'Mở ở địa chỉ mới',
 
     fmtMd: (m, d) => `${d}/${m}`,
     fmtDay: (m, d, wd) => `${viW[wd]}, ${d}/${m}`,
@@ -1196,7 +1210,7 @@ function setLang(next) {
   // Messages already on screen were written in the old language; drop them rather than leave a mix.
   for (const id of ['createErr', 'wishOk', 'wishErr', 'joinErr', 'adminOk', 'adminErr']) $(id).textContent = '';
   $('toast').hidden = true;
-  applyLang(); rerender();
+  applyLang(); rerender(); movedNote();
 }
 for (const code of L.order) {
   const b = el('button', '', L.names[code]); b.type = 'button'; b.dataset.lang = code; b.lang = L.html[code];
@@ -1705,11 +1719,32 @@ for (const button of document.querySelectorAll('[data-pet]')) {
   });
 }
 
+/* ---------- opened at an old address? ----------
+   The site has one official address (SANTA_HOME, written by deploy.sh). Opened anywhere else, the page points
+   there. What a browser remembers (sign-ins, organizer access) is kept per address, so the link for an organizer
+   carries the organizer key in the # part, exactly like the organizer link; participants sign in again with their PIN. */
+function movedNote() {
+  const home = String(window.SANTA_HOME || '').replace(/\/+$/, '');
+  if (!home || home === location.origin) return;
+  let target = home + '/';
+  if (/^[a-z0-9]{12}$/.test(EVENT_ID)) {
+    target += '?e=' + EVENT_ID;
+    const key = store.get(K_ADMIN);
+    if (typeof key === 'string' && key) target += '#admin=' + key;
+  }
+  const host = home.replace(/^https?:\/\//, '');
+  $('movedText').textContent = t('movedText', host);
+  $('movedLink').textContent = t('movedLink');
+  $('movedLink').href = target;
+  $('moved').hidden = false;
+}
+
 /* ---------- start ---------- */
 applyLang();
 if (/^[a-z0-9]{12}$/.test(EVENT_ID)) startEvent();
 else if (EVENT_ID) { document.documentElement.classList.add('event'); $('homeLink').hidden = false; rerender = render; gone(); render(); }
 else startHome();
+movedNote();                                       // after the start: an organizer link's key is on this device by now
 })();
 </script>
 </body>

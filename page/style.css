@@ -224,3 +224,7 @@ html.event .label h1.plain{font-size:clamp(26px,8vw,36px)}
 /* ---- the stamp along the tag's edge: secondary to the name, wish, budget and date ---- */
 .tag-stamp{position:absolute;left:-76px;top:50%;width:176px;transform:translateY(-50%) rotate(-90deg);font:700 7.5px/1.2 var(--font-body);letter-spacing:.12em;text-transform:uppercase;
   color:var(--berry);border:1.5px solid var(--berry);border-radius:3px;padding:2px 6px;opacity:.5;text-align:center;pointer-events:none}
+
+/* ---- an old address: point to the new one ---- */
+.moved{font-size:14px;color:var(--pine);background:var(--gold);border-radius:10px;padding:10px 14px;line-height:1.45}
+.moved a{color:var(--pine);font-weight:700;overflow-wrap:anywhere}

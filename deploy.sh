@@ -42,7 +42,9 @@ BUILD="$(mktemp -d)"
 trap 'rm -rf "$BUILD"' EXIT
 mkdir -p "$BUILD/site"
 cp -R web/. "$BUILD/site/"
-printf 'window.SANTA_API = "%s";\n' "${API_URL%/}" > "$BUILD/site/config.js"
+# SANTA_HOME is the site's official address. The same files are also served at the Amplify default address;
+# a page opened there shows a "moved" note with a link that carries the organizer key across.
+printf 'window.SANTA_API = "%s";\nwindow.SANTA_HOME = "%s";\n' "${API_URL%/}" "${SITE_URL%/}" > "$BUILD/site/config.js"
 SITE_ORIGIN="${SITE_URL%/}" perl -pi -e 's/\@\@ORIGIN\@\@/$ENV{SITE_ORIGIN}/g' "$BUILD/site/index.html"
 (cd "$BUILD/site" && zip -qr ../site.zip .)
 

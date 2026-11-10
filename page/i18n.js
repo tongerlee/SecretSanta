@@ -87,6 +87,8 @@ const SANTA_I18N = (() => {
     e_date_far: '交换日太远了，选一年以内的日期。',
     e_slow_down: '这个网络刚刚建了好几个活动，过一小时再建。',
     e_network: '网络不太稳，再试一次。',
+    movedText: (host) => `这个页面搬到了 ${host}。在新地址上要重新输入 PIN；组织者点下面的链接，组织者权限会一起带过去。`,
+    movedLink: '去新地址打开',
 
     fmtMd: (m, d) => `${m}/${d}`,
     fmtDay: (m, d, wd) => `${m}/${d} ${zhW[wd]}`,
@@ -247,6 +249,8 @@ const SANTA_I18N = (() => {
     e_date_far: 'That’s too far out. Pick a date within a year.',
     e_slow_down: 'Several events were just created from this network. Try again in an hour.',
     e_network: 'Connection hiccup. Please try again.',
+    movedText: (host) => `This page has moved to ${host}. You’ll enter your PIN again there; organizers, the link below carries your organizer access across.`,
+    movedLink: 'Open it at the new address',
 
     fmtMd: (m, d) => `${enM[m - 1]} ${d}`,
     fmtDay: (m, d, wd) => `${enW[wd]}, ${enM[m - 1]} ${d}`,
@@ -407,6 +411,8 @@ const SANTA_I18N = (() => {
     e_date_far: '너무 먼 날짜예요. 1년 이내로 골라 주세요.',
     e_slow_down: '이 네트워크에서 방금 이벤트를 여러 개 만들었어요. 1시간 뒤에 다시 시도해 주세요.',
     e_network: '연결이 불안정해요. 다시 시도해 주세요.',
+    movedText: (host) => `이 페이지는 ${host}(으)로 옮겨졌어요. 새 주소에서는 PIN을 다시 입력해 주세요. 주최자라면 아래 링크로 열면 주최자 권한도 함께 넘어가요.`,
+    movedLink: '새 주소에서 열기',
 
     fmtMd: (m, d) => `${m}월 ${d}일`,
     fmtDay: (m, d, wd) => `${m}월 ${d}일 (${koW[wd]})`,
@@ -566,6 +572,8 @@ const SANTA_I18N = (() => {
     e_date_far: 'Ngày này xa quá. Bạn chọn trong vòng một năm nhé.',
     e_slow_down: 'Mạng này vừa tạo khá nhiều sự kiện. Bạn thử lại sau một tiếng nhé.',
     e_network: 'Mạng đang chập chờn, bạn thử lại nhé.',
+    movedText: (host) => `Trang này đã chuyển sang ${host}. Ở địa chỉ mới bạn nhập lại mã PIN nhé; nếu bạn là người tổ chức, link bên dưới sẽ mang theo quyền quản lý.`,
+    movedLink: 'Mở ở địa chỉ mới',
 
     fmtMd: (m, d) => `${d}/${m}`,
     fmtDay: (m, d, wd) => `${viW[wd]}, ${d}/${m}`,

@@ -41,6 +41,8 @@ Region 要用你的账号能用的那个。2026 年 9 月之后新注册的 AWS 
 
 `template.yaml` 里的 `CustomDomain` 参数就是网站的正式地址（现在是 `gifts.departmentofunnecessarythings.com`）。它决定两件事：接口允许哪个网址调用（CORS），以及微信/iMessage 链接预览里的图片地址。换域名就改这个参数，`git pull && ./deploy.sh`。
 
+换域名后，旧地址（main.xxx.amplifyapp.com）照常能打开，但页面顶部会提示「搬到了新地址」：参与者在新地址重新输入 PIN 即可；组织者点那个链接，组织者权限会随链接带过去（浏览器记住的东西是按地址分开存的，不会自动迁移）。
+
 把域名挂到 Amplify 用 `./domain.sh --profile santa --region us-east-2`：第一次运行会在 Amplify 创建这个子域（根域名和 www 不动），然后把要加的两条 CNAME 按 Shopify 表单的格式打印出来（Name 已去掉域名部分）。到 Shopify 后台 Settings → Domains → 这个域名 → Domain settings → Edit DNS settings → Add custom record 加上去，再跑一次脚本看状态，AVAILABLE 就通了。证书由 Amplify 自动签发和续期。
 
 ## 语言

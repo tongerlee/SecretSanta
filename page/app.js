@@ -60,7 +60,7 @@ function setLang(next) {
   // Messages already on screen were written in the old language; drop them rather than leave a mix.
   for (const id of ['createErr', 'wishOk', 'wishErr', 'joinErr', 'adminOk', 'adminErr']) $(id).textContent = '';
   $('toast').hidden = true;
-  applyLang(); rerender();
+  applyLang(); rerender(); movedNote();
 }
 for (const code of L.order) {
   const b = el('button', '', L.names[code]); b.type = 'button'; b.dataset.lang = code; b.lang = L.html[code];
@@ -569,9 +569,30 @@ for (const button of document.querySelectorAll('[data-pet]')) {
   });
 }
 
+/* ---------- opened at an old address? ----------
+   The site has one official address (SANTA_HOME, written by deploy.sh). Opened anywhere else, the page points
+   there. What a browser remembers (sign-ins, organizer access) is kept per address, so the link for an organizer
+   carries the organizer key in the # part, exactly like the organizer link; participants sign in again with their PIN. */
+function movedNote() {
+  const home = String(window.SANTA_HOME || '').replace(/\/+$/, '');
+  if (!home || home === location.origin) return;
+  let target = home + '/';
+  if (/^[a-z0-9]{12}$/.test(EVENT_ID)) {
+    target += '?e=' + EVENT_ID;
+    const key = store.get(K_ADMIN);
+    if (typeof key === 'string' && key) target += '#admin=' + key;
+  }
+  const host = home.replace(/^https?:\/\//, '');
+  $('movedText').textContent = t('movedText', host);
+  $('movedLink').textContent = t('movedLink');
+  $('movedLink').href = target;
+  $('moved').hidden = false;
+}
+
 /* ---------- start ---------- */
 applyLang();
 if (/^[a-z0-9]{12}$/.test(EVENT_ID)) startEvent();
 else if (EVENT_ID) { document.documentElement.classList.add('event'); $('homeLink').hidden = false; rerender = render; gone(); render(); }
 else startHome();
+movedNote();                                       // after the start: an organizer link's key is on this device by now
 })();
