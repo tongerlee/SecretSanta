@@ -7,7 +7,7 @@ Parameters:
   # Leave empty to use only the default main.<app>.amplifyapp.com address.
   CustomDomain:
     Type: String
-    Default: santa.departmentofunnecessarythings.com
+    Default: gifts.departmentofunnecessarythings.com
     AllowedPattern: '^$|^[a-z0-9.-]+$'
 
 Conditions:
