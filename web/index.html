@@ -314,6 +314,13 @@ html.event .langs button{min-height:40px;padding:5px 9px;font-size:12.5px}
 @keyframes shimmer{to{background-position:-200% 0}}
 @media (prefers-reduced-motion:reduce){.skeleton span{animation:none}}
 
+/* ---- the way back in for someone who signed up on another device ---- */
+.returning{margin-top:-4px;display:flex;flex-wrap:wrap;align-items:center;gap:0 6px}
+.returning .link{padding:4px 2px;color:var(--pine)}
+.card.flash{animation:flash 1.3s ease-out}
+@keyframes flash{0%,35%{box-shadow:0 0 0 3px var(--gold),0 8px 22px rgba(0,0,0,.13)}100%{box-shadow:0 8px 22px rgba(0,0,0,.13)}}
+@media (prefers-reduced-motion:reduce){.card.flash{animation:none;box-shadow:0 0 0 3px var(--gold),0 8px 22px rgba(0,0,0,.13)}}
+
 /* ---- after joining: bring friends in ---- */
 .nudge{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;padding:12px 14px;border-radius:12px;background:#fff;border:1.5px dashed var(--rule);font-size:14px;color:var(--moss)}
 
@@ -462,6 +469,7 @@ footer .stamp{margin-bottom:6px}
   <section class="card" id="mineCard" hidden>
     <h2 data-i18n="mineTitle"></h2>
     <ul class="people" id="mineList"></ul>
+    <p class="hint" data-i18n="mineHint"></p>
   </section>
 
   <section class="card" id="createCard" hidden>
@@ -521,6 +529,8 @@ footer .stamp{margin-bottom:6px}
 
   <section class="card" id="joinCard" hidden>
     <h2 data-i18n="joinTitle"></h2>
+    <!-- the way back in for someone who signed up on another phone: jumps to their name in "Who's in" -->
+    <p class="hint returning" id="returning" hidden><span data-i18n="returningQ"></span> <button type="button" class="link" id="findMeBtn" data-i18n="findMe"></button></p>
     <form id="joinForm" class="stack">
       <label for="joinName" data-i18n="yourName"></label>
       <input id="joinName" maxlength="24" autocomplete="off">
@@ -658,6 +668,8 @@ const SANTA_I18N = (() => {
     mineTitle: '这台设备上的活动',
     iOrganize: '我组织的',
     iJoined: '我参加的',
+    iJoinedAs: (name) => `以「${name}」报名`,
+    mineHint: '这个列表只记在这台设备上。换了设备，就从群里再点开链接，点你的名字、输入 PIN 就能回到你的报名。',
     goneTitle: '这个活动不在了',
     goneBody: '它可能已经结束并自动删除了，也可能是链接不完整。',
     goneNew: '建一个新的活动',
@@ -667,6 +679,8 @@ const SANTA_I18N = (() => {
     notMe: '不是你？换个人进入',
     leave: '取消报名',
     joinTitle: '报名',
+    returningQ: '之前在别的设备上报过名？',
+    findMe: '找到你的名字',
     yourName: '你的名字',
     pinLabel: '给自己设一个 PIN（4 位数字）',
     pinShort: '换设备看结果时要用。随便编一个，别用银行卡密码。',
@@ -748,7 +762,7 @@ const SANTA_I18N = (() => {
     pinWasReset: (time) => `组织者在 ${time} 帮你重设过 PIN。不是你要求的话，在群里问一声。`,
     rosterIn: (n) => `已经报名的人（${n}）`,
     rosterTapDrawn: '点你的名字，输入 PIN 看结果',
-    rosterTapOpen: '已经报过名？点你的名字',
+    rosterTapOpen: '之前报过名？点你的名字、输入 PIN 就能回来',
     rosterHintDrawn: '签已经抽好了。每个人只能用自己的 PIN 看到自己的结果。',
     adminDrawn: '已经抽好了。每个人凭自己的 PIN 看结果，你这里也看不到谁抽到谁。',
     adminNeed: (n, min) => `现在 ${n} 人，至少要 ${min} 人才能抽。把群链接发出去让大家报名。`,
@@ -762,7 +776,7 @@ const SANTA_I18N = (() => {
     drawBtnN: (n) => `给这 ${n} 个人抽签`,
     removedNote: '你已经不在名单里了。',
     reenterPin: '需要重新输入 PIN。',
-    joinedNote: '报上名了。记住你刚设的 PIN，换手机看结果时要用。',
+    joinedNote: '报上名了。记住你刚设的 PIN，换设备看结果时要用。',
     pinDlgTitle: (name) => `${name}，输入你的 PIN`,
     pinDlgBody: '报名时你自己设的那串数字。这台设备只用输这一次。',
     enter: '进入',
@@ -833,6 +847,8 @@ const SANTA_I18N = (() => {
     mineTitle: 'Events on this device',
     iOrganize: 'You’re the organizer',
     iJoined: 'You’re in',
+    iJoinedAs: (name) => `Signed up as ${name}`,
+    mineHint: 'This list lives on this device only. On another device, open the link from the group chat again, tap your name and enter your PIN to get back to your sign-up.',
     goneTitle: 'This event is gone',
     goneBody: 'It may have ended and been deleted automatically, or the link might be incomplete.',
     goneNew: 'Start a new event',
@@ -842,6 +858,8 @@ const SANTA_I18N = (() => {
     notMe: 'Not you? Switch participant',
     leave: 'Cancel my sign-up',
     joinTitle: 'Sign up',
+    returningQ: 'Signed up already, on another device?',
+    findMe: 'Find your name',
     yourName: 'Your name',
     pinLabel: 'Pick a PIN (4 digits)',
     pinShort: 'Your key to your match from another device. Make one up; not your bank PIN.',
@@ -923,7 +941,7 @@ const SANTA_I18N = (() => {
     pinWasReset: (time) => `The organizer reset your PIN (${time}). If you didn’t ask for that, check with the group.`,
     rosterIn: (n) => `Who’s in (${n})`,
     rosterTapDrawn: 'Tap your name and enter your PIN to see your match',
-    rosterTapOpen: 'Already signed up? Tap your name',
+    rosterTapOpen: 'Signed up before? Tap your name and enter your PIN to get back in',
     rosterHintDrawn: 'Names have been drawn. Everyone can only see their own match, using their own PIN.',
     adminDrawn: 'Names are drawn. Everyone checks their own match with their PIN. Not even you can see who got whom.',
     adminNeed: (n, min) => `${n} signed up so far. You need at least ${min} to draw names. Share the group link so people can join.`,
@@ -937,7 +955,7 @@ const SANTA_I18N = (() => {
     drawBtnN: (n) => `Draw names for these ${n} people`,
     removedNote: 'You’re no longer on the list.',
     reenterPin: 'Please enter your PIN again.',
-    joinedNote: 'You’re in. Remember the PIN you just picked: it’s your key to your match from another phone.',
+    joinedNote: 'You’re in. Remember the PIN you just picked: it’s your key to your match from another device.',
     pinDlgTitle: (name) => `${name}, enter your PIN`,
     pinDlgBody: 'The number you picked when you signed up. You only need to enter it once on this device.',
     enter: 'Continue',
@@ -1008,6 +1026,8 @@ const SANTA_I18N = (() => {
     mineTitle: '이 기기에서 연 이벤트',
     iOrganize: '내가 주최',
     iJoined: '참가 중',
+    iJoinedAs: (name) => `참가 이름: ${name}`,
+    mineHint: '이 목록은 이 기기에만 남아요. 다른 기기에서는 단톡방 링크를 다시 열고 이름을 누른 뒤 PIN을 입력하면 내 참가 내용으로 돌아갈 수 있어요.',
     goneTitle: '이벤트를 찾을 수 없어요',
     goneBody: '이미 끝나서 자동으로 삭제됐거나, 링크가 잘렸을 수 있어요.',
     goneNew: '새 이벤트 만들기',
@@ -1017,6 +1037,8 @@ const SANTA_I18N = (() => {
     notMe: '본인이 아닌가요? 다른 이름으로 들어가기',
     leave: '참가 취소',
     joinTitle: '참가하기',
+    returningQ: '다른 기기에서 이미 참가했나요?',
+    findMe: '내 이름 찾기',
     yourName: '이름',
     pinLabel: 'PIN 번호 정하기 (숫자 4자리)',
     pinShort: '다른 기기에서 결과를 볼 때 쓰는 열쇠예요. 새로 만들고, 은행 비밀번호는 피해 주세요.',
@@ -1098,7 +1120,7 @@ const SANTA_I18N = (() => {
     pinWasReset: (time) => `${time}에 주최자가 PIN을 재설정했어요. 직접 부탁한 게 아니라면 단톡방에 물어보세요.`,
     rosterIn: (n) => `참가한 사람 (${n}명)`,
     rosterTapDrawn: '이름을 누르고 PIN을 입력하면 결과를 볼 수 있어요',
-    rosterTapOpen: '이미 참가했나요? 이름을 눌러 주세요',
+    rosterTapOpen: '이미 참가했나요? 이름을 누르고 PIN을 입력하면 다시 들어갈 수 있어요',
     rosterHintDrawn: '뽑기가 끝났어요. 각자 자기 PIN으로 자기 결과만 볼 수 있어요.',
     adminDrawn: '뽑기가 끝났어요. 각자 PIN으로 자기 결과만 확인하고, 누가 누구를 뽑았는지는 주최자도 볼 수 없어요.',
     adminNeed: (n, min) => `지금 ${n}명이에요. 최소 ${min}명이 모여야 뽑을 수 있어요. 참가 링크를 공유해 주세요.`,
@@ -1112,7 +1134,7 @@ const SANTA_I18N = (() => {
     drawBtnN: (n) => `${n}명으로 뽑기`,
     removedNote: '명단에서 빠졌어요.',
     reenterPin: 'PIN을 다시 입력해 주세요.',
-    joinedNote: '참가 완료! 방금 정한 PIN을 꼭 기억해 두세요. 다른 휴대폰에서 결과를 볼 때 필요해요.',
+    joinedNote: '참가 완료! 방금 정한 PIN을 꼭 기억해 두세요. 다른 기기에서 결과를 볼 때 필요해요.',
     pinDlgTitle: (name) => `${name} 님, PIN을 입력해 주세요`,
     pinDlgBody: '참가할 때 직접 정한 숫자예요. 이 기기에서는 한 번만 입력하면 돼요.',
     enter: '들어가기',
@@ -1182,6 +1204,8 @@ const SANTA_I18N = (() => {
     mineTitle: 'Sự kiện trên thiết bị này',
     iOrganize: 'Bạn tổ chức',
     iJoined: 'Bạn tham gia',
+    iJoinedAs: (name) => `Đăng ký với tên ${name}`,
+    mineHint: 'Danh sách này chỉ lưu trên thiết bị này. Trên thiết bị khác, bạn mở lại link trong nhóm chat, bấm vào tên mình rồi nhập mã PIN là quay lại được phần đăng ký của mình.',
     goneTitle: 'Sự kiện này không còn nữa',
     goneBody: 'Có thể sự kiện đã kết thúc và tự xóa, hoặc link bị thiếu.',
     goneNew: 'Tạo sự kiện mới',
@@ -1191,6 +1215,8 @@ const SANTA_I18N = (() => {
     notMe: 'Không phải bạn? Đổi người',
     leave: 'Hủy đăng ký',
     joinTitle: 'Đăng ký tham gia',
+    returningQ: 'Đã đăng ký trên thiết bị khác rồi?',
+    findMe: 'Tìm tên của bạn',
     yourName: 'Tên của bạn',
     pinLabel: 'Tự đặt mã PIN (4 chữ số)',
     pinShort: 'Chìa khóa để xem kết quả trên thiết bị khác. Tự nghĩ ra, đừng dùng mã PIN ngân hàng.',
@@ -1272,7 +1298,7 @@ const SANTA_I18N = (() => {
     pinWasReset: (time) => `Người tổ chức đã đặt lại mã PIN cho bạn lúc ${time}. Nếu bạn không nhờ thì hỏi lại trong nhóm nhé.`,
     rosterIn: (n) => `Đã đăng ký (${n} người)`,
     rosterTapDrawn: 'Bấm vào tên bạn rồi nhập mã PIN để xem kết quả',
-    rosterTapOpen: 'Đăng ký rồi? Bấm vào tên bạn',
+    rosterTapOpen: 'Đăng ký rồi? Bấm vào tên bạn rồi nhập mã PIN để vào lại',
     rosterHintDrawn: 'Đã bốc thăm xong. Mỗi người chỉ xem được kết quả của mình bằng mã PIN riêng.',
     adminDrawn: 'Đã bốc thăm xong. Mỗi người tự xem kết quả bằng mã PIN của mình, ngay cả bạn cũng không xem được ai bốc trúng ai.',
     adminNeed: (n, min) => `Hiện có ${n} người, cần ít nhất ${min} người mới bốc thăm được. Bạn gửi link nhóm để mọi người đăng ký nhé.`,
@@ -1286,7 +1312,7 @@ const SANTA_I18N = (() => {
     drawBtnN: (n) => `Bốc thăm cho ${n} người này`,
     removedNote: 'Bạn không còn trong danh sách nữa.',
     reenterPin: 'Bạn cần nhập lại mã PIN.',
-    joinedNote: 'Bạn đăng ký xong rồi. Nhớ kỹ mã PIN vừa đặt nhé, đó là chìa khóa để xem kết quả trên điện thoại khác.',
+    joinedNote: 'Bạn đăng ký xong rồi. Nhớ kỹ mã PIN vừa đặt nhé, đó là chìa khóa để xem kết quả trên thiết bị khác.',
     pinDlgTitle: (name) => `${name} ơi, nhập mã PIN của bạn`,
     pinDlgBody: 'Là dãy số bạn tự đặt lúc đăng ký. Trên thiết bị này chỉ cần nhập một lần.',
     enter: 'Vào xem',
@@ -1526,11 +1552,13 @@ for (const id of ['newShareBtn', 'adminShareBtn']) $(id).hidden = !canShare;
 /** Wish boxes grow with what is typed (two lines to start) instead of scrolling inside themselves. */
 function fitTextarea(ta) { ta.style.height = 'auto'; ta.style.height = Math.min(220, ta.scrollHeight + 3) + 'px'; }
 for (const ta of document.querySelectorAll('textarea')) ta.addEventListener('input', () => fitTextarea(ta));
-/** Remember that this device has to do with an event, so the home page can list it. */
-function remember(id, title, isAdmin) {
+/** Remember that this device has to do with an event, so the home page can list it, with the name used to sign up.
+    `name` left out keeps what was known; null forgets it (after cancelling a sign-up). */
+function remember(id, title, isAdmin, name) {
   const list = (store.get(K_LIST) || []).filter((e) => e && e.id !== id);
   const old = (store.get(K_LIST) || []).find((e) => e && e.id === id);
-  list.unshift({ id, title, admin: !!(isAdmin || (old && old.admin)) });
+  const kept = name === undefined ? (old && old.name) : name;
+  list.unshift({ id, title, admin: !!(isAdmin || (old && old.admin)), name: typeof kept === 'string' && kept ? kept : undefined });
   store.set(K_LIST, list.slice(0, 20));
 }
 function forgetEvent(id) { store.set(K_LIST, (store.get(K_LIST) || []).filter((e) => e && e.id !== id)); }
@@ -1600,7 +1628,8 @@ function renderMine() {
   for (const e of mine) {
     const li = el('li'); const who = el('div', 'who');
     const a = el('a', '', e.title || 'Secret Santa'); a.href = eventUrl(e.id);
-    const b = el('b'); b.append(a); who.append(b, el('small', '', e.admin ? t('iOrganize') : t('iJoined')));
+    const role = [e.admin && t('iOrganize'), e.name && t('iJoinedAs', e.name)].filter(Boolean).join(' · ') || t('iJoined');
+    const b = el('b'); b.append(a); who.append(b, el('small', '', role));
     li.append(avatar(e.title || 'S'), who); $('mineList').append(li);
   }
   renderCreated();
@@ -1714,6 +1743,7 @@ function render() {
 
   const n = st.people.length;
   $('rosterCard').hidden = n === 0;
+  $('returning').hidden = !!v || drawn || n === 0;     // someone who signed up on another phone: the way back is their name, below
   // A first-time visitor while sign-ups are open: "Sign up" leads, the people already in come second as small chips.
   // After the draw there is nothing to sign up for, so "tap your name" is the main thing and the chips are big.
   const secondary = !v && !drawn;
@@ -1785,7 +1815,7 @@ async function refresh() {
     if (r.ok) { S.admin = r.data; S.state = r.data.state; }
     else if (r.status === 403) { S.admin = null; S.adminKey = null; store.set(K_ADMIN, null); toast(errText(r.data), 5000); }
   }
-  if (S.state) remember(EVENT_ID, S.state.title, !!S.admin);
+  if (S.state) remember(EVENT_ID, S.state.title, !!S.admin, S.me ? S.me.name : undefined);
   if (S.note) { toast(S.note, 4000); S.note = ''; }
   render();
 }
@@ -1795,6 +1825,7 @@ async function refresh() {
 function signedIn(data) {
   S.me = { name: data.me.name, token: data.token }; store.set(K_ME, S.me);
   S.view = data; S.state = data.state;
+  remember(EVENT_ID, S.state.title, !!S.admin, S.me.name);
   render();
 }
 function wireEvent() {
@@ -1815,6 +1846,13 @@ function wireEvent() {
     $('meTitle').focus({ preventScroll: true });
     $('meCard').scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' });
     if (S.adminKey) refresh();
+  });
+  $('findMeBtn').addEventListener('click', () => {
+    // Bring "Who's in" into view, light it up for a moment, and put the keyboard focus on the first name.
+    const card = $('rosterCard');
+    card.scrollIntoView({ block: 'center', behavior: reduced ? 'auto' : 'smooth' });
+    card.classList.remove('flash'); void card.offsetWidth; card.classList.add('flash');
+    const first = $('names').querySelector('button'); if (first) first.focus({ preventScroll: true });
   });
   $('names').addEventListener('click', async (ev) => {
     const btn = ev.target.closest('button[data-name]');
@@ -1852,7 +1890,7 @@ function wireEvent() {
     if (!yes) return;
     const r = await api('leave', Object.assign({ id: EVENT_ID }, S.me));
     if (!r.ok) { toast(errText(r.data), 4000); return; }
-    forget(); S.state = r.data.state; toast(t('leftToast')); render();
+    forget(); S.state = r.data.state; remember(EVENT_ID, S.state.title, !!S.admin, null); toast(t('leftToast')); render();
     if (S.adminKey) refresh();
   });
 

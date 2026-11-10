@@ -96,6 +96,7 @@
   <section class="card" id="mineCard" hidden>
     <h2 data-i18n="mineTitle"></h2>
     <ul class="people" id="mineList"></ul>
+    <p class="hint" data-i18n="mineHint"></p>
   </section>
 
   <section class="card" id="createCard" hidden>
@@ -155,6 +156,8 @@
 
   <section class="card" id="joinCard" hidden>
     <h2 data-i18n="joinTitle"></h2>
+    <!-- the way back in for someone who signed up on another phone: jumps to their name in "Who's in" -->
+    <p class="hint returning" id="returning" hidden><span data-i18n="returningQ"></span> <button type="button" class="link" id="findMeBtn" data-i18n="findMe"></button></p>
     <form id="joinForm" class="stack">
       <label for="joinName" data-i18n="yourName"></label>
       <input id="joinName" maxlength="24" autocomplete="off">

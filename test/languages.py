@@ -195,6 +195,10 @@ with sync_playwright() as p:
     tops = nv.evaluate("({ join: document.getElementById('joinCard').getBoundingClientRect().top, roster: document.getElementById('rosterCard').getBoundingClientRect().top })")
     assert tops["join"] < tops["roster"], tops
     assert nv.locator("#names button.chip").count() >= 1 and nv.locator("#names .avatar").first.inner_text().strip() != ""
+    # someone who signed up on another device: the sign-up card itself points the way back, and "find your name" lands on a name
+    assert nv.is_visible("#returning") and "another device" in nv.inner_text("#returning")
+    nv.click("#findMeBtn"); nv.wait_for_timeout(500)
+    assert nv.evaluate("document.activeElement.closest('#names') !== null") and "flash" in nv.get_attribute("#rosterCard", "class")
     dv = phone(browser, "drawn order", "en-US"); dv.goto(shares["en"]); dv.wait_for_selector("#names button")
     assert dv.is_hidden("#joinCard") and "Tap your name" in dv.inner_text("#rosterTitle") and "big" in dv.get_attribute("#names", "class")
     # the brand stamp links to the store, and the title keeps the festive face for any Latin title
@@ -209,6 +213,13 @@ with sync_playwright() as p:
     order = home.evaluate("[...document.querySelectorAll('.flow > .card:not([hidden])')].map(c => c.id)")
     assert order.index("mineCard") < order.index("createCard"), order
     assert home.is_visible("#createCard"), "starting a new event must stay available underneath"
+    assert "organizer" in home.inner_text("#mineList").lower() and "this device only" in home.inner_text("#mineCard")
+    # after signing up from this device, the home list says which name was used
+    home.click("#mineList a"); home.wait_for_selector("#joinCard:not([hidden])")
+    assert home.is_hidden("#returning"), "nobody has signed up yet, so there is no name to find"
+    home.fill("#joinName", "Robin"); home.fill("#joinPin", "7777"); home.click("#joinBtn"); home.wait_for_selector("#meCard:not([hidden])")
+    home.goto(SITE); home.wait_for_selector("#mineCard:not([hidden])")
+    assert "Signed up as Robin" in home.inner_text("#mineList"), home.inner_text("#mineList")
 
     # organizer view vs participant view of the same event
     org_view = phone(browser, "organizer view", "en-US"); org_view.goto(home.get_attribute("#mineList a", "href") + "#admin=" + home.evaluate("localStorage.getItem('santa:' + document.querySelector('#mineList a').href.split('?e=')[1] + ':admin')").strip('"'))

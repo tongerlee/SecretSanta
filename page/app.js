@@ -197,11 +197,13 @@ for (const id of ['newShareBtn', 'adminShareBtn']) $(id).hidden = !canShare;
 /** Wish boxes grow with what is typed (two lines to start) instead of scrolling inside themselves. */
 function fitTextarea(ta) { ta.style.height = 'auto'; ta.style.height = Math.min(220, ta.scrollHeight + 3) + 'px'; }
 for (const ta of document.querySelectorAll('textarea')) ta.addEventListener('input', () => fitTextarea(ta));
-/** Remember that this device has to do with an event, so the home page can list it. */
-function remember(id, title, isAdmin) {
+/** Remember that this device has to do with an event, so the home page can list it, with the name used to sign up.
+    `name` left out keeps what was known; null forgets it (after cancelling a sign-up). */
+function remember(id, title, isAdmin, name) {
   const list = (store.get(K_LIST) || []).filter((e) => e && e.id !== id);
   const old = (store.get(K_LIST) || []).find((e) => e && e.id === id);
-  list.unshift({ id, title, admin: !!(isAdmin || (old && old.admin)) });
+  const kept = name === undefined ? (old && old.name) : name;
+  list.unshift({ id, title, admin: !!(isAdmin || (old && old.admin)), name: typeof kept === 'string' && kept ? kept : undefined });
   store.set(K_LIST, list.slice(0, 20));
 }
 function forgetEvent(id) { store.set(K_LIST, (store.get(K_LIST) || []).filter((e) => e && e.id !== id)); }
@@ -271,7 +273,8 @@ function renderMine() {
   for (const e of mine) {
     const li = el('li'); const who = el('div', 'who');
     const a = el('a', '', e.title || 'Secret Santa'); a.href = eventUrl(e.id);
-    const b = el('b'); b.append(a); who.append(b, el('small', '', e.admin ? t('iOrganize') : t('iJoined')));
+    const role = [e.admin && t('iOrganize'), e.name && t('iJoinedAs', e.name)].filter(Boolean).join(' · ') || t('iJoined');
+    const b = el('b'); b.append(a); who.append(b, el('small', '', role));
     li.append(avatar(e.title || 'S'), who); $('mineList').append(li);
   }
   renderCreated();
@@ -385,6 +388,7 @@ function render() {
 
   const n = st.people.length;
   $('rosterCard').hidden = n === 0;
+  $('returning').hidden = !!v || drawn || n === 0;     // someone who signed up on another phone: the way back is their name, below
   // A first-time visitor while sign-ups are open: "Sign up" leads, the people already in come second as small chips.
   // After the draw there is nothing to sign up for, so "tap your name" is the main thing and the chips are big.
   const secondary = !v && !drawn;
@@ -456,7 +460,7 @@ async function refresh() {
     if (r.ok) { S.admin = r.data; S.state = r.data.state; }
     else if (r.status === 403) { S.admin = null; S.adminKey = null; store.set(K_ADMIN, null); toast(errText(r.data), 5000); }
   }
-  if (S.state) remember(EVENT_ID, S.state.title, !!S.admin);
+  if (S.state) remember(EVENT_ID, S.state.title, !!S.admin, S.me ? S.me.name : undefined);
   if (S.note) { toast(S.note, 4000); S.note = ''; }
   render();
 }
@@ -466,6 +470,7 @@ async function refresh() {
 function signedIn(data) {
   S.me = { name: data.me.name, token: data.token }; store.set(K_ME, S.me);
   S.view = data; S.state = data.state;
+  remember(EVENT_ID, S.state.title, !!S.admin, S.me.name);
   render();
 }
 function wireEvent() {
@@ -486,6 +491,13 @@ function wireEvent() {
     $('meTitle').focus({ preventScroll: true });
     $('meCard').scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' });
     if (S.adminKey) refresh();
+  });
+  $('findMeBtn').addEventListener('click', () => {
+    // Bring "Who's in" into view, light it up for a moment, and put the keyboard focus on the first name.
+    const card = $('rosterCard');
+    card.scrollIntoView({ block: 'center', behavior: reduced ? 'auto' : 'smooth' });
+    card.classList.remove('flash'); void card.offsetWidth; card.classList.add('flash');
+    const first = $('names').querySelector('button'); if (first) first.focus({ preventScroll: true });
   });
   $('names').addEventListener('click', async (ev) => {
     const btn = ev.target.closest('button[data-name]');
@@ -523,7 +535,7 @@ function wireEvent() {
     if (!yes) return;
     const r = await api('leave', Object.assign({ id: EVENT_ID }, S.me));
     if (!r.ok) { toast(errText(r.data), 4000); return; }
-    forget(); S.state = r.data.state; toast(t('leftToast')); render();
+    forget(); S.state = r.data.state; remember(EVENT_ID, S.state.title, !!S.admin, null); toast(t('leftToast')); render();
     if (S.adminKey) refresh();
   });
 

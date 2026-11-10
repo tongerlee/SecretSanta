@@ -295,6 +295,13 @@ html.event .langs button{min-height:40px;padding:5px 9px;font-size:12.5px}
 @keyframes shimmer{to{background-position:-200% 0}}
 @media (prefers-reduced-motion:reduce){.skeleton span{animation:none}}
 
+/* ---- the way back in for someone who signed up on another device ---- */
+.returning{margin-top:-4px;display:flex;flex-wrap:wrap;align-items:center;gap:0 6px}
+.returning .link{padding:4px 2px;color:var(--pine)}
+.card.flash{animation:flash 1.3s ease-out}
+@keyframes flash{0%,35%{box-shadow:0 0 0 3px var(--gold),0 8px 22px rgba(0,0,0,.13)}100%{box-shadow:0 8px 22px rgba(0,0,0,.13)}}
+@media (prefers-reduced-motion:reduce){.card.flash{animation:none;box-shadow:0 0 0 3px var(--gold),0 8px 22px rgba(0,0,0,.13)}}
+
 /* ---- after joining: bring friends in ---- */
 .nudge{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;padding:12px 14px;border-radius:12px;background:#fff;border:1.5px dashed var(--rule);font-size:14px;color:var(--moss)}
 
