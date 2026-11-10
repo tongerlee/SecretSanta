@@ -8,6 +8,8 @@
 //     after the draw, who they give to
 //   - the organizer (the secret key in their own link): names and wishes; can draw / reopen / remove /
 //     reset a PIN / delete the event. The API never returns the pairs to the organizer either.
+//     The organizer may tie the role to their own sign-up (`organizer` = that person's key): then name + PIN
+//     can mint a fresh organizer key from any device, which also retires the old one (claimAdmin).
 // Pairs are stored scrambled so a glance at the table does not spoil the draw. That is a spoiler guard, not
 // encryption: whoever owns the AWS account can always dig them out.
 // An event deletes itself a week after its exchange date (DynamoDB TTL, plus a check on every read).
@@ -205,11 +207,12 @@ const publicState = (doc) => ({
   id: doc.id, title: doc.title, budget: doc.budget, exchangeOn: doc.exchangeOn, status: doc.status, drawAt: doc.drawAt || 0,
   people: doc.people.map((p) => p.name), min: MIN_PEOPLE, deleteAt: expiresAt(doc.exchangeOn), keepDays: KEEP_DAYS,
 });
+const isOrganizer = (doc, person) => !!doc.organizer && doc.organizer === person.key;
 function personalView(doc, person) {
   const r = recipientOf(doc, person);
   return {
     state: publicState(doc),
-    me: { name: person.name, wish: person.wish || '', pinResetAt: person.pinResetAt || 0 },
+    me: { name: person.name, wish: person.wish || '', pinResetAt: person.pinResetAt || 0, organizer: isOrganizer(doc, person) },
     giftTo: r ? { name: r.name, wish: r.wish || '' } : null,
     missed: doc.status === 'drawn' && !r,
   };
@@ -217,7 +220,14 @@ function personalView(doc, person) {
 const adminView = (doc, now) => ({
   state: publicState(doc),
   people: doc.people.map((p) => ({ name: p.name, wish: p.wish || '', locked: (p.lockUntil || 0) > now })),
+  organizerName: (doc.people.find((p) => isOrganizer(doc, p)) || {}).name || '',
 });
+/** A new organizer key; the table keeps only its hash, so any older key stops working at once. */
+function newAdminKey(doc) {
+  const adminKey = randomBytes(16).toString('hex');
+  doc.adminHash = sha(adminKey).toString('base64');
+  return adminKey;
+}
 
 /* ---------- creating an event ---------- */
 async function create(b, ip) {
@@ -226,13 +236,13 @@ async function create(b, ip) {
   if (bad) return fail(400, bad);
   if (!(await mayCreate(ip || 'unknown', now))) return fail(429, 'slow_down');
   const id = newId();
-  const adminKey = randomBytes(16).toString('hex');
   const doc = {
     ...itemKey(id), v: 1, id,
     title: clean(b.title, 30) || 'Secret Santa', budget: clean(b.budget, 20), exchangeOn: b.exchangeOn,
-    status: 'open', drawAt: 0, drawId: '', draw: '', people: [],
-    adminHash: sha(adminKey).toString('base64'), createdAt: now, ttl: Math.floor(expiresAt(b.exchangeOn) / 1000),
+    status: 'open', drawAt: 0, drawId: '', draw: '', people: [], organizer: '',
+    createdAt: now, ttl: Math.floor(expiresAt(b.exchangeOn) / 1000),
   };
+  const adminKey = newAdminKey(doc);
   await ddb.send(new PutCommand({ TableName: TABLE, Item: doc, ConditionExpression: 'attribute_not_exists(pk)' }));
   return { code: 200, body: { id, adminKey, state: publicState(doc) } };     // the key is shown once and never stored
 }
@@ -251,22 +261,37 @@ function join(doc, b, now, work) {
   return { code: 200, body: { ...personalView(doc, person), token }, save: true };
 }
 
-/** Name + PIN, used once per device. Wrong PINs are counted and saved; five in a row lock that name for ten minutes. */
-function login(doc, b, now, work) {
+/** Name + PIN. Wrong PINs are counted and saved; five in a row lock that name for ten minutes. Returns the person, or a failure. */
+function withPin(doc, b, now, work) {
   const person = doc.people.find((p) => p.key === nameKey(b.name));
-  if (!person) return fail(404, 'no_such_person');
-  if ((person.lockUntil || 0) > now) return fail(429, 'locked', { retryAfter: Math.ceil((person.lockUntil - now) / 1000) });
+  if (!person) return { res: fail(404, 'no_such_person') };
+  if ((person.lockUntil || 0) > now) return { res: fail(429, 'locked', { retryAfter: Math.ceil((person.lockUntil - now) / 1000) }) };
   if (!checkPin(person, b.pin, work)) {
     person.fails = (person.fails || 0) + 1;
     if (person.fails >= MAX_FAILS) {
       person.fails = 0; person.lockUntil = now + LOCK_MS;
-      return { ...fail(429, 'locked', { retryAfter: LOCK_MS / 1000 }), save: true };
+      return { res: { ...fail(429, 'locked', { retryAfter: LOCK_MS / 1000 }), save: true } };
     }
-    return { ...fail(401, 'bad_pin', { left: MAX_FAILS - person.fails }), save: true };
+    return { res: { ...fail(401, 'bad_pin', { left: MAX_FAILS - person.fails }), save: true } };
   }
   person.fails = 0;
+  return { person };
+}
+/** Sign in on a device: name + PIN once, then the device keeps a token. */
+function login(doc, b, now, work) {
+  const { person, res } = withPin(doc, b, now, work);
+  if (!person) return res;
   const token = issueToken(person);
   return { code: 200, body: { ...personalView(doc, person), token }, save: true };
+}
+/** The organizer, on a device without the organizer link: name + PIN mint a fresh key (the old link stops working).
+    Only for the one sign-up the organizer tied to the role; the PIN is asked for again even on a signed-in device. */
+function claimAdmin(doc, b, now, work) {
+  const { person, res } = withPin(doc, b, now, work);
+  if (!person) return res;
+  if (!isOrganizer(doc, person)) return fail(403, 'not_organizer');
+  const adminKey = newAdminKey(doc);
+  return { code: 200, body: { adminKey, ...adminView(doc, now) }, save: true };
 }
 
 /** Everything after sign-in is done with the device token. */
@@ -284,9 +309,14 @@ const setWish = withToken((doc, person, b) => {
   person.wish = clean(b.wish, 100);
   return { code: 200, body: personalView(doc, person), save: true };
 });
+/** Take a person off the list; a role tied to that sign-up goes with it, so a later sign-up with the same name inherits nothing. */
+function dropPerson(doc, person) {
+  doc.people = doc.people.filter((p) => p !== person);
+  if (isOrganizer(doc, person)) doc.organizer = '';
+}
 const leave = withToken((doc, person) => {
   if (doc.status !== 'open') return fail(409, 'closed');
-  doc.people = doc.people.filter((p) => p !== person);
+  dropPerson(doc, person);
   return { code: 200, body: { state: publicState(doc) }, save: true };
 });
 const logout = withToken((doc, person, b, now, at) => {
@@ -313,8 +343,16 @@ function admin(doc, b, now, work) {
     case 'remove':
       if (doc.status !== 'open') return fail(409, 'closed');
       if (!target()) return fail(404, 'no_such_person');
-      doc.people = doc.people.filter((p) => p !== target());
+      dropPerson(doc, target());
       return done();
+    case 'linkOrganizer': {
+      // Tie the role to one sign-up (name + PIN can then recover it), or to none (empty name).
+      if (clean(b.name, 24) === '') { doc.organizer = ''; return done(); }
+      const person = target();
+      if (!person) return fail(404, 'no_such_person');
+      doc.organizer = person.key;
+      return done();
+    }
     case 'setPin': {
       const person = target();
       if (!person) return fail(404, 'no_such_person');
@@ -350,7 +388,7 @@ const json = (code, body) => ({
   body: JSON.stringify(body),
 });
 const state = (doc) => ({ code: 200, body: publicState(doc) });
-const ROUTES = { '/api/state': state, '/api/join': join, '/api/login': login, '/api/me': me, '/api/wish': setWish, '/api/leave': leave, '/api/logout': logout, '/api/admin': admin };
+const ROUTES = { '/api/state': state, '/api/join': join, '/api/login': login, '/api/me': me, '/api/wish': setWish, '/api/leave': leave, '/api/logout': logout, '/api/admin': admin, '/api/claimAdmin': claimAdmin };
 
 export async function handler(event) {
   const method = event.requestContext?.http?.method || 'GET';

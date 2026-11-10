@@ -321,6 +321,12 @@ html.event .langs button{min-height:40px;padding:5px 9px;font-size:12.5px}
 @keyframes flash{0%,35%{box-shadow:0 0 0 3px var(--gold),0 8px 22px rgba(0,0,0,.13)}100%{box-shadow:0 8px 22px rgba(0,0,0,.13)}}
 @media (prefers-reduced-motion:reduce){.card.flash{animation:none;box-shadow:0 0 0 3px var(--gold),0 8px 22px rgba(0,0,0,.13)}}
 
+/* ---- the organizer without their link: PIN brings the controls here ---- */
+.recover{display:flex;flex-direction:column;gap:10px;padding:12px 14px;border-radius:12px;background:#f3f7f4;border:1.5px dashed var(--pine)}
+.card .recover p{color:var(--pine)}
+h3.sub{margin:6px 0 0;font:700 14px/1.3 var(--font-body);color:var(--pine)}
+.btn.danger{border-color:var(--berry);color:var(--berry)}
+
 /* ---- after joining: bring friends in ---- */
 .nudge{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;padding:12px 14px;border-radius:12px;background:#fff;border:1.5px dashed var(--rule);font-size:14px;color:var(--moss)}
 
@@ -505,6 +511,11 @@ footer .stamp{margin-bottom:6px}
       <span id="nudgeText"></span>
       <button type="button" class="btn sm" id="shareBtn" data-i18n="share"></button>
     </div>
+    <!-- the organizer, on a device without the organizer link: their PIN brings the controls here -->
+    <div class="recover" id="recover" hidden>
+      <p><b data-i18n="orgRecoverTitle"></b> <span data-i18n="orgRecoverBody"></span></p>
+      <button type="button" class="btn" id="recoverBtn" data-i18n="orgRecoverBtn"></button>
+    </div>
     <form id="wishForm" class="stack inset">
       <label for="wishInput" data-i18n="wishLabel"></label>
       <textarea id="wishInput" rows="2" aria-describedby="wishHelp" maxlength="100" autocomplete="off"></textarea>
@@ -588,7 +599,14 @@ footer .stamp{margin-bottom:6px}
       <div class="stack">
         <p class="hint" data-i18n="myAdminHint"></p>
         <input id="adminUrl" readonly data-i18n-aria="adminLinkAria">
-        <button type="button" class="btn" data-copy="adminUrl" data-i18n="copyAdmin"></button>
+        <div class="row2">
+          <button type="button" class="btn" data-copy="adminUrl" data-i18n="copyAdmin"></button>
+          <a class="btn" id="adminMail" href="#" data-i18n="mailMe"></a>
+        </div>
+        <!-- the role tied to the organizer's own sign-up, so name + PIN can bring it back on any device -->
+        <h3 class="sub" data-i18n="orgLinkTitle"></h3>
+        <p class="hint" id="orgLinkText"></p>
+        <button type="button" class="btn" id="orgLinkBtn" hidden></button>
         <button type="button" class="link danger" id="destroyBtn" data-i18n="destroyNow"></button>
       </div>
     </details>
@@ -706,6 +724,20 @@ const SANTA_I18N = (() => {
     myAdminHint: '只给你自己。换设备管理这个活动时用它打开。',
     adminLinkAria: '组织者链接',
     destroyNow: '现在就删除这个活动',
+    orgRecoverTitle: '你是这个活动的组织者。',
+    orgRecoverBody: '组织者链接不在这台设备上？用你的 PIN 就能把组织者权限拿回来，旧链接会同时失效。',
+    orgRecoverBtn: '拿回组织者权限',
+    orgRecoverDlgBody: '会给这台设备生成一条新的组织者链接，旧的那条立刻失效。',
+    orgRecoverOk: '拿回权限',
+    orgRecovered: '组织者权限已经回到这台设备。到「我的组织者链接」里把新链接存一份。',
+    orgLinkTitle: '万一链接弄丢了',
+    orgLinked: (name) => `已绑定到你的报名「${name}」。在任何设备上：点你的名字、输入 PIN，再点「拿回组织者权限」就行。`,
+    orgNotLinked: '还没绑定到任何报名。你自己报名后，就能用名字和 PIN 把组织者权限找回来。',
+    orgNotLinkedMine: '还没绑定。绑定到你的报名后，用名字和 PIN 就能在任何设备上找回组织者权限。',
+    orgLinkBtn: (name) => `绑定到我的报名（${name}）`,
+    orgUnlinkBtn: '解除绑定',
+    orgLinkedOk: (name) => `已绑定到「${name}」：以后用这个名字和 PIN 就能找回组织者权限。`,
+    orgUnlinkedOk: '已解除绑定。现在只有组织者链接能管理这个活动。',
     merry: 'Merry Christmas！',
     makeOwn: '建一个自己的活动',
     cancel: '取消',
@@ -722,6 +754,7 @@ const SANTA_I18N = (() => {
     e_too_few: '至少要 3 个人才能抽签。',
     e_already_drawn: '已经抽过了。',
     e_forbidden: '组织者链接不对。请用创建活动时拿到的那个组织者链接重新打开。',
+    e_not_organizer: '这个报名没有绑定组织者权限。',
     e_not_found: '这个活动不在了。',
     e_bad_date: '先选交换日。',
     e_date_past: '交换日不能选已经过去太久的日期。',
@@ -885,6 +918,20 @@ const SANTA_I18N = (() => {
     myAdminHint: 'Just for you. Open it on another device to manage this event from there.',
     adminLinkAria: 'Organizer link',
     destroyNow: 'Delete this event now',
+    orgRecoverTitle: 'You’re the organizer of this event.',
+    orgRecoverBody: 'No organizer link on this device? Your PIN brings the controls back here; the old link stops working at the same time.',
+    orgRecoverBtn: 'Get my organizer controls back',
+    orgRecoverDlgBody: 'A fresh organizer link is made for this device. The old one stops working right away.',
+    orgRecoverOk: 'Get them back',
+    orgRecovered: 'Organizer controls are back on this device. Save the new link under “My organizer link”.',
+    orgLinkTitle: 'If you ever lose this link',
+    orgLinked: (name) => `Tied to your sign-up as ${name}. On any device: tap your name, enter your PIN, then “Get my organizer controls back”.`,
+    orgNotLinked: 'Not tied to a sign-up yet. Once you sign up yourself, your name and PIN can bring these controls back.',
+    orgNotLinkedMine: 'Not tied to a sign-up yet. Tie it to yours and your name and PIN can bring these controls back on any device.',
+    orgLinkBtn: (name) => `Tie it to my sign-up (${name})`,
+    orgUnlinkBtn: 'Untie',
+    orgLinkedOk: (name) => `Tied to ${name}: that name and PIN can bring the organizer controls back from now on.`,
+    orgUnlinkedOk: 'Untied. Only the organizer link runs this event now.',
     merry: 'Merry Christmas!',
     makeOwn: 'Start your own event',
     cancel: 'Cancel',
@@ -901,6 +948,7 @@ const SANTA_I18N = (() => {
     e_too_few: 'You need at least 3 people to draw names.',
     e_already_drawn: 'Names have already been drawn.',
     e_forbidden: 'That organizer link doesn’t match. Open the organizer link you got when you created the event.',
+    e_not_organizer: 'This sign-up isn’t tied to the organizer controls.',
     e_not_found: 'This event is gone.',
     e_bad_date: 'Pick an exchange day first.',
     e_date_past: 'That date is too far in the past. Pick a later one.',
@@ -1064,6 +1112,20 @@ const SANTA_I18N = (() => {
     myAdminHint: '나만 쓰는 링크예요. 다른 기기에서 이 이벤트를 관리할 때 이 링크로 열어 주세요.',
     adminLinkAria: '주최자 링크',
     destroyNow: '지금 이 이벤트 삭제하기',
+    orgRecoverTitle: '이 이벤트의 주최자시네요.',
+    orgRecoverBody: '이 기기에 주최자 링크가 없나요? PIN만 입력하면 주최자 메뉴를 여기로 가져올 수 있어요. 예전 링크는 그 순간부터 쓸 수 없게 돼요.',
+    orgRecoverBtn: '주최자 메뉴 되찾기',
+    orgRecoverDlgBody: '이 기기용 새 주최자 링크를 만들어요. 예전 링크는 바로 쓸 수 없게 돼요.',
+    orgRecoverOk: '되찾기',
+    orgRecovered: '주최자 메뉴가 이 기기로 돌아왔어요. “내 주최자 링크”에서 새 링크를 저장해 두세요.',
+    orgLinkTitle: '링크를 잃어버렸을 때를 대비해서',
+    orgLinked: (name) => `내 참가 이름 ${name}에 연결돼 있어요. 어느 기기에서든 이름을 누르고 PIN을 입력한 뒤 “주최자 메뉴 되찾기”를 누르면 돼요.`,
+    orgNotLinked: '아직 어떤 참가에도 연결되지 않았어요. 직접 참가하면 이름과 PIN으로 주최자 메뉴를 되찾을 수 있어요.',
+    orgNotLinkedMine: '아직 연결되지 않았어요. 내 참가에 연결해 두면 어느 기기에서든 이름과 PIN으로 주최자 메뉴를 되찾을 수 있어요.',
+    orgLinkBtn: (name) => `내 참가(${name})에 연결하기`,
+    orgUnlinkBtn: '연결 해제',
+    orgLinkedOk: (name) => `${name}에 연결했어요. 앞으로 이 이름과 PIN으로 주최자 메뉴를 되찾을 수 있어요.`,
+    orgUnlinkedOk: '연결을 해제했어요. 이제 주최자 링크로만 이벤트를 관리할 수 있어요.',
     merry: '메리 크리스마스!',
     makeOwn: '내 이벤트 만들기',
     cancel: '취소',
@@ -1080,6 +1142,7 @@ const SANTA_I18N = (() => {
     e_too_few: '최소 3명은 있어야 뽑을 수 있어요.',
     e_already_drawn: '이미 뽑기가 끝났어요.',
     e_forbidden: '주최자 링크가 맞지 않아요. 이벤트를 만들 때 받은 주최자 링크로 다시 열어 주세요.',
+    e_not_organizer: '이 참가는 주최자 메뉴와 연결되어 있지 않아요.',
     e_not_found: '이벤트를 찾을 수 없어요.',
     e_bad_date: '교환 날짜를 먼저 골라 주세요.',
     e_date_past: '너무 지난 날짜예요. 다른 날짜를 골라 주세요.',
@@ -1242,6 +1305,20 @@ const SANTA_I18N = (() => {
     myAdminHint: 'Chỉ dành cho bạn. Mở link này khi muốn quản lý sự kiện trên thiết bị khác.',
     adminLinkAria: 'Link quản lý',
     destroyNow: 'Xóa sự kiện này ngay',
+    orgRecoverTitle: 'Bạn là người tổ chức sự kiện này.',
+    orgRecoverBody: 'Thiết bị này không có link quản lý? Chỉ cần mã PIN là lấy lại được quyền quản lý tại đây; link cũ sẽ hết hiệu lực ngay lúc đó.',
+    orgRecoverBtn: 'Lấy lại quyền quản lý',
+    orgRecoverDlgBody: 'Một link quản lý mới sẽ được tạo cho thiết bị này. Link cũ hết hiệu lực ngay.',
+    orgRecoverOk: 'Lấy lại',
+    orgRecovered: 'Quyền quản lý đã về thiết bị này. Bạn lưu link mới trong “Link quản lý của bạn” nhé.',
+    orgLinkTitle: 'Phòng khi bạn làm mất link này',
+    orgLinked: (name) => `Đã gắn với đăng ký của bạn (${name}). Trên bất kỳ thiết bị nào: bấm vào tên bạn, nhập mã PIN rồi bấm “Lấy lại quyền quản lý”.`,
+    orgNotLinked: 'Chưa gắn với đăng ký nào. Khi bạn tự đăng ký, tên và mã PIN của bạn có thể lấy lại quyền quản lý.',
+    orgNotLinkedMine: 'Chưa gắn với đăng ký nào. Gắn với đăng ký của bạn thì tên và mã PIN có thể lấy lại quyền quản lý trên bất kỳ thiết bị nào.',
+    orgLinkBtn: (name) => `Gắn với đăng ký của tôi (${name})`,
+    orgUnlinkBtn: 'Bỏ gắn',
+    orgLinkedOk: (name) => `Đã gắn với ${name}: từ giờ tên và mã PIN này có thể lấy lại quyền quản lý.`,
+    orgUnlinkedOk: 'Đã bỏ gắn. Giờ chỉ link quản lý mới điều hành được sự kiện này.',
     merry: 'Giáng sinh vui vẻ!',
     makeOwn: 'Tạo sự kiện của riêng bạn',
     cancel: 'Hủy',
@@ -1258,6 +1335,7 @@ const SANTA_I18N = (() => {
     e_too_few: 'Cần ít nhất 3 người mới bốc thăm được.',
     e_already_drawn: 'Đã bốc thăm rồi.',
     e_forbidden: 'Link quản lý không đúng. Bạn mở lại bằng link quản lý nhận được lúc tạo sự kiện nhé.',
+    e_not_organizer: 'Đăng ký này không gắn với quyền quản lý.',
     e_not_found: 'Sự kiện này không còn nữa.',
     e_bad_date: 'Bạn chọn ngày đổi quà trước nhé.',
     e_date_past: 'Ngày này qua lâu rồi. Bạn chọn ngày khác nhé.',
@@ -1471,7 +1549,7 @@ async function api(path, body) {
 }
 // Error codes the server sends that have their own sentence (key "e_<code>" in i18n.js). Anything else reads as a network hiccup.
 const ERR_CODES = ['bad_name', 'bad_pin_format', 'name_taken', 'closed', 'full', 'no_such_person', 'too_few', 'already_drawn',
-  'forbidden', 'not_found', 'bad_date', 'date_past', 'date_far', 'slow_down'];
+  'forbidden', 'not_found', 'bad_date', 'date_past', 'date_far', 'slow_down', 'not_organizer'];
 function errText(d) {
   const code = d && d.error;
   if (code === 'bad_pin') return t('e_bad_pin', d.left || 0);
@@ -1736,6 +1814,7 @@ function render() {
     $('leaveBtn').hidden = drawn;
     $('nudge').hidden = drawn || !!S.admin;             // the organizer has the invite block for this
     $('nudgeText').textContent = t('nudge', st.people.length);
+    $('recover').hidden = !v.me.organizer || !!S.adminKey;   // the organizer's own sign-up, on a device without the organizer link
   } else if (S.tagKey) { S.tagKey = ''; $('tagSlot').replaceChildren(); }
   // The organizer's next move (invite, then draw) leads once they have signed up themselves; after the draw their own
   // result comes first again and the controls drop back below the names.
@@ -1786,7 +1865,16 @@ function renderAdmin() {
   $('manageSummary').textContent = t('managePeople', n);
   $('cfgDrawAtHint').textContent = t('cfgDrawAtHint', tzName(st.drawAt || Date.now()));
   $('shareUrl').value = eventUrl(EVENT_ID);
-  $('adminUrl').value = eventUrl(EVENT_ID) + '#admin=' + S.adminKey;
+  const adminLink = eventUrl(EVENT_ID) + '#admin=' + S.adminKey;
+  $('adminUrl').value = adminLink;
+  $('adminMail').href = 'mailto:?subject=' + encodeURIComponent(t('mailSubject', st.title)) + '&body=' + encodeURIComponent(t('mailBody', st.title, adminLink));
+  // The role tied to a sign-up: that name + PIN can bring the controls back on any device.
+  const tied = a.organizerName || '', mine = S.me ? S.me.name : '';
+  $('orgLinkText').textContent = tied ? t('orgLinked', tied) : (mine ? t('orgNotLinkedMine') : t('orgNotLinked'));
+  $('orgLinkBtn').hidden = !tied && !mine;
+  $('orgLinkBtn').textContent = tied ? t('orgUnlinkBtn') : t('orgLinkBtn', mine);
+  $('orgLinkBtn').dataset.act = tied ? 'untie' : 'tie';
+  $('orgLinkBtn').classList.toggle('danger', !!tied);
   if (!$('settings').open) {
     $('cfgTitle').value = st.title; $('cfgBudget').value = st.budget; $('cfgExchangeOn').value = st.exchangeOn; $('cfgDrawAt').value = localInputValue(st.drawAt);
   }
@@ -1845,7 +1933,25 @@ function wireEvent() {
     signedIn(r.data);
     $('meTitle').focus({ preventScroll: true });
     $('meCard').scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' });
-    if (S.adminKey) refresh();
+    // The organizer signing up on their own device: tie the role to this sign-up, so a lost link is no longer fatal.
+    if (S.adminKey) adminDo({ action: 'linkOrganizer', name }, t('orgLinkedOk', name));
+  });
+  $('recoverBtn').addEventListener('click', async () => {
+    if (!S.me) return;
+    let note = '';
+    for (;;) {
+      const pin = await openDialog({ title: t('pinDlgTitle', S.me.name), body: [note || t('orgRecoverDlgBody')], ok: t('orgRecoverOk'), pin: 'hide' });
+      if (pin == null) return;
+      const r = await api('claimAdmin', { id: EVENT_ID, name: S.me.name, pin });
+      if (r.ok) {
+        S.adminKey = r.data.adminKey; store.set(K_ADMIN, S.adminKey);
+        const { adminKey, ...view } = r.data; S.admin = view; S.state = view.state; remember(EVENT_ID, view.state.title, true);
+        toast(t('orgRecovered'), 6000); render(); refresh();
+        return;
+      }
+      if (r.data.error === 'not_found') { gone(); render(); return; }
+      note = errText(r.data);
+    }
   });
   $('findMeBtn').addEventListener('click', () => {
     // Bring "Who's in" into view, light it up for a moment, and put the keyboard focus on the first name.
@@ -1932,6 +2038,10 @@ function wireEvent() {
     ev.preventDefault();
     const at = $('cfgDrawAt').value ? new Date($('cfgDrawAt').value).getTime() : 0;
     adminDo({ action: 'settings', title: $('cfgTitle').value, budget: $('cfgBudget').value, exchangeOn: $('cfgExchangeOn').value, drawAt: Number.isFinite(at) ? at : 0 }, t('settingsSaved'));
+  });
+  $('orgLinkBtn').addEventListener('click', () => {
+    if ($('orgLinkBtn').dataset.act === 'untie') adminDo({ action: 'linkOrganizer', name: '' }, t('orgUnlinkedOk'));
+    else if (S.me) adminDo({ action: 'linkOrganizer', name: S.me.name }, t('orgLinkedOk', S.me.name));
   });
   $('destroyBtn').addEventListener('click', async () => {
     const yes = await openDialog({ title: t('destroyTitle'), body: t('destroyBody'), ok: t('del') });

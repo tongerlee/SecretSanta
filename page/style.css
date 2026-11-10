@@ -302,6 +302,12 @@ html.event .langs button{min-height:40px;padding:5px 9px;font-size:12.5px}
 @keyframes flash{0%,35%{box-shadow:0 0 0 3px var(--gold),0 8px 22px rgba(0,0,0,.13)}100%{box-shadow:0 8px 22px rgba(0,0,0,.13)}}
 @media (prefers-reduced-motion:reduce){.card.flash{animation:none;box-shadow:0 0 0 3px var(--gold),0 8px 22px rgba(0,0,0,.13)}}
 
+/* ---- the organizer without their link: PIN brings the controls here ---- */
+.recover{display:flex;flex-direction:column;gap:10px;padding:12px 14px;border-radius:12px;background:#f3f7f4;border:1.5px dashed var(--pine)}
+.card .recover p{color:var(--pine)}
+h3.sub{margin:6px 0 0;font:700 14px/1.3 var(--font-body);color:var(--pine)}
+.btn.danger{border-color:var(--berry);color:var(--berry)}
+
 /* ---- after joining: bring friends in ---- */
 .nudge{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;padding:12px 14px;border-radius:12px;background:#fff;border:1.5px dashed var(--rule);font-size:14px;color:var(--moss)}
 

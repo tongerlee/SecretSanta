@@ -116,7 +116,7 @@ async function api(path, body) {
 }
 // Error codes the server sends that have their own sentence (key "e_<code>" in i18n.js). Anything else reads as a network hiccup.
 const ERR_CODES = ['bad_name', 'bad_pin_format', 'name_taken', 'closed', 'full', 'no_such_person', 'too_few', 'already_drawn',
-  'forbidden', 'not_found', 'bad_date', 'date_past', 'date_far', 'slow_down'];
+  'forbidden', 'not_found', 'bad_date', 'date_past', 'date_far', 'slow_down', 'not_organizer'];
 function errText(d) {
   const code = d && d.error;
   if (code === 'bad_pin') return t('e_bad_pin', d.left || 0);
@@ -381,6 +381,7 @@ function render() {
     $('leaveBtn').hidden = drawn;
     $('nudge').hidden = drawn || !!S.admin;             // the organizer has the invite block for this
     $('nudgeText').textContent = t('nudge', st.people.length);
+    $('recover').hidden = !v.me.organizer || !!S.adminKey;   // the organizer's own sign-up, on a device without the organizer link
   } else if (S.tagKey) { S.tagKey = ''; $('tagSlot').replaceChildren(); }
   // The organizer's next move (invite, then draw) leads once they have signed up themselves; after the draw their own
   // result comes first again and the controls drop back below the names.
@@ -431,7 +432,16 @@ function renderAdmin() {
   $('manageSummary').textContent = t('managePeople', n);
   $('cfgDrawAtHint').textContent = t('cfgDrawAtHint', tzName(st.drawAt || Date.now()));
   $('shareUrl').value = eventUrl(EVENT_ID);
-  $('adminUrl').value = eventUrl(EVENT_ID) + '#admin=' + S.adminKey;
+  const adminLink = eventUrl(EVENT_ID) + '#admin=' + S.adminKey;
+  $('adminUrl').value = adminLink;
+  $('adminMail').href = 'mailto:?subject=' + encodeURIComponent(t('mailSubject', st.title)) + '&body=' + encodeURIComponent(t('mailBody', st.title, adminLink));
+  // The role tied to a sign-up: that name + PIN can bring the controls back on any device.
+  const tied = a.organizerName || '', mine = S.me ? S.me.name : '';
+  $('orgLinkText').textContent = tied ? t('orgLinked', tied) : (mine ? t('orgNotLinkedMine') : t('orgNotLinked'));
+  $('orgLinkBtn').hidden = !tied && !mine;
+  $('orgLinkBtn').textContent = tied ? t('orgUnlinkBtn') : t('orgLinkBtn', mine);
+  $('orgLinkBtn').dataset.act = tied ? 'untie' : 'tie';
+  $('orgLinkBtn').classList.toggle('danger', !!tied);
   if (!$('settings').open) {
     $('cfgTitle').value = st.title; $('cfgBudget').value = st.budget; $('cfgExchangeOn').value = st.exchangeOn; $('cfgDrawAt').value = localInputValue(st.drawAt);
   }
@@ -490,7 +500,25 @@ function wireEvent() {
     signedIn(r.data);
     $('meTitle').focus({ preventScroll: true });
     $('meCard').scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' });
-    if (S.adminKey) refresh();
+    // The organizer signing up on their own device: tie the role to this sign-up, so a lost link is no longer fatal.
+    if (S.adminKey) adminDo({ action: 'linkOrganizer', name }, t('orgLinkedOk', name));
+  });
+  $('recoverBtn').addEventListener('click', async () => {
+    if (!S.me) return;
+    let note = '';
+    for (;;) {
+      const pin = await openDialog({ title: t('pinDlgTitle', S.me.name), body: [note || t('orgRecoverDlgBody')], ok: t('orgRecoverOk'), pin: 'hide' });
+      if (pin == null) return;
+      const r = await api('claimAdmin', { id: EVENT_ID, name: S.me.name, pin });
+      if (r.ok) {
+        S.adminKey = r.data.adminKey; store.set(K_ADMIN, S.adminKey);
+        const { adminKey, ...view } = r.data; S.admin = view; S.state = view.state; remember(EVENT_ID, view.state.title, true);
+        toast(t('orgRecovered'), 6000); render(); refresh();
+        return;
+      }
+      if (r.data.error === 'not_found') { gone(); render(); return; }
+      note = errText(r.data);
+    }
   });
   $('findMeBtn').addEventListener('click', () => {
     // Bring "Who's in" into view, light it up for a moment, and put the keyboard focus on the first name.
@@ -577,6 +605,10 @@ function wireEvent() {
     ev.preventDefault();
     const at = $('cfgDrawAt').value ? new Date($('cfgDrawAt').value).getTime() : 0;
     adminDo({ action: 'settings', title: $('cfgTitle').value, budget: $('cfgBudget').value, exchangeOn: $('cfgExchangeOn').value, drawAt: Number.isFinite(at) ? at : 0 }, t('settingsSaved'));
+  });
+  $('orgLinkBtn').addEventListener('click', () => {
+    if ($('orgLinkBtn').dataset.act === 'untie') adminDo({ action: 'linkOrganizer', name: '' }, t('orgUnlinkedOk'));
+    else if (S.me) adminDo({ action: 'linkOrganizer', name: S.me.name }, t('orgLinkedOk', S.me.name));
   });
   $('destroyBtn').addEventListener('click', async () => {
     const yes = await openDialog({ title: t('destroyTitle'), body: t('destroyBody'), ok: t('del') });

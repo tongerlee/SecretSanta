@@ -220,3 +220,43 @@ test('a PIN is hashed once per request and the same PIN still signs in afterward
   const salts = [...item.matchAll(/"salt":\{"S":"([^"]+)"/g)].map((m) => m[1]);
   assert.equal(new Set(salts).size, salts.length, 'every person has their own salt');
 });
+
+test('a lost organizer link: the role tied to one sign-up comes back with that name + PIN, and the old key dies', async () => {
+  const p = await party();
+  // nothing tied yet: nobody can claim, however right their PIN is
+  assert.equal((await post('/api/claimAdmin', { id: p.id, name: 'Jennifer', pin: '1111' })).data.error, 'not_organizer');
+  assert.equal((await p.admin({ action: 'list' })).data.organizerName, '');
+  assert.equal((await p.me('Jennifer')).data.me.organizer, false);
+  // tie it to Jennifer; only the organizer key can do that, and only to someone on the list
+  assert.equal((await post('/api/admin', { id: p.id, adminKey: 'f'.repeat(32), action: 'linkOrganizer', name: 'Jennifer' })).status, 403);
+  assert.equal((await p.admin({ action: 'linkOrganizer', name: 'Nobody' })).data.error, 'no_such_person');
+  const linked = await p.admin({ action: 'linkOrganizer', name: 'Jennifer' });
+  assert.equal(linked.data.organizerName, 'Jennifer');
+  assert.equal((await p.me('Jennifer')).data.me.organizer, true);
+  assert.equal((await p.me('Mia')).data.me.organizer, false);
+  assert.ok(!JSON.stringify(await rawItem(p.id)).includes('1111'), 'still no PIN in the table');
+  // the wrong person, a wrong PIN (counted like a sign-in), then the right one
+  assert.equal((await post('/api/claimAdmin', { id: p.id, name: 'Mia', pin: '3333' })).data.error, 'not_organizer');
+  const wrong = await post('/api/claimAdmin', { id: p.id, name: 'Jennifer', pin: '9999' });
+  assert.equal(wrong.status, 401); assert.equal(wrong.data.left, 4);
+  const claimed = await post('/api/claimAdmin', { id: p.id, name: 'Jennifer', pin: '1111' });
+  assert.equal(claimed.status, 200); assert.match(claimed.data.adminKey, /^[0-9a-f]{32}$/); assert.notEqual(claimed.data.adminKey, p.adminKey);
+  assert.equal(claimed.data.organizerName, 'Jennifer');
+  // the old link is dead, the new one works, and the sign-in itself still works too
+  assert.equal((await p.admin({ action: 'list' })).status, 403);
+  const fresh = (body) => post('/api/admin', { id: p.id, adminKey: claimed.data.adminKey, ...body });
+  assert.equal((await fresh({ action: 'list' })).status, 200);
+  assert.equal((await post('/api/login', { id: p.id, name: 'Jennifer', pin: '1111' })).status, 200);
+  // five wrong PINs on the claim lock the name for sign-in as well
+  for (let i = 0; i < 5; i++) await post('/api/claimAdmin', { id: p.id, name: 'Jennifer', pin: '0000' });
+  assert.equal((await post('/api/login', { id: p.id, name: 'Jennifer', pin: '1111' })).data.error, 'locked');
+  // untie it; and a tie dies with the sign-up it was tied to
+  assert.equal((await fresh({ action: 'linkOrganizer', name: '' })).data.organizerName, '');
+  await fresh({ action: 'linkOrganizer', name: 'Mia' });
+  assert.equal((await fresh({ action: 'remove', name: 'Mia' })).data.organizerName, '');
+  await post('/api/join', { id: p.id, name: 'Mia', pin: '7777', wish: '' });
+  assert.equal((await post('/api/claimAdmin', { id: p.id, name: 'Mia', pin: '7777' })).data.error, 'not_organizer', 'a new Mia inherits nothing');
+  await fresh({ action: 'linkOrganizer', name: 'Leo' });
+  await post('/api/leave', { id: p.id, name: 'Leo', token: p.tokens.Leo });
+  assert.equal((await fresh({ action: 'list' })).data.organizerName, '');
+});

@@ -132,6 +132,11 @@
       <span id="nudgeText"></span>
       <button type="button" class="btn sm" id="shareBtn" data-i18n="share"></button>
     </div>
+    <!-- the organizer, on a device without the organizer link: their PIN brings the controls here -->
+    <div class="recover" id="recover" hidden>
+      <p><b data-i18n="orgRecoverTitle"></b> <span data-i18n="orgRecoverBody"></span></p>
+      <button type="button" class="btn" id="recoverBtn" data-i18n="orgRecoverBtn"></button>
+    </div>
     <form id="wishForm" class="stack inset">
       <label for="wishInput" data-i18n="wishLabel"></label>
       <textarea id="wishInput" rows="2" aria-describedby="wishHelp" maxlength="100" autocomplete="off"></textarea>
@@ -215,7 +220,14 @@
       <div class="stack">
         <p class="hint" data-i18n="myAdminHint"></p>
         <input id="adminUrl" readonly data-i18n-aria="adminLinkAria">
-        <button type="button" class="btn" data-copy="adminUrl" data-i18n="copyAdmin"></button>
+        <div class="row2">
+          <button type="button" class="btn" data-copy="adminUrl" data-i18n="copyAdmin"></button>
+          <a class="btn" id="adminMail" href="#" data-i18n="mailMe"></a>
+        </div>
+        <!-- the role tied to the organizer's own sign-up, so name + PIN can bring it back on any device -->
+        <h3 class="sub" data-i18n="orgLinkTitle"></h3>
+        <p class="hint" id="orgLinkText"></p>
+        <button type="button" class="btn" id="orgLinkBtn" hidden></button>
         <button type="button" class="link danger" id="destroyBtn" data-i18n="destroyNow"></button>
       </div>
     </details>

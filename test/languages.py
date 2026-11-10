@@ -24,7 +24,7 @@ def phone(browser, label, locale):
     ctx = browser.new_context(viewport={"width": 390, "height": 844}, device_scale_factor=1, locale=locale)
     page = ctx.new_page()
     page.on("pageerror", lambda e: errors.append(f"{label}: {e}"))
-    quiet = ("401", "404", "409", "429")
+    quiet = ("401", "403", "404", "409", "429")      # expected answers: wrong PIN, retired organizer link, gone, taken, locked
     page.on("console", lambda m: errors.append(f"{label} console: {m.text}") if m.type == "error" and not any(q in m.text for q in quiet) else None)
     return page
 
@@ -228,6 +228,30 @@ with sync_playwright() as p:
     assert not org_view.evaluate("document.getElementById('manage').open")
     part_view = phone(browser, "participant view", "en-US"); part_view.goto(org_view.url); part_view.wait_for_selector("#joinCard:not([hidden])")
     assert part_view.is_hidden("#adminCard") and part_view.evaluate("localStorage.length") == 0 or part_view.is_hidden("#adminCard")
+
+    # ---- a lost organizer link: the role is tied to the organizer's own sign-up, and name + PIN bring it back elsewhere
+    ev = post("create", {"title": "Recovery check", "budget": "$20", "exchangeOn": "2026-12-24"})
+    a = phone(browser, "organizer device", "en-US"); a.goto(SITE + "?e=" + ev["id"] + "#admin=" + ev["adminKey"]); a.wait_for_selector("#adminCard:not([hidden])")
+    a.evaluate("document.getElementById('adminLinkBox').open = true")
+    assert "Not tied to a sign-up yet" in a.inner_text("#orgLinkText") and a.is_hidden("#orgLinkBtn")
+    a.fill("#joinName", "Host"); a.fill("#joinPin", "4321"); a.click("#joinBtn"); a.wait_for_selector("#adminOk:has-text('Tied to Host')")
+    assert "Tied to your sign-up as Host" in a.inner_text("#orgLinkText") and a.inner_text("#orgLinkBtn") == "Untie"
+    assert a.is_hidden("#recover"), "this device has the organizer link, so there is nothing to recover"
+    old_link = a.input_value("#adminUrl")
+    b = phone(browser, "lost the link", "en-US"); b.goto(SITE + "?e=" + ev["id"]); b.wait_for_selector("#names button")
+    b.locator("#names button", has_text="Host").click(); b.fill("#dlgPin", "4321"); b.click("#dlgOk"); b.wait_for_selector("#meCard:not([hidden])")
+    assert b.is_visible("#recover") and b.is_hidden("#adminCard")
+    b.screenshot(path=str(OUT / "check-recover.png"), full_page=False)
+    b.click("#recoverBtn"); b.fill("#dlgPin", "0000"); b.click("#dlgOk"); b.wait_for_selector("#dlgBody p:has-text('4 tries left')")   # wrong PIN counts, like a sign-in
+    b.fill("#dlgPin", "4321"); b.click("#dlgOk"); b.wait_for_selector("#adminCard:not([hidden])")
+    assert "Organizer controls are back" in b.inner_text("#toast") and b.is_hidden("#recover")
+    b.evaluate("document.getElementById('adminLinkBox').open = true")
+    assert b.input_value("#adminUrl") != old_link and b.input_value("#adminUrl").startswith(SITE + "?e=" + ev["id"] + "#admin=")
+    assert b.get_attribute("#adminMail", "href").startswith("mailto:?subject=Recovery")
+    a.reload(); a.wait_for_selector("#recover:not([hidden])", timeout=15000)                   # the old link is dead; that device can recover the same way
+    assert a.is_hidden("#adminCard")
+    b.click("#orgLinkBtn"); b.wait_for_selector("#adminOk:has-text('Untied')")
+    assert "Tie it to my sign-up (Host)" in b.inner_text("#orgLinkBtn")
 
     # the pause control: visible on the picture, works by mouse and keyboard, stops pets, lights and snow together
     pg = phone(browser, "motion", "en-US"); pg.goto(fresh); pg.wait_for_selector("#joinCard:not([hidden])")
