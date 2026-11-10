@@ -2,6 +2,17 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: Secret Santa - static site on Amplify Hosting, API on Lambda (Function URL), one DynamoDB table
 
+Parameters:
+  # The site's own address once a custom domain is attached in the Amplify console (Hosting > Custom domains).
+  # Leave empty to use only the default main.<app>.amplifyapp.com address.
+  CustomDomain:
+    Type: String
+    Default: santa.departmentofunnecessarythings.com
+    AllowedPattern: '^$|^[a-z0-9.-]+$'
+
+Conditions:
+  HasCustomDomain: !Not [!Equals [!Ref CustomDomain, '']]
+
 Resources:
   # One item per event (pk = E#<id>), plus short-lived counters that limit how fast events can be created.
   Table:
@@ -62,11 +73,11 @@ Resources:
               Resource: !GetAtt Table.Arn
       FunctionUrlConfig:
         AuthType: NONE
-        # Only pages served from the Amplify site may call the API from a browser.
-        # If you attach your own domain to the site, add it to AllowOrigins.
+        # Only pages served from the site (default address and custom domain) may call the API from a browser.
         Cors:
           AllowOrigins:
             - !Sub 'https://main.${Site.DefaultDomain}'
+            - !If [HasCustomDomain, !Sub 'https://${CustomDomain}', !Ref AWS::NoValue]
           AllowMethods:
             - POST
           AllowHeaders:
@@ -86,7 +97,10 @@ Resources:
 
 Outputs:
   SiteUrl:
-    Description: The website. Create events here.
+    Description: The website (the custom domain once it is attached). Create events here; link previews point here.
+    Value: !If [HasCustomDomain, !Sub 'https://${CustomDomain}/', !Sub 'https://main.${Site.DefaultDomain}/']
+  DefaultSiteUrl:
+    Description: The site's built-in Amplify address, which keeps working alongside the custom domain
     Value: !Sub 'https://main.${Site.DefaultDomain}/'
   ApiEndpoint:
     Description: Where the site sends its API calls (deploy.sh writes this into config.js)

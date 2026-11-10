@@ -37,6 +37,12 @@ Region 要用你的账号能用的那个。2026 年 9 月之后新注册的 AWS 
 1. 打开群链接，填名字，自己设一个 4 位数字 PIN，心愿可填可不填，点报名。
 2. 抽签后再打开同一个链接。同一台手机直接看到自己的吊牌；换了设备就点自己的名字，输一次 PIN。
 
+## 自己的域名
+
+`template.yaml` 里的 `CustomDomain` 参数就是网站的正式地址（现在是 `santa.departmentofunnecessarythings.com`）。它决定两件事：接口允许哪个网址调用（CORS），以及微信/iMessage 链接预览里的图片地址。换域名就改这个参数，`git pull && ./deploy.sh`。
+
+域名本身在 Amplify 控制台挂：App → Hosting → Custom domains → Add domain，填根域名后选 Manual configuration，只保留 `santa` 这个子域，再把它给出的两条 CNAME 加到 DNS 服务商（这个域名的 DNS 在 Squarespace Domains）。证书由 Amplify 自动签发和续期。
+
 ## 语言
 
 页面有四种语言：中文、English、한국어、Tiếng Việt。
