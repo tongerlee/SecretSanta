@@ -104,9 +104,10 @@ def run(p):
         if s != 200: note(False, f"sign-up of {name!r}", (s, d))
     org.reload(); org.wait_for_selector("#manage"); org.evaluate("document.getElementById('manage').open = true"); org.wait_for_selector(f"#adminList li >> nth={len(crowd)}", timeout=20000)
     def harmless():
-        dom = org.evaluate("({ imgs: document.images.length, scripts: document.scripts.length, planted: document.querySelectorAll('img[src=\"x\"], main script, #adminList small b, #adminList small script, #names script').length, hit: window.__xss || 0 })")
+        dom = org.evaluate("({ imgs: document.images.length, petImgs: document.querySelectorAll('img.pets').length, scripts: document.scripts.length, planted: document.querySelectorAll('img[src=\"x\"], main script, #adminList small b, #adminList small script, #names script').length, hit: window.__xss || 0 })")
         shown = org.inner_text("#adminList")
-        ok = dom["imgs"] == 1 and dom["scripts"] == 2 and dom["planted"] == 0 and "<img src=x onerror=1>" in shown and "<script>1</script>" in shown
+        # the only images on the page are the pet artwork (two clipped copies of pets.png); anything else was planted
+        ok = dom["imgs"] == dom["petImgs"] and dom["scripts"] == 2 and dom["planted"] == 0 and "<img src=x onerror=1>" in shown and "<script>1</script>" in shown
         return (ok, (dom, shown[:200]))
     step("names and wishes containing HTML show as plain text and run nothing", harmless)
     step("organizer page layout with long and unusual names", lambda: layout(org))
