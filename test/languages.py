@@ -45,6 +45,8 @@ def check(page, label):
         .filter(n => n.offsetParent && n.scrollWidth > n.clientWidth + 1).map(n => (n.id || n.className || n.tagName) + ': ' + n.textContent.slice(0, 30))""")
     if spill: errors.append(f"{label}: text spills out of {spill}")
     empty = page.evaluate("""() => [...document.querySelectorAll('[data-i18n]')].filter(n => !n.textContent.trim()).map(n => n.dataset.i18n)""")
+    gap = page.evaluate("(() => { const a = document.querySelector('.nametag.cat').getBoundingClientRect(), b = document.querySelector('.nametag.dog').getBoundingClientRect(); return b.left - a.right; })()")
+    if gap < 4: errors.append(f"{label}: the two pet name tags touch (gap {gap:.0f}px)")
     if empty: errors.append(f"{label}: untranslated {empty}")
 
 def shot(page, lang, name, full=True):

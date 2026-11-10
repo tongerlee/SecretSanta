@@ -9,9 +9,9 @@ const SANTA_I18N = (() => {
   const zhW = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
   const zh = {
     langLabel: '语言',
-    petsAlt: '灰白猫蛋饼和伯恩山小狗 Waffle 坐在雪地上',
+    petsAlt: '灰白猫蛋饼和伯恩山小狗小蛙（Waffle）坐在雪地上',
     petCat: '摸摸蛋饼',
-    petDog: '摸摸 Waffle',
+    petDog: '摸摸小蛙',
     pauseAll: '暂停动画（宠物、雪花、彩灯）',
     playAll: '播放动画',
     eyebrow: '交换礼物 · GIFT EXCHANGE',
