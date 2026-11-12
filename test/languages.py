@@ -235,7 +235,7 @@ with sync_playwright() as p:
     a.evaluate("document.getElementById('adminLinkBox').open = true")
     assert "Not tied to a sign-up yet" in a.inner_text("#orgLinkText") and a.is_hidden("#orgLinkBtn")
     a.fill("#joinName", "Host"); a.fill("#joinPin", "4321"); a.click("#joinBtn"); a.wait_for_selector("#adminOk:has-text('Tied to Host')")
-    assert "Tied to your sign-up as Host" in a.inner_text("#orgLinkText") and a.inner_text("#orgLinkBtn") == "Untie"
+    a.wait_for_selector("#orgLinkText:has-text('Tied to your sign-up as Host')"); assert a.inner_text("#orgLinkBtn") == "Untie"
     assert a.is_hidden("#recover"), "this device has the organizer link, so there is nothing to recover"
     old_link = a.input_value("#adminUrl")
     b = phone(browser, "lost the link", "en-US"); b.goto(SITE + "?e=" + ev["id"]); b.wait_for_selector("#names button")

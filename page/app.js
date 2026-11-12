@@ -595,7 +595,7 @@ function wireEvent() {
     S.busy = true; $('adminOk').textContent = ''; $('adminErr').textContent = ''; render();
     const r = await api('admin', Object.assign({ id: EVENT_ID, adminKey: S.adminKey }, body));
     S.busy = false;
-    if (r.ok && r.data.state) { S.admin = r.data; S.state = r.data.state; $('adminOk').textContent = okText; }
+    if (r.ok && r.data.state) { S.admin = r.data; S.state = r.data.state; render(); $('adminOk').textContent = okText; }   // the panel shows the result at once, not after the refresh
     else if (!r.ok) $('adminErr').textContent = errText(r.data);
     if (body.action !== 'destroy') await refresh();
     return r.ok;
