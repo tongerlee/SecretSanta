@@ -59,10 +59,11 @@ def walk(browser, lang, c):
     org.goto(SITE); org.wait_for_selector("#createCard:not([hidden])")
     assert org.evaluate("document.documentElement.lang") == c["html"], (lang, "did not follow the phone's language")
     assert org.get_attribute(f"#langs button[data-lang={lang}]", "aria-pressed") == "true"
-    org.fill("#newBudget", c["budget"]); org.fill("#newDate", "2026-12-24")
+    org.fill("#newBudget", c["budget"]); org.fill("#newDate", "2026-12-24"); org.fill("#newOrgPin", "8642")
     shot(org, lang, "1-home")
     org.click("#createBtn"); org.wait_for_selector("#createdCard:not([hidden])")
     share = org.input_value("#newShare")
+    assert "PIN" in org.inner_text("#createdCard .keep"), "the hand-off says the organizer PIN is the spare key"
     assert org.get_attribute("#newAdmin", "type") == "password" and org.get_attribute("#newAdminMail", "href").startswith("mailto:?subject=")   # the organizer link starts masked
     shot(org, lang, "2-created")
     org.click("#newOpen"); org.wait_for_selector("#adminCard:not([hidden])")
@@ -208,7 +209,7 @@ with sync_playwright() as p:
     # saved events sit above "start a new event" once this device has any
     home = phone(browser, "home order", "en-US"); home.goto(SITE); home.wait_for_selector("#createCard:not([hidden])")
     assert home.is_hidden("#mineCard"), "no saved events yet, so the list should be hidden"
-    home.fill("#newDate", "2026-12-24"); home.click("#createBtn"); home.wait_for_selector("#createdCard:not([hidden])")
+    home.fill("#newDate", "2026-12-24"); home.fill("#newOrgPin", "8642"); home.click("#createBtn"); home.wait_for_selector("#createdCard:not([hidden])")
     home.goto(SITE); home.wait_for_selector("#mineCard:not([hidden])")
     order = home.evaluate("[...document.querySelectorAll('.flow > .card:not([hidden])')].map(c => c.id)")
     assert order.index("mineCard") < order.index("createCard"), order
@@ -229,29 +230,37 @@ with sync_playwright() as p:
     part_view = phone(browser, "participant view", "en-US"); part_view.goto(org_view.url); part_view.wait_for_selector("#joinCard:not([hidden])")
     assert part_view.is_hidden("#adminCard") and part_view.evaluate("localStorage.length") == 0 or part_view.is_hidden("#adminCard")
 
-    # ---- a lost organizer link: the role is tied to the organizer's own sign-up, and name + PIN bring it back elsewhere
-    ev = post("create", {"title": "Recovery check", "budget": "$20", "exchangeOn": "2026-12-24"})
+    # ---- a lost organizer link: the organizer PIN (set at creation) brings the controls back on any device
+    ev = post("create", {"title": "Recovery check", "budget": "$20", "exchangeOn": "2026-12-24"})          # an older event: no organizer PIN yet
     a = phone(browser, "organizer device", "en-US"); a.goto(SITE + "?e=" + ev["id"] + "#admin=" + ev["adminKey"]); a.wait_for_selector("#adminCard:not([hidden])")
     a.evaluate("document.getElementById('adminLinkBox').open = true")
-    assert "Not tied to a sign-up yet" in a.inner_text("#orgLinkText") and a.is_hidden("#orgLinkBtn")
-    a.fill("#joinName", "Host"); a.fill("#joinPin", "4321"); a.click("#joinBtn"); a.wait_for_selector("#adminOk:has-text('Tied to Host')")
-    a.wait_for_selector("#orgLinkText:has-text('Tied to your sign-up as Host')"); assert a.inner_text("#orgLinkBtn") == "Untie"
-    assert a.is_hidden("#recover"), "this device has the organizer link, so there is nothing to recover"
+    assert "no organizer PIN yet" in a.inner_text("#orgPinText") and a.inner_text("#orgPinBtn") == "Set an organizer PIN"
+    assert a.is_hidden("#orgLinkText") and a.is_hidden("#orgLinkBtn") and a.is_hidden("#orgClaimBtn")
+    b = phone(browser, "lost the link", "en-US"); b.goto(SITE + "?e=" + ev["id"]); b.wait_for_selector("#joinCard:not([hidden])")
+    assert b.is_hidden("#orgClaimBtn"), "no PIN, so nothing to offer on another device"
+    a.click("#orgPinBtn"); a.fill("#dlgPin", "12"); a.click("#dlgOk"); a.wait_for_selector("#adminErr:not(:empty)")             # 4-8 digits
+    a.click("#orgPinBtn"); a.fill("#dlgPin", "4321"); a.click("#dlgOk"); a.wait_for_selector("#adminOk:has-text('Organizer PIN saved')")
+    assert "I’m the organizer" in a.inner_text("#orgPinText") and a.inner_text("#orgPinBtn") == "Change organizer PIN"
     old_link = a.input_value("#adminUrl")
-    b = phone(browser, "lost the link", "en-US"); b.goto(SITE + "?e=" + ev["id"]); b.wait_for_selector("#names button")
-    b.locator("#names button", has_text="Host").click(); b.fill("#dlgPin", "4321"); b.click("#dlgOk"); b.wait_for_selector("#meCard:not([hidden])")
-    assert b.is_visible("#recover") and b.is_hidden("#adminCard")
+    b.reload(); b.wait_for_selector("#orgClaimBtn:not([hidden])")
     b.screenshot(path=str(OUT / "check-recover.png"), full_page=False)
-    b.click("#recoverBtn"); b.fill("#dlgPin", "0000"); b.click("#dlgOk"); b.wait_for_selector("#dlgBody p:has-text('4 tries left')")   # wrong PIN counts, like a sign-in
+    b.click("#orgClaimBtn"); b.fill("#dlgPin", "0000"); b.click("#dlgOk"); b.wait_for_selector("#dlgBody p:has-text('4 tries left')")   # wrong PIN counts
     b.fill("#dlgPin", "4321"); b.click("#dlgOk"); b.wait_for_selector("#adminCard:not([hidden])")
-    assert "Organizer controls are back" in b.inner_text("#toast") and b.is_hidden("#recover")
+    assert "Organizer controls are back" in b.inner_text("#toast") and b.is_hidden("#orgClaimBtn")
     b.evaluate("document.getElementById('adminLinkBox').open = true")
     assert b.input_value("#adminUrl") != old_link and b.input_value("#adminUrl").startswith(SITE + "?e=" + ev["id"] + "#admin=")
     assert b.get_attribute("#adminMail", "href").startswith("mailto:?subject=Recovery")
-    a.reload(); a.wait_for_selector("#recover:not([hidden])", timeout=15000)                   # the old link is dead; that device can recover the same way
+    a.reload(); a.wait_for_selector("#orgClaimBtn:not([hidden])", timeout=15000)                   # the old link is dead; that device can recover the same way
     assert a.is_hidden("#adminCard")
-    b.click("#orgLinkBtn"); b.wait_for_selector("#adminOk:has-text('Untied')")
-    assert "Tie it to my sign-up (Host)" in b.inner_text("#orgLinkBtn")
+    # a new event made on the page carries its PIN from the start
+    # the form insists on a PIN (checked before anything is sent), and an event created with one is covered from the start
+    c = phone(browser, "new organizer", "en-US"); c.goto(SITE); c.wait_for_selector("#createCard:not([hidden])")
+    c.fill("#newDate", "2026-12-24"); c.click("#createBtn"); c.wait_for_selector("#createErr:not(:empty)")
+    assert c.evaluate("document.activeElement.id") == "newOrgPin"
+    ev2 = post("create", {"title": "With a PIN", "exchangeOn": "2026-12-24", "orgPin": "2468"})
+    c.goto(SITE + "?e=" + ev2["id"] + "#admin=" + ev2["adminKey"]); c.wait_for_selector("#adminCard:not([hidden])"); c.evaluate("document.getElementById('adminLinkBox').open = true")
+    assert c.inner_text("#orgPinBtn") == "Change organizer PIN"
+    d = phone(browser, "another device", "en-US"); d.goto(SITE + "?e=" + ev2["id"]); d.wait_for_selector("#orgClaimBtn:not([hidden])")
 
     # the pause control: visible on the picture, works by mouse and keyboard, stops pets, lights and snow together
     pg = phone(browser, "motion", "en-US"); pg.goto(fresh); pg.wait_for_selector("#joinCard:not([hidden])")

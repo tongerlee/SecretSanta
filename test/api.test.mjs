@@ -26,7 +26,7 @@ async function party(people = PEOPLE) {
 test('creating an event gives a link id and an organizer key that is never stored', async () => {
   const ev = await create();
   assert.match(ev.id, /^[a-z0-9]{12}$/); assert.match(ev.adminKey, /^[0-9a-f]{32}$/);
-  assert.deepEqual(ev.state, { id: ev.id, title: 'Secret Santa 2026', budget: '$50 以内', exchangeOn: '2026-12-24', status: 'open', drawAt: 0, people: [], min: 3, deleteAt: Date.UTC(2027, 0, 1, 12), keepDays: 7 });
+  assert.deepEqual(ev.state, { id: ev.id, title: 'Secret Santa 2026', budget: '$50 以内', exchangeOn: '2026-12-24', status: 'open', drawAt: 0, people: [], min: 3, deleteAt: Date.UTC(2027, 0, 1, 12), keepDays: 7, orgPin: false });
   const item = await rawItem(ev.id);
   assert.ok(!JSON.stringify(item).includes(ev.adminKey), 'only a hash of the organizer key is in the table');
   assert.equal(Number(item.ttl.N), Date.UTC(2027, 0, 1, 12) / 1000, 'DynamoDB TTL is stamped a week after the exchange date');
@@ -109,7 +109,7 @@ test('draw: everyone gets exactly one other person, and only their own result', 
   const adminSees = await p.admin({ action: 'list' });
   assert.ok(!JSON.stringify(adminSees.data).includes('giftTo'), 'the organizer response carries no pairs');
   const pub = await post('/api/state', { id: p.id });
-  assert.deepEqual(Object.keys(pub.data).sort(), ['budget', 'deleteAt', 'drawAt', 'exchangeOn', 'id', 'keepDays', 'min', 'people', 'status', 'title']);
+  assert.deepEqual(Object.keys(pub.data).sort(), ['budget', 'deleteAt', 'drawAt', 'exchangeOn', 'id', 'keepDays', 'min', 'orgPin', 'people', 'status', 'title']);
 
   const gives = {};
   for (const [name] of PEOPLE) {
@@ -259,4 +259,34 @@ test('a lost organizer link: the role tied to one sign-up comes back with that n
   await fresh({ action: 'linkOrganizer', name: 'Leo' });
   await post('/api/leave', { id: p.id, name: 'Leo', token: p.tokens.Leo });
   assert.equal((await fresh({ action: 'list' })).data.organizerName, '');
+});
+
+test('an organizer PIN set at creation (or later) brings the controls back from any device', async () => {
+  // creation validates it, and stores only a hash
+  assert.equal((await post('/api/create', { title: 'x', exchangeOn: '2026-12-24', orgPin: '12' })).data.error, 'bad_pin_format');
+  const ev = (await post('/api/create', { title: 'Spare key', exchangeOn: '2026-12-24', orgPin: '246810' })).data;
+  assert.ok(ev.adminKey && ev.state.orgPin === true);
+  assert.ok(!JSON.stringify(await rawItem(ev.id)).includes('246810'));
+  assert.equal((await post('/api/state', { id: ev.id })).data.orgPin, true);
+  // wrong PINs count and lock; the right one mints a new key and retires the old
+  const wrong = await post('/api/claimAdmin', { id: ev.id, orgPin: '000000' });
+  assert.equal(wrong.status, 401); assert.equal(wrong.data.left, 4);
+  const got = await post('/api/claimAdmin', { id: ev.id, orgPin: '246810' });
+  assert.equal(got.status, 200); assert.match(got.data.adminKey, /^[0-9a-f]{32}$/); assert.notEqual(got.data.adminKey, ev.adminKey);
+  assert.equal((await post('/api/admin', { id: ev.id, adminKey: ev.adminKey, action: 'list' })).status, 403);
+  assert.equal((await post('/api/admin', { id: ev.id, adminKey: got.data.adminKey, action: 'list' })).status, 200);
+  for (let i = 0; i < 5; i++) await post('/api/claimAdmin', { id: ev.id, orgPin: '111111' });
+  assert.equal((await post('/api/claimAdmin', { id: ev.id, orgPin: '246810' })).data.error, 'locked');
+  // an older event without one: the claim says so; the organizer can set one from the controls
+  const p = await party();
+  assert.equal((await p.admin({ action: 'list' })).data.orgPin, false);
+  assert.equal((await post('/api/claimAdmin', { id: p.id, orgPin: '1234' })).data.error, 'no_org_pin');
+  assert.equal((await p.admin({ action: 'setOrgPin', pin: 'abcd' })).data.error, 'bad_pin_format');
+  assert.equal((await p.admin({ action: 'setOrgPin', pin: '9876' })).data.orgPin, true);
+  assert.equal((await post('/api/claimAdmin', { id: p.id, orgPin: '9876' })).status, 200);
+  // changing it needs the organizer key, and the old PIN then stops working
+  const k2 = (await post('/api/claimAdmin', { id: p.id, orgPin: '9876' })).data.adminKey;
+  assert.equal((await post('/api/admin', { id: p.id, adminKey: k2, action: 'setOrgPin', pin: '5555' })).status, 200);
+  assert.equal((await post('/api/claimAdmin', { id: p.id, orgPin: '9876' })).status, 401);
+  assert.equal((await post('/api/claimAdmin', { id: p.id, orgPin: '5555' })).status, 200);
 });

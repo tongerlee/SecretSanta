@@ -323,6 +323,7 @@ h3.sub{margin:6px 0 0;font:700 14px/1.3 var(--font-body);color:var(--pine)}
 /* ---- the brand, as a rubber stamp ---- */
 footer{display:flex;flex-direction:column;align-items:center;gap:8px;padding:10px 8px 4px}
 .foot-line{margin:0;line-height:1.5;max-width:36em}
+.foot-link{background:none;border:0;padding:6px 8px;min-height:44px;font:inherit;font-size:14px;color:var(--on-night-soft);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .foot-line:empty{display:none}
 footer .stamp{margin-bottom:6px}
 .stamp{display:inline-flex;flex-direction:column;align-items:center;gap:1px;padding:7px 14px 8px;border:2px solid var(--on-night-soft);border-radius:8px;color:var(--on-night-soft);text-decoration:none;transform:rotate(-2.5deg);opacity:.85;

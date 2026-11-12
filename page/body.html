@@ -108,6 +108,9 @@
       <input id="newBudget" maxlength="20" autocomplete="off" data-i18n-ph="budgetPh">
       <label for="newDate" data-i18n="exchangeDay"></label>
       <input id="newDate" type="date">
+      <label for="newOrgPin" data-i18n="orgPinLabel"></label>
+      <input id="newOrgPin" class="pin" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" aria-describedby="orgPinHint">
+      <p class="hint" id="orgPinHint" data-i18n="orgPinHint"></p>
       <button class="btn primary" id="createBtn" data-i18n="createBtn"></button>
       <p class="err" id="createErr" role="alert"></p>
     </form>
@@ -226,8 +229,10 @@
         </div>
         <!-- the role tied to the organizer's own sign-up, so name + PIN can bring it back on any device -->
         <h3 class="sub" data-i18n="orgLinkTitle"></h3>
-        <p class="hint" id="orgLinkText"></p>
-        <button type="button" class="btn" id="orgLinkBtn" hidden></button>
+        <p class="hint" id="orgPinText"></p>
+        <button type="button" class="btn" id="orgPinBtn"></button>
+        <p class="hint" id="orgLinkText" hidden></p>
+        <button type="button" class="btn danger" id="orgLinkBtn" data-i18n="orgUnlinkBtn" hidden></button>
         <button type="button" class="link danger" id="destroyBtn" data-i18n="destroyNow"></button>
       </div>
     </details>
@@ -241,6 +246,7 @@
     </a>
     <p class="foot-line" data-i18n="merry"></p>
     <p class="foot-line" id="retention"></p>
+    <button type="button" class="foot-link" id="orgClaimBtn" data-i18n="orgClaim" hidden></button>
     <a class="foot-line" id="homeLink" href="./" data-i18n="makeOwn" hidden></a>
   </footer>
  </div>

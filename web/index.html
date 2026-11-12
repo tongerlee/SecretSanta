@@ -342,6 +342,7 @@ h3.sub{margin:6px 0 0;font:700 14px/1.3 var(--font-body);color:var(--pine)}
 /* ---- the brand, as a rubber stamp ---- */
 footer{display:flex;flex-direction:column;align-items:center;gap:8px;padding:10px 8px 4px}
 .foot-line{margin:0;line-height:1.5;max-width:36em}
+.foot-link{background:none;border:0;padding:6px 8px;min-height:44px;font:inherit;font-size:14px;color:var(--on-night-soft);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .foot-line:empty{display:none}
 footer .stamp{margin-bottom:6px}
 .stamp{display:inline-flex;flex-direction:column;align-items:center;gap:1px;padding:7px 14px 8px;border:2px solid var(--on-night-soft);border-radius:8px;color:var(--on-night-soft);text-decoration:none;transform:rotate(-2.5deg);opacity:.85;
@@ -488,6 +489,9 @@ footer .stamp{margin-bottom:6px}
       <input id="newBudget" maxlength="20" autocomplete="off" data-i18n-ph="budgetPh">
       <label for="newDate" data-i18n="exchangeDay"></label>
       <input id="newDate" type="date">
+      <label for="newOrgPin" data-i18n="orgPinLabel"></label>
+      <input id="newOrgPin" class="pin" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" aria-describedby="orgPinHint">
+      <p class="hint" id="orgPinHint" data-i18n="orgPinHint"></p>
       <button class="btn primary" id="createBtn" data-i18n="createBtn"></button>
       <p class="err" id="createErr" role="alert"></p>
     </form>
@@ -606,8 +610,10 @@ footer .stamp{margin-bottom:6px}
         </div>
         <!-- the role tied to the organizer's own sign-up, so name + PIN can bring it back on any device -->
         <h3 class="sub" data-i18n="orgLinkTitle"></h3>
-        <p class="hint" id="orgLinkText"></p>
-        <button type="button" class="btn" id="orgLinkBtn" hidden></button>
+        <p class="hint" id="orgPinText"></p>
+        <button type="button" class="btn" id="orgPinBtn"></button>
+        <p class="hint" id="orgLinkText" hidden></p>
+        <button type="button" class="btn danger" id="orgLinkBtn" data-i18n="orgUnlinkBtn" hidden></button>
         <button type="button" class="link danger" id="destroyBtn" data-i18n="destroyNow"></button>
       </div>
     </details>
@@ -621,6 +627,7 @@ footer .stamp{margin-bottom:6px}
     </a>
     <p class="foot-line" data-i18n="merry"></p>
     <p class="foot-line" id="retention"></p>
+    <button type="button" class="foot-link" id="orgClaimBtn" data-i18n="orgClaim" hidden></button>
     <a class="foot-line" id="homeLink" href="./" data-i18n="makeOwn" hidden></a>
   </footer>
  </div>
@@ -668,7 +675,7 @@ const SANTA_I18N = (() => {
     shareLabel: '发到群里的链接',
     copyShare: '复制群链接',
     forYou: '只给你自己的',
-    forYouBody: '抽签、改设置都靠这条链接，别发到群里。这里默认把它遮住了：现在就复制存好，或者发一封邮件给自己。',
+    forYouBody: '抽签、改设置都靠这条链接，别发到群里。这里默认把它遮住了：复制存好，或者发一封邮件给自己。真弄丢了也不怕：在任何设备上用你刚设的组织者 PIN 就能拿回来。',
     adminLinkLabel: '你的组织者链接',
     copyAdmin: '复制组织者链接',
     reveal: '显示链接',
@@ -681,6 +688,8 @@ const SANTA_I18N = (() => {
     eventName: '活动名称',
     budgetPh: '比如 $50 以内',
     createBtn: '创建活动',
+    orgPinLabel: '组织者 PIN',
+    orgPinHint: '4–8 位数字，只有你知道。换了设备或弄丢链接时，凭它拿回组织者权限。',
     privacyShort: '不用注册。只存名字、心愿和 PIN 的哈希，交换日一周后整个活动自动删除。',
     privacyMore: '具体存了什么？',
     privacyDetails: '只有参加的人自己填的名字和心愿，以及 PIN 的加密哈希（不是 PIN 本身）。抽签结果只有本人凭 PIN 能看，组织者也看不到谁抽到谁。活动在交换日 7 天后自动删除，组织者也可以提前手动删除。',
@@ -732,12 +741,16 @@ const SANTA_I18N = (() => {
     orgRecoverOk: '拿回权限',
     orgRecovered: '组织者权限已经回到这台设备。到「我的组织者链接」里把新链接存一份。',
     orgLinkTitle: '万一链接弄丢了',
+    orgPinOn: '在任何设备上打开群链接，点页面底部的「我是组织者」，输入组织者 PIN，权限就回来了（旧链接同时作废）。',
+    orgPinOff: '这个活动还没有组织者 PIN。设一个，以后换设备或弄丢链接都能凭它拿回权限。',
+    orgPinSetBtn: '设置组织者 PIN',
+    orgPinChange: '修改组织者 PIN',
+    orgPinDlgTitle: '组织者 PIN',
+    orgPinDlgBody: '4–8 位数字，只有你知道。',
+    orgPinSaved: '组织者 PIN 已保存。',
+    orgClaim: '我是组织者，拿回权限',
     orgLinked: (name) => `已绑定到你的报名「${name}」。在任何设备上：点你的名字、输入 PIN，再点「拿回组织者权限」就行。`,
-    orgNotLinked: '还没绑定到任何报名。你自己报名后，就能用名字和 PIN 把组织者权限找回来。',
-    orgNotLinkedMine: '还没绑定。绑定到你的报名后，用名字和 PIN 就能在任何设备上找回组织者权限。',
-    orgLinkBtn: (name) => `绑定到我的报名（${name}）`,
     orgUnlinkBtn: '解除绑定',
-    orgLinkedOk: (name) => `已绑定到「${name}」：以后用这个名字和 PIN 就能找回组织者权限。`,
     orgUnlinkedOk: '已解除绑定。现在只有组织者链接能管理这个活动。',
     merry: 'Merry Christmas！',
     makeOwn: '建一个自己的活动',
@@ -756,6 +769,7 @@ const SANTA_I18N = (() => {
     e_already_drawn: '已经抽过了。',
     e_forbidden: '组织者链接不对。请用创建活动时拿到的那个组织者链接重新打开。',
     e_not_organizer: '这个报名没有绑定组织者权限。',
+    e_no_org_pin: '这个活动还没有设组织者 PIN。',
     e_not_found: '这个活动不在了。',
     e_bad_date: '先选交换日。',
     e_date_past: '交换日不能选已经过去太久的日期。',
@@ -863,7 +877,7 @@ const SANTA_I18N = (() => {
     shareLabel: 'Link for the group chat',
     copyShare: 'Copy group link',
     forYou: 'For you only',
-    forYouBody: 'This one runs the draw and changes settings, so keep it out of the group chat. It’s hidden here by default: copy it somewhere safe or email it to yourself now.',
+    forYouBody: 'This one runs the draw and changes settings, so keep it out of the group chat. It’s hidden here by default: copy it somewhere safe or email it to yourself. If it ever goes missing, the organizer PIN you just set brings it back on any device.',
     adminLinkLabel: 'Your organizer link',
     copyAdmin: 'Copy organizer link',
     reveal: 'Show link',
@@ -876,6 +890,8 @@ const SANTA_I18N = (() => {
     eventName: 'Event name',
     budgetPh: 'e.g. under $50',
     createBtn: 'Create event',
+    orgPinLabel: 'Organizer PIN',
+    orgPinHint: '4–8 digits, known only to you. It gets your organizer controls back on any device if you lose the link.',
     privacyShort: 'No account needed. Just names, wishes and a hashed PIN, and the whole event deletes itself a week after exchange day.',
     privacyMore: 'What exactly is stored?',
     privacyDetails: 'Only the names and wishes people type in, plus a scrambled (hashed) copy of each PIN, never the PIN itself. Each match is visible only to that person with their PIN; not even the organizer can see who got whom. The event deletes itself 7 days after exchange day, and the organizer can delete it any time before that.',
@@ -927,12 +943,16 @@ const SANTA_I18N = (() => {
     orgRecoverOk: 'Get them back',
     orgRecovered: 'Organizer controls are back on this device. Save the new link under “My organizer link”.',
     orgLinkTitle: 'If you ever lose this link',
+    orgPinOn: 'On any device, open the group link, tap “I’m the organizer” at the bottom of the page and enter your organizer PIN. The controls come back there and the old link stops working.',
+    orgPinOff: 'This event has no organizer PIN yet. Set one and any device can get these controls back with it.',
+    orgPinSetBtn: 'Set an organizer PIN',
+    orgPinChange: 'Change organizer PIN',
+    orgPinDlgTitle: 'Organizer PIN',
+    orgPinDlgBody: '4–8 digits, known only to you.',
+    orgPinSaved: 'Organizer PIN saved.',
+    orgClaim: 'I’m the organizer: get my controls back',
     orgLinked: (name) => `Tied to your sign-up as ${name}. On any device: tap your name, enter your PIN, then “Get my organizer controls back”.`,
-    orgNotLinked: 'Not tied to a sign-up yet. Once you sign up yourself, your name and PIN can bring these controls back.',
-    orgNotLinkedMine: 'Not tied to a sign-up yet. Tie it to yours and your name and PIN can bring these controls back on any device.',
-    orgLinkBtn: (name) => `Tie it to my sign-up (${name})`,
     orgUnlinkBtn: 'Untie',
-    orgLinkedOk: (name) => `Tied to ${name}: that name and PIN can bring the organizer controls back from now on.`,
     orgUnlinkedOk: 'Untied. Only the organizer link runs this event now.',
     merry: 'Merry Christmas!',
     makeOwn: 'Start your own event',
@@ -951,6 +971,7 @@ const SANTA_I18N = (() => {
     e_already_drawn: 'Names have already been drawn.',
     e_forbidden: 'That organizer link doesn’t match. Open the organizer link you got when you created the event.',
     e_not_organizer: 'This sign-up isn’t tied to the organizer controls.',
+    e_no_org_pin: 'This event has no organizer PIN yet.',
     e_not_found: 'This event is gone.',
     e_bad_date: 'Pick an exchange day first.',
     e_date_past: 'That date is too far in the past. Pick a later one.',
@@ -1058,7 +1079,7 @@ const SANTA_I18N = (() => {
     shareLabel: '단톡방에 올릴 링크',
     copyShare: '참가 링크 복사',
     forYou: '나만 쓰는 링크',
-    forYouBody: '뽑기와 설정 변경은 이 링크로만 할 수 있으니 단톡방에는 올리지 마세요. 여기서는 가려 두었어요. 지금 복사해서 안전한 곳에 저장하거나, 내 메일로 보내 두세요.',
+    forYouBody: '뽑기와 설정 변경은 이 링크로만 할 수 있으니 단톡방에는 올리지 마세요. 여기서는 가려 두었어요. 복사해서 안전한 곳에 저장하거나, 내 메일로 보내 두세요. 잃어버려도 괜찮아요. 방금 정한 주최자 PIN으로 어느 기기에서든 되찾을 수 있어요.',
     adminLinkLabel: '내 주최자 링크',
     copyAdmin: '주최자 링크 복사',
     reveal: '링크 보기',
@@ -1071,6 +1092,8 @@ const SANTA_I18N = (() => {
     eventName: '이벤트 이름',
     budgetPh: '예: $50 이하',
     createBtn: '이벤트 만들기',
+    orgPinLabel: '주최자 PIN',
+    orgPinHint: '나만 아는 숫자 4~8자리. 기기를 바꾸거나 링크를 잃어버려도 이걸로 주최자 메뉴를 되찾을 수 있어요.',
     privacyShort: '회원가입 없이 써요. 이름, 받고 싶은 선물, 암호화된 PIN만 저장하고, 교환 날짜 일주일 뒤에 이벤트 전체가 자동 삭제돼요.',
     privacyMore: '정확히 무엇을 저장하나요?',
     privacyDetails: '참가자가 직접 적은 이름과 받고 싶은 선물, 그리고 PIN의 해시값만 저장해요. PIN 자체는 저장하지 않아요. 뽑기 결과는 본인이 PIN으로만 볼 수 있고, 주최자도 누가 누구를 뽑았는지 볼 수 없어요. 이벤트는 교환 날짜 7일 뒤에 자동으로 삭제되고, 그 전에 주최자가 직접 삭제할 수도 있어요.',
@@ -1122,12 +1145,16 @@ const SANTA_I18N = (() => {
     orgRecoverOk: '되찾기',
     orgRecovered: '주최자 메뉴가 이 기기로 돌아왔어요. “내 주최자 링크”에서 새 링크를 저장해 두세요.',
     orgLinkTitle: '링크를 잃어버렸을 때를 대비해서',
+    orgPinOn: '어느 기기에서든 참가 링크를 열고 페이지 맨 아래 “제가 주최자예요”를 누른 뒤 주최자 PIN을 입력하면 메뉴가 돌아와요. 예전 링크는 그때 쓸 수 없게 돼요.',
+    orgPinOff: '이 이벤트에는 아직 주최자 PIN이 없어요. 하나 정해 두면 어느 기기에서든 이걸로 메뉴를 되찾을 수 있어요.',
+    orgPinSetBtn: '주최자 PIN 정하기',
+    orgPinChange: '주최자 PIN 바꾸기',
+    orgPinDlgTitle: '주최자 PIN',
+    orgPinDlgBody: '나만 아는 숫자 4~8자리.',
+    orgPinSaved: '주최자 PIN을 저장했어요.',
+    orgClaim: '제가 주최자예요, 메뉴 되찾기',
     orgLinked: (name) => `내 참가 이름 ${name}에 연결돼 있어요. 어느 기기에서든 이름을 누르고 PIN을 입력한 뒤 “주최자 메뉴 되찾기”를 누르면 돼요.`,
-    orgNotLinked: '아직 어떤 참가에도 연결되지 않았어요. 직접 참가하면 이름과 PIN으로 주최자 메뉴를 되찾을 수 있어요.',
-    orgNotLinkedMine: '아직 연결되지 않았어요. 내 참가에 연결해 두면 어느 기기에서든 이름과 PIN으로 주최자 메뉴를 되찾을 수 있어요.',
-    orgLinkBtn: (name) => `내 참가(${name})에 연결하기`,
     orgUnlinkBtn: '연결 해제',
-    orgLinkedOk: (name) => `${name}에 연결했어요. 앞으로 이 이름과 PIN으로 주최자 메뉴를 되찾을 수 있어요.`,
     orgUnlinkedOk: '연결을 해제했어요. 이제 주최자 링크로만 이벤트를 관리할 수 있어요.',
     merry: '메리 크리스마스!',
     makeOwn: '내 이벤트 만들기',
@@ -1146,6 +1173,7 @@ const SANTA_I18N = (() => {
     e_already_drawn: '이미 뽑기가 끝났어요.',
     e_forbidden: '주최자 링크가 맞지 않아요. 이벤트를 만들 때 받은 주최자 링크로 다시 열어 주세요.',
     e_not_organizer: '이 참가는 주최자 메뉴와 연결되어 있지 않아요.',
+    e_no_org_pin: '이 이벤트에는 아직 주최자 PIN이 없어요.',
     e_not_found: '이벤트를 찾을 수 없어요.',
     e_bad_date: '교환 날짜를 먼저 골라 주세요.',
     e_date_past: '너무 지난 날짜예요. 다른 날짜를 골라 주세요.',
@@ -1252,7 +1280,7 @@ const SANTA_I18N = (() => {
     shareLabel: 'Link gửi vào nhóm',
     copyShare: 'Sao chép link nhóm',
     forYou: 'Chỉ dành cho bạn',
-    forYouBody: 'Bốc thăm và đổi cài đặt đều cần link này, nên đừng gửi vào nhóm. Ở đây link được che sẵn: bạn sao chép cất đi hoặc gửi email cho chính mình ngay nhé.',
+    forYouBody: 'Bốc thăm và đổi cài đặt đều cần link này, nên đừng gửi vào nhóm. Ở đây link được che sẵn: bạn sao chép cất đi hoặc gửi email cho chính mình. Lỡ mất cũng không sao: mã PIN quản lý bạn vừa đặt sẽ lấy lại được trên bất kỳ thiết bị nào.',
     adminLinkLabel: 'Link quản lý của bạn',
     copyAdmin: 'Sao chép link quản lý',
     reveal: 'Hiện link',
@@ -1265,6 +1293,8 @@ const SANTA_I18N = (() => {
     eventName: 'Tên sự kiện',
     budgetPh: 'Ví dụ: dưới $50',
     createBtn: 'Tạo sự kiện',
+    orgPinLabel: 'Mã PIN quản lý',
+    orgPinHint: '4–8 chữ số, chỉ mình bạn biết. Đổi thiết bị hay mất link thì dùng nó để lấy lại quyền quản lý.',
     privacyShort: 'Không cần tài khoản. Chỉ lưu tên, gợi ý quà và mã PIN đã mã hóa; cả sự kiện tự xóa một tuần sau ngày đổi quà.',
     privacyMore: 'Lưu chính xác những gì?',
     privacyDetails: 'Chỉ có tên và gợi ý quà mọi người tự điền, cùng bản mã hóa (hash) của mã PIN, không phải mã PIN thật. Kết quả bốc thăm chỉ chính người đó xem được bằng mã PIN của mình; ngay cả người tổ chức cũng không biết ai bốc trúng ai. Sự kiện tự xóa 7 ngày sau ngày đổi quà, và người tổ chức có thể xóa sớm hơn bất cứ lúc nào.',
@@ -1316,12 +1346,16 @@ const SANTA_I18N = (() => {
     orgRecoverOk: 'Lấy lại',
     orgRecovered: 'Quyền quản lý đã về thiết bị này. Bạn lưu link mới trong “Link quản lý của bạn” nhé.',
     orgLinkTitle: 'Phòng khi bạn làm mất link này',
+    orgPinOn: 'Trên bất kỳ thiết bị nào, mở link nhóm, bấm “Tôi là người tổ chức” ở cuối trang rồi nhập mã PIN quản lý. Quyền quản lý sẽ về thiết bị đó và link cũ hết hiệu lực.',
+    orgPinOff: 'Sự kiện này chưa có mã PIN quản lý. Đặt một mã để thiết bị nào cũng lấy lại được quyền quản lý.',
+    orgPinSetBtn: 'Đặt mã PIN quản lý',
+    orgPinChange: 'Đổi mã PIN quản lý',
+    orgPinDlgTitle: 'Mã PIN quản lý',
+    orgPinDlgBody: '4–8 chữ số, chỉ mình bạn biết.',
+    orgPinSaved: 'Đã lưu mã PIN quản lý.',
+    orgClaim: 'Tôi là người tổ chức, lấy lại quyền quản lý',
     orgLinked: (name) => `Đã gắn với đăng ký của bạn (${name}). Trên bất kỳ thiết bị nào: bấm vào tên bạn, nhập mã PIN rồi bấm “Lấy lại quyền quản lý”.`,
-    orgNotLinked: 'Chưa gắn với đăng ký nào. Khi bạn tự đăng ký, tên và mã PIN của bạn có thể lấy lại quyền quản lý.',
-    orgNotLinkedMine: 'Chưa gắn với đăng ký nào. Gắn với đăng ký của bạn thì tên và mã PIN có thể lấy lại quyền quản lý trên bất kỳ thiết bị nào.',
-    orgLinkBtn: (name) => `Gắn với đăng ký của tôi (${name})`,
     orgUnlinkBtn: 'Bỏ gắn',
-    orgLinkedOk: (name) => `Đã gắn với ${name}: từ giờ tên và mã PIN này có thể lấy lại quyền quản lý.`,
     orgUnlinkedOk: 'Đã bỏ gắn. Giờ chỉ link quản lý mới điều hành được sự kiện này.',
     merry: 'Giáng sinh vui vẻ!',
     makeOwn: 'Tạo sự kiện của riêng bạn',
@@ -1340,6 +1374,7 @@ const SANTA_I18N = (() => {
     e_already_drawn: 'Đã bốc thăm rồi.',
     e_forbidden: 'Link quản lý không đúng. Bạn mở lại bằng link quản lý nhận được lúc tạo sự kiện nhé.',
     e_not_organizer: 'Đăng ký này không gắn với quyền quản lý.',
+    e_no_org_pin: 'Sự kiện này chưa có mã PIN quản lý.',
     e_not_found: 'Sự kiện này không còn nữa.',
     e_bad_date: 'Bạn chọn ngày đổi quà trước nhé.',
     e_date_past: 'Ngày này qua lâu rồi. Bạn chọn ngày khác nhé.',
@@ -1554,7 +1589,7 @@ async function api(path, body) {
 }
 // Error codes the server sends that have their own sentence (key "e_<code>" in i18n.js). Anything else reads as a network hiccup.
 const ERR_CODES = ['bad_name', 'bad_pin_format', 'name_taken', 'closed', 'full', 'no_such_person', 'too_few', 'already_drawn',
-  'forbidden', 'not_found', 'bad_date', 'date_past', 'date_far', 'slow_down', 'not_organizer'];
+  'forbidden', 'not_found', 'bad_date', 'date_past', 'date_far', 'slow_down', 'not_organizer', 'no_org_pin'];
 function errText(d) {
   const code = d && d.error;
   if (code === 'bad_pin') return t('e_bad_pin', d.left || 0);
@@ -1767,8 +1802,10 @@ function startHome() {
     ev.preventDefault();
     if ($('createBtn').disabled) return;
     if (!$('newDate').value) { $('createErr').textContent = t('e_bad_date'); return; }
+    if (!/^\d{4,8}$/.test($('newOrgPin').value.trim())) { $('createErr').textContent = t('e_bad_pin_format'); $('newOrgPin').focus(); return; }
     $('createBtn').disabled = true; $('createBtn').textContent = t('loading'); $('createForm').setAttribute('aria-busy', 'true'); $('createErr').textContent = '';
-    const r = await api('create', { title: $('newTitle').value, budget: $('newBudget').value, exchangeOn: $('newDate').value });
+    const r = await api('create', { title: $('newTitle').value, budget: $('newBudget').value, exchangeOn: $('newDate').value, orgPin: $('newOrgPin').value.trim() });
+    $('newOrgPin').value = '';
     $('createBtn').disabled = false; $('createBtn').textContent = t('createBtn'); $('createForm').removeAttribute('aria-busy');
     if (!r.ok) { $('createErr').textContent = errText(r.data); return; }
     const { id, adminKey, state } = r.data;
@@ -1844,6 +1881,7 @@ function render() {
   // The organizer's next move (invite, then draw) leads once they have signed up themselves; after the draw their own
   // result comes first again and the controls drop back below the names.
   $('adminCard').classList.toggle('lead', !!S.admin && !!v && !drawn);
+  $('orgClaimBtn').hidden = !st.orgPin || !!S.adminKey;      // "I'm the organizer": the spare key, for a device without the link
 
   const n = st.people.length;
   $('rosterCard').hidden = n === 0;
@@ -1896,12 +1934,12 @@ function renderAdmin() {
   $('adminUrl').value = adminLink;
   $('adminMail').href = 'mailto:?subject=' + encodeURIComponent(t('mailSubject', st.title)) + '&body=' + encodeURIComponent(t('mailBody', st.title, adminLink));
   // The role tied to a sign-up: that name + PIN can bring the controls back on any device.
-  const tied = a.organizerName || '', mine = S.me ? S.me.name : '';
-  $('orgLinkText').textContent = tied ? t('orgLinked', tied) : (mine ? t('orgNotLinkedMine') : t('orgNotLinked'));
-  $('orgLinkBtn').hidden = !tied && !mine;
-  $('orgLinkBtn').textContent = tied ? t('orgUnlinkBtn') : t('orgLinkBtn', mine);
-  $('orgLinkBtn').dataset.act = tied ? 'untie' : 'tie';
-  $('orgLinkBtn').classList.toggle('danger', !!tied);
+  $('orgPinText').textContent = a.orgPin ? t('orgPinOn') : t('orgPinOff');
+  $('orgPinBtn').textContent = a.orgPin ? t('orgPinChange') : t('orgPinSetBtn');
+  $('orgPinBtn').classList.toggle('primary', !a.orgPin);
+  const tied = a.organizerName || '';
+  $('orgLinkText').hidden = $('orgLinkBtn').hidden = !tied;
+  if (tied) $('orgLinkText').textContent = t('orgLinked', tied);
   if (!$('settings').open) {
     $('cfgTitle').value = st.title; $('cfgBudget').value = st.budget; $('cfgExchangeOn').value = st.exchangeOn; $('cfgDrawAt').value = localInputValue(st.drawAt);
   }
@@ -1960,16 +1998,15 @@ function wireEvent() {
     signedIn(r.data);
     $('meTitle').focus({ preventScroll: true });
     $('meCard').scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' });
-    // The organizer signing up on their own device: tie the role to this sign-up, so a lost link is no longer fatal.
-    if (S.adminKey) adminDo({ action: 'linkOrganizer', name }, t('orgLinkedOk', name));
+    if (S.adminKey) refresh();
   });
-  $('recoverBtn').addEventListener('click', async () => {
-    if (!S.me) return;
+  /** Ask for a PIN until it is right or the sheet is closed; a fresh organizer key lands on this device. */
+  async function claim(title, firstNote, body) {
     let note = '';
     for (;;) {
-      const pin = await openDialog({ title: t('pinDlgTitle', S.me.name), body: [note || t('orgRecoverDlgBody')], ok: t('orgRecoverOk'), pin: 'hide' });
+      const pin = await openDialog({ title, body: [note || firstNote], ok: t('orgRecoverOk'), pin: 'hide' });
       if (pin == null) return;
-      const r = await api('claimAdmin', { id: EVENT_ID, name: S.me.name, pin });
+      const r = await api('claimAdmin', Object.assign({ id: EVENT_ID }, body(pin)));
       if (r.ok) {
         S.adminKey = r.data.adminKey; store.set(K_ADMIN, S.adminKey);
         const { adminKey, ...view } = r.data; S.admin = view; S.state = view.state; remember(EVENT_ID, view.state.title, true);
@@ -1979,7 +2016,9 @@ function wireEvent() {
       if (r.data.error === 'not_found') { gone(); render(); return; }
       note = errText(r.data);
     }
-  });
+  }
+  $('orgClaimBtn').addEventListener('click', () => claim(t('orgPinDlgTitle'), t('orgRecoverDlgBody'), (pin) => ({ orgPin: pin })));
+  $('recoverBtn').addEventListener('click', () => { if (S.me) claim(t('pinDlgTitle', S.me.name), t('orgRecoverDlgBody'), (pin) => ({ name: S.me.name, pin })); });
   $('findMeBtn').addEventListener('click', () => {
     // Bring "Who's in" into view, light it up for a moment, and put the keyboard focus on the first name.
     const card = $('rosterCard');
@@ -2066,9 +2105,12 @@ function wireEvent() {
     const at = $('cfgDrawAt').value ? new Date($('cfgDrawAt').value).getTime() : 0;
     adminDo({ action: 'settings', title: $('cfgTitle').value, budget: $('cfgBudget').value, exchangeOn: $('cfgExchangeOn').value, drawAt: Number.isFinite(at) ? at : 0 }, t('settingsSaved'));
   });
-  $('orgLinkBtn').addEventListener('click', () => {
-    if ($('orgLinkBtn').dataset.act === 'untie') adminDo({ action: 'linkOrganizer', name: '' }, t('orgUnlinkedOk'));
-    else if (S.me) adminDo({ action: 'linkOrganizer', name: S.me.name }, t('orgLinkedOk', S.me.name));
+  $('orgLinkBtn').addEventListener('click', () => adminDo({ action: 'linkOrganizer', name: '' }, t('orgUnlinkedOk')));
+  $('orgPinBtn').addEventListener('click', async () => {
+    const pin = await openDialog({ title: t('orgPinDlgTitle'), body: t('orgPinDlgBody'), ok: t('save'), pin: 'show' });
+    if (pin == null) return;
+    if (!/^\d{4,8}$/.test(pin)) { $('adminErr').textContent = t('e_bad_pin_format'); return; }
+    adminDo({ action: 'setOrgPin', pin }, t('orgPinSaved'));
   });
   $('destroyBtn').addEventListener('click', async () => {
     const yes = await openDialog({ title: t('destroyTitle'), body: t('destroyBody'), ok: t('del') });

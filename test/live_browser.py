@@ -75,7 +75,7 @@ def run(p):
     print("\n== creating an event on the real site")
     org = phone(chrome, "organizer", permissions=["clipboard-read", "clipboard-write"])
     org.goto(SITE); org.wait_for_selector("#createCard:not([hidden])")
-    org.fill("#newTitle", "TEST please ignore"); org.fill("#newBudget", "under $50"); org.fill("#newDate", "2026-12-24")
+    org.fill("#newTitle", "TEST please ignore"); org.fill("#newBudget", "under $50"); org.fill("#newDate", "2026-12-24"); org.fill("#newOrgPin", "8642")
     org.click("#createBtn"); org.wait_for_selector("#createdCard:not([hidden])", timeout=20000)
     share, admin_link = org.input_value("#newShare"), org.input_value("#newAdmin")
     EVENT[:] = [share.split("?e=")[1], admin_link.split("#admin=")[1]]

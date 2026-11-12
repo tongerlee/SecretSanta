@@ -232,7 +232,7 @@ def run():
     section("the draw")
     s, d, _ = admin(E1, "draw")
     check("draw works", s == 200 and d["state"]["status"] == "drawn", (s, d))
-    check("organizer's answer to the draw holds no pairs", set(d) == {"state", "people", "organizerName"} and "giftTo" not in json.dumps(d) and not secrets_in(d), d)
+    check("organizer's answer to the draw holds no pairs", set(d) == {"state", "people", "organizerName", "orgPin"} and "giftTo" not in json.dumps(d) and not secrets_in(d), d)
     gives = check_draw(E1, tokens, "5 people")
     s, d, _ = me(E1, "Jennifer", tokens["Jennifer"])
     wishes = {"Jennifer": "good red wine", "小雪": "猫咪周边", "Mia": "slippers", "阿杰": "", "Hương": "nến thơm"}

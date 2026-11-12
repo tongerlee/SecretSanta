@@ -206,6 +206,7 @@ function recipientOf(doc, person) {
 const publicState = (doc) => ({
   id: doc.id, title: doc.title, budget: doc.budget, exchangeOn: doc.exchangeOn, status: doc.status, drawAt: doc.drawAt || 0,
   people: doc.people.map((p) => p.name), min: MIN_PEOPLE, deleteAt: expiresAt(doc.exchangeOn), keepDays: KEEP_DAYS,
+  orgPin: !!doc.orgPin,                                      // an organizer PIN exists: "I'm the organizer" + PIN brings the controls back
 });
 const isOrganizer = (doc, person) => !!doc.organizer && doc.organizer === person.key;
 function personalView(doc, person) {
@@ -221,7 +222,10 @@ const adminView = (doc, now) => ({
   state: publicState(doc),
   people: doc.people.map((p) => ({ name: p.name, wish: p.wish || '', locked: (p.lockUntil || 0) > now })),
   organizerName: (doc.people.find((p) => isOrganizer(doc, p)) || {}).name || '',
+  orgPin: !!doc.orgPin,
 });
+/** The organizer PIN: the spare key. Hashed like a participant PIN, with the same five-tries-then-ten-minutes lock. */
+const setOrgPin = (doc, pin, work) => { doc.orgPin = { ...hashPin(pin, work), fails: 0, lockUntil: 0 }; };
 /** A new organizer key; the table keeps only its hash, so any older key stops working at once. */
 function newAdminKey(doc) {
   const adminKey = randomBytes(16).toString('hex');
@@ -234,6 +238,7 @@ async function create(b, ip) {
   const now = clock();
   const bad = checkDate(b.exchangeOn, now);
   if (bad) return fail(400, bad);
+  if (b.orgPin !== undefined && b.orgPin !== '' && !pinOk(b.orgPin)) return fail(400, 'bad_pin_format');
   if (!(await mayCreate(ip || 'unknown', now))) return fail(429, 'slow_down');
   const id = newId();
   const doc = {
@@ -243,6 +248,7 @@ async function create(b, ip) {
     createdAt: now, ttl: Math.floor(expiresAt(b.exchangeOn) / 1000),
   };
   const adminKey = newAdminKey(doc);
+  if (b.orgPin) setOrgPin(doc, b.orgPin, newWork());
   await ddb.send(new PutCommand({ TableName: TABLE, Item: doc, ConditionExpression: 'attribute_not_exists(pk)' }));
   return { code: 200, body: { id, adminKey, state: publicState(doc) } };     // the key is shown once and never stored
 }
@@ -287,9 +293,21 @@ function login(doc, b, now, work) {
 /** The organizer, on a device without the organizer link: name + PIN mint a fresh key (the old link stops working).
     Only for the one sign-up the organizer tied to the role; the PIN is asked for again even on a signed-in device. */
 function claimAdmin(doc, b, now, work) {
-  const { person, res } = withPin(doc, b, now, work);
-  if (!person) return res;
-  if (!isOrganizer(doc, person)) return fail(403, 'not_organizer');
+  if (typeof b.orgPin === 'string') {
+    const o = doc.orgPin;
+    if (!o) return fail(404, 'no_org_pin');
+    if ((o.lockUntil || 0) > now) return fail(429, 'locked', { retryAfter: Math.ceil((o.lockUntil - now) / 1000) });
+    if (!checkPin(o, b.orgPin, work)) {
+      o.fails = (o.fails || 0) + 1;
+      if (o.fails >= MAX_FAILS) { o.fails = 0; o.lockUntil = now + LOCK_MS; return { ...fail(429, 'locked', { retryAfter: LOCK_MS / 1000 }), save: true }; }
+      return { ...fail(401, 'bad_pin', { left: MAX_FAILS - o.fails }), save: true };
+    }
+    o.fails = 0;
+  } else {
+    const { person, res } = withPin(doc, b, now, work);
+    if (!person) return res;
+    if (!isOrganizer(doc, person)) return fail(403, 'not_organizer');
+  }
   const adminKey = newAdminKey(doc);
   return { code: 200, body: { adminKey, ...adminView(doc, now) }, save: true };
 }
@@ -344,6 +362,10 @@ function admin(doc, b, now, work) {
       if (doc.status !== 'open') return fail(409, 'closed');
       if (!target()) return fail(404, 'no_such_person');
       dropPerson(doc, target());
+      return done();
+    case 'setOrgPin':
+      if (!pinOk(b.pin)) return fail(400, 'bad_pin_format');
+      setOrgPin(doc, b.pin, work);
       return done();
     case 'linkOrganizer': {
       // Tie the role to one sign-up (name + PIN can then recover it), or to none (empty name).
