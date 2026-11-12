@@ -7,7 +7,7 @@
 # The event id is the 12 characters after ?e= in any link to the event.
 set -euo pipefail
 cd "$(dirname "$0")"
-STACK="${STACK_NAME:-secret-santa}"
+STACK="${STACK:-secret-santa}"      # same variable deploy.sh uses
 
 ID="${1:-}"; shift || true
 [[ "$ID" =~ ^[a-z0-9]{12}$ ]] || { echo "usage: $0 <event-id> [aws cli options]   e.g. $0 kr4trywka3y4 --profile santa --region us-east-2"; exit 1; }
