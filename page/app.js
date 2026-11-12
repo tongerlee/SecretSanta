@@ -234,6 +234,24 @@ function confetti(x, y) {
   requestAnimationFrame(step);
 }
 
+/* ---------- a wish written in another language ---------- */
+// Wishes are people's own words; the site has no translation service. When a wish is plainly not in the language the
+// page is showing, a small link opens Google Translate with it (only when tapped, so nothing leaves the page by itself).
+const GT_LANG = { zh: 'zh-CN', en: 'en', ko: 'ko', vi: 'vi' };
+function wishScript(text) {
+  if (/\p{Script=Han}/u.test(text)) return 'zh';
+  if (/\p{Script=Hangul}/u.test(text)) return 'ko';
+  if (/[ăâđêôơưàảãáạằẳẵắặầẩẫấậèẻẽéẹềểễếệìỉĩíịòỏõóọồổỗốộờởỡớợùủũúụừửữứựỳỷỹýỵ]/i.test(text)) return 'vi';
+  return 'en';
+}
+function translateLink(text) {
+  if (!text || wishScript(text) === lang) return null;
+  const a = el('a', 'translate', t('translateWish'));
+  a.href = 'https://translate.google.com/?sl=auto&tl=' + GT_LANG[lang] + '&text=' + encodeURIComponent(text) + '&op=translate';
+  a.target = '_blank'; a.rel = 'noopener';
+  return a;
+}
+
 /* ---------- the gift tag ---------- */
 const PAW = '<svg class="paw" viewBox="0 0 40 40" aria-hidden="true"><ellipse cx="20" cy="26" rx="9" ry="7.5"/><ellipse cx="8.5" cy="16" rx="3.6" ry="4.6"/><ellipse cx="16" cy="9.5" rx="3.6" ry="4.8"/><ellipse cx="24" cy="9.5" rx="3.6" ry="4.8"/><ellipse cx="31.5" cy="16" rx="3.6" ry="4.6"/></svg>';
 function buildTag(a) {
@@ -246,7 +264,9 @@ function buildTag(a) {
   const name = el('p', 'tag-name' + (beyondPlainLatin(a.r) ? ' plain' : ''), a.r);
   const stamp = el('span', 'tag-stamp', 'Approved for unnecessary thoughtfulness'); stamp.lang = 'en'; stamp.setAttribute('aria-hidden', 'true');
   front.append(el('span', 'hole'), stamp, el('p', 'tag-k', t('tagTo')), name);
-  front.append(el('p', 'tag-wish', a.w ? t('tagWish', a.w) : t('tagNoWish')));
+  const wish = el('p', 'tag-wish', a.w ? t('tagWish', a.w) : t('tagNoWish'));
+  const tr = translateLink(a.w); if (tr) wish.append(' ', tr);
+  front.append(wish);
   const meta = [a.b && t('tagBudget', a.b), a.d && t('tagDate', a.d)].filter(Boolean).join(' · ');
   if (meta) front.append(el('p', 'tag-meta', meta));
   const hide = el('button', 'link', t('hide')); hide.type = 'button';
@@ -418,7 +438,9 @@ function renderAdmin() {
   const list = $('adminList'); list.replaceChildren();
   for (const p of a.people) {
     const li = el('li'); const who = el('div', 'who'); who.append(el('b', '', p.name)); li.append(avatar(p.name));
-    who.append(el('small', '', (p.wish ? t('wishOf', p.wish) : t('noWish')) + (p.locked ? t('pinLocked') : '')));
+    const line = el('small', '', (p.wish ? t('wishOf', p.wish) : t('noWish')) + (p.locked ? t('pinLocked') : ''));
+    const tr = translateLink(p.wish); if (tr) line.append(' ', tr);
+    who.append(line);
     const acts = el('div', 'row');
     const pin = el('button', 'btn sm', t('resetPin')); pin.type = 'button'; pin.dataset.act = 'setPin'; pin.dataset.name = p.name;
     acts.append(pin);

@@ -129,6 +129,7 @@ button.chip:active{transform:scale(.98)}
 .tag-k{font-size:11px;letter-spacing:.16em;font-weight:700;opacity:.72}
 .card .tag-front .tag-name,.tag-name{font:600 46px/1.05 var(--font-hand);overflow-wrap:anywhere;max-width:100%;margin:2px 0 4px}
 .tag-wish{font-size:14px;line-height:1.45;overflow-wrap:anywhere;max-width:100%}
+a.translate{white-space:nowrap;font-size:12px;font-weight:700;color:var(--pine);text-decoration-color:var(--rule);padding:4px 2px}   /* opens Google Translate with the wish; shown only when the wish is not in the page's language */
 .tag-meta{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;border-top:1px dashed currentColor;padding-top:8px;margin-top:6px;width:100%;overflow-wrap:anywhere}
 .tag-front .link{color:var(--kraft-ink);align-self:center;margin-top:4px}
 .paw{position:absolute;right:14px;bottom:12px;width:34px;height:34px;fill:var(--kraft-ink);opacity:.16;transform:rotate(18deg)}
