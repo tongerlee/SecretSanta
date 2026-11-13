@@ -24,16 +24,14 @@ Region 要用你的账号能用的那个。2026 年 9 月之后新注册的 AWS 
 
 ### 推送即部署（GitHub Actions）
 
-`.github/workflows/deploy.yml`：每次 push 到 main，先跑单元测试，再 build 页面，再执行 `./deploy.sh`。GitHub 用 OIDC 临时凭证登录 AWS，哪里都不存长期密钥。一次性准备：
+`.github/workflows/deploy.yml`：每次 push 到 main，先跑单元测试，再 build 页面，再执行 `./deploy.sh`。一次性准备（需要本机装好并登录 `gh`）：
 
 ```bash
-./setup-ci.sh --profile santa --region us-east-2     # 建 OIDC 身份提供者 + 只信任本仓库 main 分支的角色 + 部署权限
-gh variable set AWS_DEPLOY_ROLE --repo tongerlee/SecretSanta --body "<脚本最后打印的 arn>"
-gh variable set AWS_REGION --repo tongerlee/SecretSanta --body us-east-2
-gh secret set ALERT_EMAIL --repo tongerlee/SecretSanta         # 可选，见下面的告警
+./setup-ci.sh --profile santa --region us-east-2
+gh secret set ALERT_EMAIL --repo tongerlee/SecretSanta     # 可选，见下面的告警；回车后再输邮箱
 ```
 
-没设 `AWS_DEPLOY_ROLE` 之前 workflow 会自动跳过，不会报错。本地 `./deploy.sh` 照旧可用。仓库是公开的，workflow 日志也是公开的，所以邮箱放 secret（日志里会打码），不要放 variable。
+脚本先试 OIDC（GitHub 用临时凭证扮演一个只信任本仓库 main 分支的角色，哪里都不存长期密钥）；账号的 SCP 不允许建 OIDC provider 时（2026 年新注册的账号就是这样），改为建一个只有这个 stack 权限的 IAM 用户，生成 access key 直接用 `gh` 写进仓库的 secrets，屏幕上不显示。再跑一次会换新密钥、作废旧的。最后它把 `CI_DEPLOY=on`、`AWS_REGION` 等写进仓库变量；`CI_DEPLOY` 不是 `on` 时 workflow 直接跳过。本地 `./deploy.sh` 照旧可用。仓库是公开的，workflow 日志也是公开的，所以邮箱和密钥都走 secret（日志里会打码）。
 
 ### 告警
 

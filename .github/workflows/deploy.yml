@@ -1,7 +1,10 @@
 # Every push to main: unit tests, build the page, deploy API + site with ./deploy.sh.
-# Needs, under Settings > Secrets and variables > Actions:
-#   variable AWS_DEPLOY_ROLE  arn of the role made by ./setup-ci.sh (GitHub signs in with OIDC; no long-lived keys anywhere)
+# ./setup-ci.sh sets these up, under Settings > Secrets and variables > Actions:
+#   variable CI_DEPLOY        "on" turns this workflow on; anything else and pushes are skipped
 #   variable AWS_REGION       the Region the account can deploy to (us-east-2)
+#   and one of the two ways to sign in to AWS:
+#   variable AWS_DEPLOY_ROLE  a role GitHub assumes with OIDC (no stored keys), when the account allows an OIDC provider
+#   secrets  AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY  keys of a deploy-only IAM user, when it does not
 #   secret   ALERT_EMAIL      optional: an email for the "API is throwing errors" alarm (a secret, so logs never show it;
 #                             this repository is public and so are its workflow logs)
 name: Deploy
@@ -18,7 +21,7 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    if: vars.AWS_DEPLOY_ROLE != ''      # until setup-ci.sh has been run and the variable set, pushes just skip this
+    if: vars.CI_DEPLOY == 'on'          # until setup-ci.sh has been run, pushes just skip this
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -32,6 +35,8 @@ jobs:
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ vars.AWS_DEPLOY_ROLE }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ vars.AWS_REGION || 'us-east-2' }}
       - uses: aws-actions/setup-sam@v2
         with:

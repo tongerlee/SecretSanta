@@ -1,64 +1,28 @@
 #!/usr/bin/env bash
-# One-time: let GitHub Actions deploy this repository into your AWS account, with no long-lived keys anywhere.
-# GitHub signs each run with OIDC; AWS trusts those tokens only for pushes to main of the one repository below.
+# One-time: let GitHub Actions deploy this repository into your AWS account.
 #
 #   ./setup-ci.sh --profile santa --region us-east-2
 #
-# Afterwards, in the repository on GitHub (Settings > Secrets and variables > Actions):
-#   Variables: AWS_DEPLOY_ROLE = the arn printed at the end,  AWS_REGION = us-east-2
-#   Secrets (optional): ALERT_EMAIL = where the "API is throwing errors" email should go
-# Safe to run again: everything is created only if missing, and the policies are brought up to date.
+# Preferred: GitHub signs each run with OIDC and assumes a role (no long-lived keys anywhere). Some accounts (the
+# 2026 "new sign-up" ones) forbid adding an OIDC provider; then a deploy-only IAM user with an access key is made
+# instead. Either way the permissions are the ones deploy.sh needs, scoped to this stack's names where the service
+# allows it. The script finishes by writing the variables and secrets into the GitHub repository with `gh`, so the
+# secret key never appears on screen (without gh it prints what to paste where). Safe to run again.
 set -euo pipefail
 cd "$(dirname "$0")"
 
 REPO="${REPO:-tongerlee/SecretSanta}"
-ROLE="${ROLE:-github-deploy-secret-santa}"
+NAME="${NAME:-github-deploy-secret-santa}"      # the role, or the user
 STACK="${STACK:-secret-santa}"
+REGION="us-east-2"
+for ((i = 1; i <= $#; i++)); do [ "${!i}" = "--region" ] && j=$((i + 1)) && REGION="${!j}"; done
 
 ACCOUNT="$(aws sts get-caller-identity --query Account --output text "$@")"
 PARTITION="$(aws sts get-caller-identity --query Arn --output text "$@" | cut -d: -f2)"
 PROVIDER="arn:${PARTITION}:iam::${ACCOUNT}:oidc-provider/token.actions.githubusercontent.com"
 
-echo "== 1/3  GitHub as an identity provider in account $ACCOUNT"
-if aws iam get-open-id-connect-provider --open-id-connect-provider-arn "$PROVIDER" "$@" >/dev/null 2>&1; then
-  echo "already there"
-else
-  # AWS now checks GitHub's certificate chain itself; the thumbprint is still a required argument.
-  aws iam create-open-id-connect-provider --url https://token.actions.githubusercontent.com \
-    --client-id-list sts.amazonaws.com --thumbprint-list 6938fd4d98bab03faadb97b34396831e3780aea1 "$@" >/dev/null
-  echo "created"
-fi
-
-echo "== 2/3  Role $ROLE, usable only from pushes to main of $REPO"
-TRUST="$(cat <<JSON
-{
-  "Version": "2012-10-17",
-  "Statement": [{
-    "Effect": "Allow",
-    "Principal": { "Federated": "$PROVIDER" },
-    "Action": "sts:AssumeRoleWithWebIdentity",
-    "Condition": {
-      "StringEquals": {
-        "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
-        "token.actions.githubusercontent.com:sub": "repo:${REPO}:ref:refs/heads/main"
-      }
-    }
-  }]
-}
-JSON
-)"
-if aws iam get-role --role-name "$ROLE" "$@" >/dev/null 2>&1; then
-  aws iam update-assume-role-policy --role-name "$ROLE" --policy-document "$TRUST" "$@"
-  echo "already there; trust policy refreshed"
-else
-  aws iam create-role --role-name "$ROLE" --assume-role-policy-document "$TRUST" \
-    --description "GitHub Actions deploys the $STACK stack (deploy.sh)" --max-session-duration 3600 "$@" >/dev/null
-  echo "created"
-fi
-
-echo "== 3/3  What deploy.sh is allowed to do"
-# Everything deploy.sh touches: the CloudFormation stack and SAM's upload bucket, the Lambda, its role, the table,
-# the Amplify app, the alarms, plus reading the stack outputs. Scoped to this stack's names where the service allows it.
+# Everything deploy.sh touches: the CloudFormation stack and SAM's upload bucket, the Lambda and its role, the table,
+# the Amplify app, the alarms, plus reading the stack outputs.
 POLICY="$(cat <<JSON
 {
   "Version": "2012-10-17",
@@ -90,15 +54,90 @@ POLICY="$(cat <<JSON
 }
 JSON
 )"
-aws iam put-role-policy --role-name "$ROLE" --policy-name deploy --policy-document "$POLICY" "$@"
-ROLE_ARN="$(aws iam get-role --role-name "$ROLE" --query Role.Arn --output text "$@")"
 
-echo
-echo "Done. Now tell GitHub about the role, either with the gh CLI:"
-echo
-echo "  gh variable set AWS_DEPLOY_ROLE --repo $REPO --body \"$ROLE_ARN\""
-echo "  gh variable set AWS_REGION --repo $REPO --body \"${AWS_REGION:-us-east-2}\""
-echo "  gh secret set ALERT_EMAIL --repo $REPO            # optional, type your email when asked"
-echo
-echo "or on github.com: $REPO > Settings > Secrets and variables > Actions."
-echo "From then on every push to main runs the tests and deploys (Actions tab shows each run)."
+# ---------- hand the result to GitHub ----------
+VARS=(); SECRETS=()      # name=value pairs
+finish() {
+  echo
+  if command -v gh >/dev/null && gh auth status >/dev/null 2>&1; then
+    for kv in "${VARS[@]}"; do
+      if [ -n "${kv#*=}" ]; then gh variable set "${kv%%=*}" --repo "$REPO" --body "${kv#*=}"
+      else gh variable delete "${kv%%=*}" --repo "$REPO" >/dev/null 2>&1 || true; fi      # an empty value means "not this way"
+    done
+    for kv in "${SECRETS[@]}"; do printf '%s' "${kv#*=}" | gh secret set "${kv%%=*}" --repo "$REPO"; done
+    echo "GitHub is set up. Every push to main now runs the tests and deploys (Actions tab shows each run)."
+    echo "Optional: gh secret set ALERT_EMAIL --repo $REPO   (then type the email) for the API error alarm."
+  else
+    echo "gh is not signed in, so set these by hand at github.com/$REPO > Settings > Secrets and variables > Actions:"
+    for kv in "${VARS[@]}"; do echo "  variable ${kv%%=*} = ${kv#*=}   $([ -z "${kv#*=}" ] && echo '(delete it if it exists)')"; done
+    for kv in "${SECRETS[@]}"; do echo "  secret   ${kv%%=*} = ${kv#*=}"; done
+    echo "(The secret key above is shown once; clear your terminal afterwards.)"
+  fi
+}
+
+echo "== 1/2  How GitHub will sign in to account $ACCOUNT"
+MODE=""
+if aws iam get-open-id-connect-provider --open-id-connect-provider-arn "$PROVIDER" "$@" >/dev/null 2>&1; then
+  MODE=oidc; echo "OIDC provider already there"
+else
+  OUT="$(aws iam create-open-id-connect-provider --url https://token.actions.githubusercontent.com \
+          --client-id-list sts.amazonaws.com --thumbprint-list 6938fd4d98bab03faadb97b34396831e3780aea1 "$@" 2>&1)" && MODE=oidc && echo "OIDC provider created"
+  if [ "$MODE" != oidc ]; then
+    if grep -q "service control policy\|AccessDenied" <<< "$OUT"; then
+      echo "This account does not allow an OIDC provider (denied by a service control policy); using a deploy-only IAM user instead."
+      MODE=keys
+    else
+      echo "$OUT"; exit 1
+    fi
+  fi
+fi
+
+echo "== 2/2  Permissions: what deploy.sh is allowed to do"
+if [ "$MODE" = oidc ]; then
+  TRUST="$(cat <<JSON
+{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Principal": { "Federated": "$PROVIDER" },
+    "Action": "sts:AssumeRoleWithWebIdentity",
+    "Condition": {
+      "StringEquals": {
+        "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
+        "token.actions.githubusercontent.com:sub": "repo:${REPO}:ref:refs/heads/main"
+      }
+    }
+  }]
+}
+JSON
+)"
+  if aws iam get-role --role-name "$NAME" "$@" >/dev/null 2>&1; then
+    aws iam update-assume-role-policy --role-name "$NAME" --policy-document "$TRUST" "$@"
+  else
+    aws iam create-role --role-name "$NAME" --assume-role-policy-document "$TRUST" \
+      --description "GitHub Actions deploys the $STACK stack (deploy.sh)" --max-session-duration 3600 "$@" >/dev/null
+  fi
+  aws iam put-role-policy --role-name "$NAME" --policy-name deploy --policy-document "$POLICY" "$@"
+  ROLE_ARN="$(aws iam get-role --role-name "$NAME" --query Role.Arn --output text "$@")"
+  echo "role $NAME, usable only from pushes to main of $REPO"
+  VARS=("CI_DEPLOY=on" "AWS_REGION=$REGION" "AWS_DEPLOY_ROLE=$ROLE_ARN")
+else
+  if ! aws iam get-user --user-name "$NAME" "$@" >/dev/null 2>&1; then
+    OUT="$(aws iam create-user --user-name "$NAME" --tags Key=purpose,Value="GitHub Actions deploys $STACK" "$@" 2>&1)" || {
+      echo "$OUT"; echo
+      echo "This account allows neither an OIDC provider nor an IAM user, so GitHub cannot deploy into it."
+      echo "Deploying stays a local step: cd into the repository and run  git pull && ./deploy.sh $*"
+      exit 1
+    }
+  fi
+  aws iam put-user-policy --user-name "$NAME" --policy-name deploy --policy-document "$POLICY" "$@"
+  # One fresh key each run; older keys of this user are retired so a leaked one cannot linger.
+  for old in $(aws iam list-access-keys --user-name "$NAME" --query 'AccessKeyMetadata[].AccessKeyId' --output text "$@"); do
+    aws iam delete-access-key --user-name "$NAME" --access-key-id "$old" "$@"
+  done
+  read -r AKID SECRET <<< "$(aws iam create-access-key --user-name "$NAME" --query '[AccessKey.AccessKeyId,AccessKey.SecretAccessKey]' --output text "$@")"
+  echo "user $NAME with a new access key (any older key of this user was retired)"
+  VARS=("CI_DEPLOY=on" "AWS_REGION=$REGION" "AWS_DEPLOY_ROLE=")
+  SECRETS=("AWS_ACCESS_KEY_ID=$AKID" "AWS_SECRET_ACCESS_KEY=$SECRET")
+fi
+finish
