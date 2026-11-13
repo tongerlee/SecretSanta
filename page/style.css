@@ -149,6 +149,9 @@ dialog h2{margin-bottom:8px}
 .notice{font-size:14px;color:var(--on-night-soft);padding:0 2px}
 .deadline{display:flex;gap:8px;align-items:flex-start;font-size:13px;font-weight:500;color:var(--pine);padding:9px 16px 10px;border-top:1px dashed var(--moss);margin:0 -16px;line-height:1.45}
 .deadline svg{flex:none;margin-top:2px;color:var(--moss)}
+.deadline.today{color:var(--berry);font-weight:700}
+.deadline.today svg{color:var(--berry)}
+.tag-new{display:inline-block;font:700 10.5px/1 var(--font-body);letter-spacing:.04em;text-transform:uppercase;color:#fff;background:var(--berry);padding:3px 6px;border-radius:999px;vertical-align:middle}
 .row{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center}
 .people{list-style:none;padding:0;display:flex;flex-direction:column}
 .people li{display:flex;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--rule);flex-wrap:wrap}

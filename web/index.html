@@ -168,6 +168,9 @@ dialog h2{margin-bottom:8px}
 .notice{font-size:14px;color:var(--on-night-soft);padding:0 2px}
 .deadline{display:flex;gap:8px;align-items:flex-start;font-size:13px;font-weight:500;color:var(--pine);padding:9px 16px 10px;border-top:1px dashed var(--moss);margin:0 -16px;line-height:1.45}
 .deadline svg{flex:none;margin-top:2px;color:var(--moss)}
+.deadline.today{color:var(--berry);font-weight:700}
+.deadline.today svg{color:var(--berry)}
+.tag-new{display:inline-block;font:700 10.5px/1 var(--font-body);letter-spacing:.04em;text-transform:uppercase;color:#fff;background:var(--berry);padding:3px 6px;border-radius:999px;vertical-align:middle}
 .row{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center}
 .people{list-style:none;padding:0;display:flex;flex-direction:column}
 .people li{display:flex;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--rule);flex-wrap:wrap}
@@ -436,6 +439,7 @@ footer .stamp{margin-bottom:6px}
       <div><dt data-i18n="howTitle"></dt><dd data-i18n="howBody"></dd></div>
     </dl>
     <p class="deadline" id="deadline" hidden><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 5.5V10l3 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="deadlineText"></span></p>
+    <p class="deadline" id="countdown" hidden><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><rect x="2.5" y="8" width="15" height="9.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M2.5 11h15M10 8v9.5M6 8c-2.2 0-3-1.2-3-2.2S4.2 4 5.4 4.4C7 5 8.3 6.6 10 8c1.7-1.4 3-3 4.6-3.6 1.2-.4 2.4.4 2.4 1.4S16.2 8 14 8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="countdownText"></span></p>
     <!-- language buttons, filled in by app.js from the list in i18n.js -->
     <nav class="langs" id="langs" data-i18n-aria="langLabel"></nav>
   </header>
@@ -574,8 +578,12 @@ footer .stamp{margin-bottom:6px}
         <button type="button" class="btn" id="copyShareBtn" data-copy="shareUrl" data-i18n="copyShare"></button>
         <button type="button" class="btn" id="adminShareBtn" data-i18n="share"></button>
       </div>
+      <button type="button" class="link" id="msgBtn" data-i18n="copyMsg"></button>
     </div>
-    <p class="hint" id="adminStatusDrawn" hidden></p>
+    <div class="stack invite" id="drawnBox" hidden>
+      <p class="hint" id="adminStatusDrawn"></p>
+      <button type="button" class="btn" id="msgBtnDrawn" data-i18n="copyReminder"></button>
+    </div>
     <button type="button" class="btn" id="drawBtn"></button>
     <button type="button" class="link danger" id="reopenBtn" data-i18n="reopen" hidden></button>
     <p class="okmsg" id="adminOk" role="status"></p>
@@ -792,6 +800,16 @@ const SANTA_I18N = (() => {
     tagTo: 'TO · 你要送礼物给',
     tagWish: (wish) => `TA 的心愿：${wish}`,
     tagNoWish: 'TA 还没写心愿，自由发挥。',
+    wishUpdated: '心愿更新了',
+    daysLeft: (n) => `距离交换日还有 ${n} 天`,
+    tomorrow: '明天就交换礼物啦！',
+    today: '今天交换礼物！🎁',
+    afterDay: '礼物交换完啦，希望大家都喜欢。',
+    copyMsg: '复制一段群消息',
+    copyReminder: '复制提醒文案',
+    copyManualMsg: '这台设备不让自动复制，长按选中下面的文字复制：',
+    msgOpen: (title, budget, date, link) => `🎁 ${title}｜交换礼物报名中！点链接填个名字和 PIN 就行，顺便写上想要的东西。预算 ${budget}，${date} 交换。\n${link}`,
+    msgDrawn: (title, budget, date, link) => `🎁 ${title}｜抽签结果出来啦！点链接、点自己的名字、输 PIN，就能看到你要送礼物的人。预算 ${budget}，${date} 交换，想改心愿也在那里改。\n${link}`,
     translateWish: '翻译 ↗',
     tagBudget: (budget) => `预算 ${budget}`,
     tagDate: (day) => `${day} 交换`,
@@ -994,6 +1012,16 @@ const SANTA_I18N = (() => {
     tagTo: 'TO · You’re getting a gift for',
     tagWish: (wish) => `Their wish: ${wish}`,
     tagNoWish: 'No wish yet. Surprise them!',
+    wishUpdated: 'Wish updated',
+    daysLeft: (n) => `${n} days until exchange day`,
+    tomorrow: 'Gift exchange is tomorrow!',
+    today: 'Exchange day is today! 🎁',
+    afterDay: 'Gifts exchanged. Hope everyone loved theirs.',
+    copyMsg: 'Copy a message for the group',
+    copyReminder: 'Copy a reminder for the group',
+    copyManualMsg: 'This device won’t copy automatically. Select the text below and copy it:',
+    msgOpen: (title, budget, date, link) => `🎁 ${title}: gift exchange sign-ups are open! Tap the link, add your name and a PIN, and say what you’d love. Budget ${budget}, exchange on ${date}.\n${link}`,
+    msgDrawn: (title, budget, date, link) => `🎁 ${title}: names are drawn! Tap the link, tap your name and enter your PIN to see who you’re getting a gift for. Budget ${budget}, exchange on ${date}. You can update your wish there too.\n${link}`,
     translateWish: 'Translate ↗',
     tagBudget: (budget) => `Budget ${budget}`,
     tagDate: (day) => `Exchange on ${day}`,
@@ -1196,6 +1224,16 @@ const SANTA_I18N = (() => {
     tagTo: 'TO · 내가 선물할 사람',
     tagWish: (wish) => `받고 싶은 선물: ${wish}`,
     tagNoWish: '받고 싶은 선물을 아직 안 적었어요. 센스 있게 골라 주세요!',
+    wishUpdated: '위시 변경됨',
+    daysLeft: (n) => `선물 교환까지 ${n}일`,
+    tomorrow: '내일이 선물 교환 날이에요!',
+    today: '오늘 선물 교환! 🎁',
+    afterDay: '선물 교환이 끝났어요. 모두 마음에 들었길!',
+    copyMsg: '단톡방에 올릴 메시지 복사',
+    copyReminder: '단톡방에 올릴 알림 복사',
+    copyManualMsg: '이 기기에서는 자동 복사가 안 돼요. 아래 글을 선택해서 복사해 주세요:',
+    msgOpen: (title, budget, date, link) => `🎁 ${title} 선물 교환 참가 신청 받아요! 링크 열고 이름이랑 PIN만 정하면 끝. 받고 싶은 선물도 적어 주세요. 예산 ${budget}, 교환은 ${date}.\n${link}`,
+    msgDrawn: (title, budget, date, link) => `🎁 ${title} 뽑기 끝났어요! 링크 열고 이름 누른 뒤 PIN 입력하면 누구에게 선물할지 볼 수 있어요. 예산 ${budget}, 교환은 ${date}. 받고 싶은 선물도 거기서 바꿀 수 있어요.\n${link}`,
     translateWish: '번역 ↗',
     tagBudget: (budget) => `예산 ${budget}`,
     tagDate: (day) => `${day} 교환`,
@@ -1397,6 +1435,16 @@ const SANTA_I18N = (() => {
     tagTo: 'TO · Bạn sẽ tặng quà cho',
     tagWish: (wish) => `Bạn ấy thích: ${wish}`,
     tagNoWish: 'Bạn ấy chưa gợi ý gì, bạn cứ tự do sáng tạo nhé.',
+    wishUpdated: 'Gợi ý mới',
+    daysLeft: (n) => `Còn ${n} ngày nữa là đổi quà`,
+    tomorrow: 'Mai là ngày đổi quà rồi!',
+    today: 'Hôm nay đổi quà! 🎁',
+    afterDay: 'Đổi quà xong rồi, mong ai cũng thích món của mình.',
+    copyMsg: 'Sao chép tin nhắn gửi nhóm',
+    copyReminder: 'Sao chép lời nhắc gửi nhóm',
+    copyManualMsg: 'Thiết bị này không tự sao chép được. Bạn chọn đoạn chữ bên dưới rồi sao chép nhé:',
+    msgOpen: (title, budget, date, link) => `🎁 ${title}: mở đăng ký đổi quà rồi nè! Bấm link, điền tên và mã PIN là xong, nhớ ghi món bạn thích. Ngân sách ${budget}, đổi quà ngày ${date}.\n${link}`,
+    msgDrawn: (title, budget, date, link) => `🎁 ${title}: bốc thăm xong rồi! Bấm link, bấm tên mình rồi nhập mã PIN để xem bạn tặng quà cho ai. Ngân sách ${budget}, đổi quà ngày ${date}. Muốn sửa gợi ý quà cũng ở đó luôn.\n${link}`,
     translateWish: 'Dịch ↗',
     tagBudget: (budget) => `Ngân sách ${budget}`,
     tagDate: (day) => `Đổi quà ${day}`,
@@ -1484,6 +1532,7 @@ const store = {
 };
 const K_ME = 'santa:' + EVENT_ID + ':me';          // { name, token } - a random pass for this device, never the PIN
 const K_ADMIN = 'santa:' + EVENT_ID + ':admin';    // the organizer key, only on the organizer's device
+const K_SEEN = 'santa:' + EVENT_ID + ':seenWish';  // the recipient's wish as last read on this device, to mark a change
 const K_LIST = 'santa:events';                     // events this device has touched, to find them again
 const K_LANG = 'santa:lang';                       // the language picked on this device
 const pageUrl = location.origin + location.pathname;
@@ -1602,6 +1651,12 @@ function errText(d) {
 function dayText(ymd) {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd || '');
   return m ? t('fmtDay', +m[2], +m[3], new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])).getUTCDay()) : '—';
+}
+/** Whole days from today to the exchange day, in this device's calendar (0 = today, negative = past). */
+function daysUntil(ymd) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd || ''); if (!m) return null;
+  const now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.round((new Date(+m[1], +m[2] - 1, +m[3]) - today) / 864e5);
 }
 const timeText = (ms) => { const d = new Date(ms); return t('fmtTime', d.getMonth() + 1, d.getDate(), d.getDay(), d.getHours(), d.getMinutes()); };
 /** This device's time zone, short ("PST", "GMT+9"), so a time next to it is never read in the wrong zone. */
@@ -1739,6 +1794,9 @@ function buildTag(a) {
   front.append(el('span', 'hole'), stamp, el('p', 'tag-k', t('tagTo')), name);
   const wish = el('p', 'tag-wish', a.w ? t('tagWish', a.w) : t('tagNoWish'));
   const tr = translateLink(a.w); if (tr) wish.append(' ', tr);
+  // The wish this device last read is kept locally; a different one now gets a small mark until it has been read.
+  const seen = store.get(K_SEEN);
+  if (typeof seen === 'string' && seen !== (a.w || '')) wish.prepend(el('span', 'tag-new', t('wishUpdated')), ' ');
   front.append(wish);
   const meta = [a.b && t('tagBudget', a.b), a.d && t('tagDate', a.d)].filter(Boolean).join(' · ');
   if (meta) front.append(el('p', 'tag-meta', meta));
@@ -1751,7 +1809,7 @@ function buildTag(a) {
     inner.classList.add('fold');
     setTimeout(() => { swap(); inner.classList.remove('fold'); }, 200);
   };
-  back.addEventListener('click', () => { const r = back.getBoundingClientRect(); confetti(r.left + r.width / 2, r.top + r.height / 2); flip(true); });
+  back.addEventListener('click', () => { const r = back.getBoundingClientRect(); confetti(r.left + r.width / 2, r.top + r.height / 2); flip(true); store.set(K_SEEN, a.w || ''); });
   hide.addEventListener('click', () => flip(false));
   return tag;
 }
@@ -1853,6 +1911,16 @@ function render() {
   pill.className = 'pill' + (drawn ? ' drawn' : '');
   $('deadline').hidden = drawn || !st.drawAt;
   if (st.drawAt) $('deadlineText').textContent = t('deadline', timeText(st.drawAt), tzName(st.drawAt));
+  const left = daysUntil(st.exchangeOn);
+  $('countdown').hidden = !drawn || left === null;
+  if (drawn && left !== null) {
+    $('countdownText').textContent = left > 1 ? t('daysLeft', left) : left === 1 ? t('tomorrow') : left === 0 ? t('today') : t('afterDay');
+    $('countdown').classList.toggle('today', left === 0);
+    if (left === 0 && !S.cheered) {        // exchange day: one burst, after the page has settled
+      S.cheered = true;
+      setTimeout(() => { const r = $('countdown').getBoundingClientRect(); confetti(r.left + r.width / 2, r.top + r.height / 2); }, 700);
+    }
+  }
   $('retention').textContent = t('retention', dateText(st.deleteAt));
 
   const v = S.view;
@@ -1906,10 +1974,9 @@ function renderAdmin() {
   const drawn = st.status === 'drawn', n = a.people.length;
   // While sign-ups are open the invite block leads and "copy the group link" is the red button, until there are enough
   // people; then "draw names" takes the red. After the draw there is nothing to invite to, so the block goes away.
-  $('invite').hidden = drawn;
+  $('invite').hidden = drawn; $('drawnBox').hidden = !drawn;
   $('adminStatus').textContent = n < st.min ? t('adminNeed', n, st.min) : t('adminReady', n);
   $('copyShareBtn').classList.toggle('primary', n < st.min);
-  $('adminStatusDrawn').hidden = !drawn;
   $('adminStatusDrawn').textContent = drawn ? t('adminDrawn') : '';
   const list = $('adminList'); list.replaceChildren();
   for (const p of a.people) {
@@ -2050,6 +2117,22 @@ function wireEvent() {
     S.view = r.data; S.state = r.data.state; $('wishOk').textContent = t('saved'); $('wishInput').blur(); render();
   });
   const shareThis = () => shareLink(eventUrl(EVENT_ID), (S.state && S.state.title) || 'Secret Santa');
+  // A ready-made message for the group chat: an invite while sign-ups are open, a "names are drawn" reminder after.
+  const groupMessage = () => {
+    const st = S.state, link = eventUrl(EVENT_ID), budget = st.budget || '—', date = dayText(st.exchangeOn);
+    return st.status === 'drawn' ? t('msgDrawn', st.title, budget, date, link) : t('msgOpen', st.title, budget, date, link);
+  };
+  const copyMsg = async () => {
+    if (!S.state) return;
+    const text = groupMessage();
+    let ok = false; try { await navigator.clipboard.writeText(text); ok = true; } catch (e) { /* no clipboard: show it instead */ }
+    if (ok) { toast(t('copied')); return; }
+    const box = el('textarea'); box.value = text; box.readOnly = true; box.rows = 6; box.setAttribute('aria-label', t('copyMsg'));
+    openDialog({ title: t('copyMsg'), body: [t('copyManualMsg'), box], ok: t('ok') });
+    box.focus(); box.select();
+  };
+  $('msgBtn').addEventListener('click', copyMsg);
+  $('msgBtnDrawn').addEventListener('click', copyMsg);
   $('shareBtn').addEventListener('click', shareThis);
   $('adminShareBtn').addEventListener('click', shareThis);
   $('logoutBtn').addEventListener('click', () => {

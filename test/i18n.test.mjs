@@ -10,7 +10,7 @@ const L = new Function(read('i18n.js') + '\nreturn SANTA_I18N;')();
 const app = read('app.js');
 const body = read('body.html');
 const base = L.dict[L.order[0]];
-const sample = (key, fn) => (key.startsWith('fmt') ? [12, 24, 4, 20, 5].slice(0, fn.length) : ['71', '82', '93'].slice(0, fn.length));
+const sample = (key, fn) => (key.startsWith('fmt') ? [12, 24, 4, 20, 5].slice(0, fn.length) : ['71', '82', '93', '104'].slice(0, fn.length));
 
 test('all four languages are present and complete', () => {
   assert.deepEqual(L.order, ['zh', 'en', 'ko', 'vi']);

@@ -55,6 +55,7 @@
       <div><dt data-i18n="howTitle"></dt><dd data-i18n="howBody"></dd></div>
     </dl>
     <p class="deadline" id="deadline" hidden><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 5.5V10l3 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="deadlineText"></span></p>
+    <p class="deadline" id="countdown" hidden><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><rect x="2.5" y="8" width="15" height="9.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M2.5 11h15M10 8v9.5M6 8c-2.2 0-3-1.2-3-2.2S4.2 4 5.4 4.4C7 5 8.3 6.6 10 8c1.7-1.4 3-3 4.6-3.6 1.2-.4 2.4.4 2.4 1.4S16.2 8 14 8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="countdownText"></span></p>
     <!-- language buttons, filled in by app.js from the list in i18n.js -->
     <nav class="langs" id="langs" data-i18n-aria="langLabel"></nav>
   </header>
@@ -193,8 +194,12 @@
         <button type="button" class="btn" id="copyShareBtn" data-copy="shareUrl" data-i18n="copyShare"></button>
         <button type="button" class="btn" id="adminShareBtn" data-i18n="share"></button>
       </div>
+      <button type="button" class="link" id="msgBtn" data-i18n="copyMsg"></button>
     </div>
-    <p class="hint" id="adminStatusDrawn" hidden></p>
+    <div class="stack invite" id="drawnBox" hidden>
+      <p class="hint" id="adminStatusDrawn"></p>
+      <button type="button" class="btn" id="msgBtnDrawn" data-i18n="copyReminder"></button>
+    </div>
     <button type="button" class="btn" id="drawBtn"></button>
     <button type="button" class="link danger" id="reopenBtn" data-i18n="reopen" hidden></button>
     <p class="okmsg" id="adminOk" role="status"></p>

@@ -112,8 +112,21 @@ def walk(browser, lang, c):
     plain = "plain" in (org.get_attribute("#tagSlot .tag-name", "class") or "")
     assert plain == (got in ("Hương", "Nguyễn An")), (got, plain)        # only names the handwriting font cannot draw
     shot(org, lang, "8-tag-front", full=False)
+    # once names are drawn: a countdown to exchange day in the header, and a ready-made reminder for the group
+    assert org.is_visible("#countdown") and any(ch.isdigit() for ch in org.inner_text("#countdownText")), org.inner_text("#countdownText")
+    assert org.is_visible("#drawnBox") and org.is_visible("#msgBtnDrawn")
+    org.click("#msgBtnDrawn"); org.wait_for_selector("#toast:visible, #dlg[open]")
+    if org.is_visible("#dlg[open]"): assert share in org.input_value("#dlgBody textarea"); org.click("#dlgOk")
     org.evaluate("window.scrollTo(0, document.body.scrollHeight)")
     shot(org, lang, "9-organizer-drawn", full=False)
+    # the recipient changes their wish: the organizer's tag, already read once, now carries a "wish updated" mark
+    assert org.locator("#tagSlot .tag-new").count() == 0
+    fresh = post("login", {"id": eid, "name": got, "pin": "5555" if got == a else "3333"})["token"]    # a's PIN was reset above, which retires old tokens
+    post("wish", {"id": eid, "name": got, "token": fresh, "wish": "something else entirely"})
+    org.reload(); org.wait_for_selector("#tagSlot .tag-back"); org.click("#tagSlot .tag-back"); org.wait_for_timeout(450)
+    assert org.locator("#tagSlot .tag-new").count() == 1 and "something else entirely" in org.inner_text("#tagSlot .tag-wish")
+    org.reload(); org.wait_for_selector("#tagSlot .tag-back"); org.click("#tagSlot .tag-back"); org.wait_for_timeout(450)
+    assert org.locator("#tagSlot .tag-new").count() == 0, "read once, the mark goes"
 
     # the person whose PIN was reset comes back on a new phone and sees the note about it
     back = phone(browser, lang + " returning", c["locale"]); back.goto(share); back.wait_for_selector("#names button")

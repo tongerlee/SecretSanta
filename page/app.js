@@ -11,6 +11,7 @@ const store = {
 };
 const K_ME = 'santa:' + EVENT_ID + ':me';          // { name, token } - a random pass for this device, never the PIN
 const K_ADMIN = 'santa:' + EVENT_ID + ':admin';    // the organizer key, only on the organizer's device
+const K_SEEN = 'santa:' + EVENT_ID + ':seenWish';  // the recipient's wish as last read on this device, to mark a change
 const K_LIST = 'santa:events';                     // events this device has touched, to find them again
 const K_LANG = 'santa:lang';                       // the language picked on this device
 const pageUrl = location.origin + location.pathname;
@@ -129,6 +130,12 @@ function errText(d) {
 function dayText(ymd) {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd || '');
   return m ? t('fmtDay', +m[2], +m[3], new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])).getUTCDay()) : '—';
+}
+/** Whole days from today to the exchange day, in this device's calendar (0 = today, negative = past). */
+function daysUntil(ymd) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd || ''); if (!m) return null;
+  const now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.round((new Date(+m[1], +m[2] - 1, +m[3]) - today) / 864e5);
 }
 const timeText = (ms) => { const d = new Date(ms); return t('fmtTime', d.getMonth() + 1, d.getDate(), d.getDay(), d.getHours(), d.getMinutes()); };
 /** This device's time zone, short ("PST", "GMT+9"), so a time next to it is never read in the wrong zone. */
@@ -266,6 +273,9 @@ function buildTag(a) {
   front.append(el('span', 'hole'), stamp, el('p', 'tag-k', t('tagTo')), name);
   const wish = el('p', 'tag-wish', a.w ? t('tagWish', a.w) : t('tagNoWish'));
   const tr = translateLink(a.w); if (tr) wish.append(' ', tr);
+  // The wish this device last read is kept locally; a different one now gets a small mark until it has been read.
+  const seen = store.get(K_SEEN);
+  if (typeof seen === 'string' && seen !== (a.w || '')) wish.prepend(el('span', 'tag-new', t('wishUpdated')), ' ');
   front.append(wish);
   const meta = [a.b && t('tagBudget', a.b), a.d && t('tagDate', a.d)].filter(Boolean).join(' · ');
   if (meta) front.append(el('p', 'tag-meta', meta));
@@ -278,7 +288,7 @@ function buildTag(a) {
     inner.classList.add('fold');
     setTimeout(() => { swap(); inner.classList.remove('fold'); }, 200);
   };
-  back.addEventListener('click', () => { const r = back.getBoundingClientRect(); confetti(r.left + r.width / 2, r.top + r.height / 2); flip(true); });
+  back.addEventListener('click', () => { const r = back.getBoundingClientRect(); confetti(r.left + r.width / 2, r.top + r.height / 2); flip(true); store.set(K_SEEN, a.w || ''); });
   hide.addEventListener('click', () => flip(false));
   return tag;
 }
@@ -380,6 +390,16 @@ function render() {
   pill.className = 'pill' + (drawn ? ' drawn' : '');
   $('deadline').hidden = drawn || !st.drawAt;
   if (st.drawAt) $('deadlineText').textContent = t('deadline', timeText(st.drawAt), tzName(st.drawAt));
+  const left = daysUntil(st.exchangeOn);
+  $('countdown').hidden = !drawn || left === null;
+  if (drawn && left !== null) {
+    $('countdownText').textContent = left > 1 ? t('daysLeft', left) : left === 1 ? t('tomorrow') : left === 0 ? t('today') : t('afterDay');
+    $('countdown').classList.toggle('today', left === 0);
+    if (left === 0 && !S.cheered) {        // exchange day: one burst, after the page has settled
+      S.cheered = true;
+      setTimeout(() => { const r = $('countdown').getBoundingClientRect(); confetti(r.left + r.width / 2, r.top + r.height / 2); }, 700);
+    }
+  }
   $('retention').textContent = t('retention', dateText(st.deleteAt));
 
   const v = S.view;
@@ -433,10 +453,9 @@ function renderAdmin() {
   const drawn = st.status === 'drawn', n = a.people.length;
   // While sign-ups are open the invite block leads and "copy the group link" is the red button, until there are enough
   // people; then "draw names" takes the red. After the draw there is nothing to invite to, so the block goes away.
-  $('invite').hidden = drawn;
+  $('invite').hidden = drawn; $('drawnBox').hidden = !drawn;
   $('adminStatus').textContent = n < st.min ? t('adminNeed', n, st.min) : t('adminReady', n);
   $('copyShareBtn').classList.toggle('primary', n < st.min);
-  $('adminStatusDrawn').hidden = !drawn;
   $('adminStatusDrawn').textContent = drawn ? t('adminDrawn') : '';
   const list = $('adminList'); list.replaceChildren();
   for (const p of a.people) {
@@ -577,6 +596,22 @@ function wireEvent() {
     S.view = r.data; S.state = r.data.state; $('wishOk').textContent = t('saved'); $('wishInput').blur(); render();
   });
   const shareThis = () => shareLink(eventUrl(EVENT_ID), (S.state && S.state.title) || 'Secret Santa');
+  // A ready-made message for the group chat: an invite while sign-ups are open, a "names are drawn" reminder after.
+  const groupMessage = () => {
+    const st = S.state, link = eventUrl(EVENT_ID), budget = st.budget || '—', date = dayText(st.exchangeOn);
+    return st.status === 'drawn' ? t('msgDrawn', st.title, budget, date, link) : t('msgOpen', st.title, budget, date, link);
+  };
+  const copyMsg = async () => {
+    if (!S.state) return;
+    const text = groupMessage();
+    let ok = false; try { await navigator.clipboard.writeText(text); ok = true; } catch (e) { /* no clipboard: show it instead */ }
+    if (ok) { toast(t('copied')); return; }
+    const box = el('textarea'); box.value = text; box.readOnly = true; box.rows = 6; box.setAttribute('aria-label', t('copyMsg'));
+    openDialog({ title: t('copyMsg'), body: [t('copyManualMsg'), box], ok: t('ok') });
+    box.focus(); box.select();
+  };
+  $('msgBtn').addEventListener('click', copyMsg);
+  $('msgBtnDrawn').addEventListener('click', copyMsg);
   $('shareBtn').addEventListener('click', shareThis);
   $('adminShareBtn').addEventListener('click', shareThis);
   $('logoutBtn').addEventListener('click', () => {
