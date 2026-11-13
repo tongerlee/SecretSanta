@@ -1,0 +1,42 @@
+# Every push to main: unit tests, build the page, deploy API + site with ./deploy.sh.
+# Needs, under Settings > Secrets and variables > Actions:
+#   variable AWS_DEPLOY_ROLE  arn of the role made by ./setup-ci.sh (GitHub signs in with OIDC; no long-lived keys anywhere)
+#   variable AWS_REGION       the Region the account can deploy to (us-east-2)
+#   secret   ALERT_EMAIL      optional: an email for the "API is throwing errors" alarm (a secret, so logs never show it;
+#                             this repository is public and so are its workflow logs)
+name: Deploy
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  id-token: write      # for the OIDC sign-in
+  contents: read
+concurrency:
+  group: deploy        # one deploy at a time; a newer push waits for the running one
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: vars.AWS_DEPLOY_ROLE != ''      # until setup-ci.sh has been run and the variable set, pushes just skip this
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Build the page from page/
+        run: python3 page/build.py
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-2' }}
+      - uses: aws-actions/setup-sam@v2
+        with:
+          use-installer: true
+      - name: Deploy
+        env:
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
+        run: ./deploy.sh --region ${{ vars.AWS_REGION || 'us-east-2' }}

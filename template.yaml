@@ -9,9 +9,16 @@ Parameters:
     Type: String
     Default: gifts.departmentofunnecessarythings.com
     AllowedPattern: '^$|^[a-z0-9.-]+$'
+  # An address to email when the API throws errors or gets throttled (deploy.sh passes ALERT_EMAIL). Empty: no alarm.
+  # The first deploy with it sends a "confirm subscription" email from AWS; the alarm only reaches you after that click.
+  AlertEmail:
+    Type: String
+    Default: ''
+    NoEcho: true
 
 Conditions:
   HasCustomDomain: !Not [!Equals [!Ref CustomDomain, '']]
+  HasAlertEmail: !Not [!Equals [!Ref AlertEmail, '']]
 
 Resources:
   # One item per event (pk = E#<id>), plus short-lived counters that limit how fast events can be created.
@@ -94,6 +101,50 @@ Resources:
       Action: lambda:InvokeFunction
       Principal: '*'
       InvokedViaFunctionUrl: true
+
+  # ---- alarms: an email when the API misbehaves (only with AlertEmail) ----
+  Alerts:
+    Type: AWS::SNS::Topic
+    Condition: HasAlertEmail
+    Properties:
+      Subscription:
+        - Endpoint: !Ref AlertEmail
+          Protocol: email
+  ApiErrors:
+    Type: AWS::CloudWatch::Alarm
+    Condition: HasAlertEmail
+    Properties:
+      AlarmDescription: Secret Santa API returned errors in the last 5 minutes
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref ApiFunction
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref Alerts]
+      OKActions: [!Ref Alerts]
+  ApiThrottles:
+    Type: AWS::CloudWatch::Alarm
+    Condition: HasAlertEmail
+    Properties:
+      AlarmDescription: Secret Santa API was throttled (more than 10 requests at once for a while)
+      Namespace: AWS/Lambda
+      MetricName: Throttles
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref ApiFunction
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 5
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref Alerts]
 
 Outputs:
   SiteUrl:

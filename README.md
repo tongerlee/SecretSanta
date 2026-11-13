@@ -22,6 +22,23 @@ Region 要用你的账号能用的那个。2026 年 9 月之后新注册的 AWS 
 
 它做三件事：用 SAM 建表、Lambda 和 Amplify 应用；把接口地址写进 `config.js`；把 `web/` 打包上传到 Amplify。跑完会打印网站地址。改了代码再跑一次就是更新。全部删除：`sam delete --stack-name secret-santa`。
 
+### 推送即部署（GitHub Actions）
+
+`.github/workflows/deploy.yml`：每次 push 到 main，先跑单元测试，再 build 页面，再执行 `./deploy.sh`。GitHub 用 OIDC 临时凭证登录 AWS，哪里都不存长期密钥。一次性准备：
+
+```bash
+./setup-ci.sh --profile santa --region us-east-2     # 建 OIDC 身份提供者 + 只信任本仓库 main 分支的角色 + 部署权限
+gh variable set AWS_DEPLOY_ROLE --repo tongerlee/SecretSanta --body "<脚本最后打印的 arn>"
+gh variable set AWS_REGION --repo tongerlee/SecretSanta --body us-east-2
+gh secret set ALERT_EMAIL --repo tongerlee/SecretSanta         # 可选，见下面的告警
+```
+
+没设 `AWS_DEPLOY_ROLE` 之前 workflow 会自动跳过，不会报错。本地 `./deploy.sh` 照旧可用。仓库是公开的，workflow 日志也是公开的，所以邮箱放 secret（日志里会打码），不要放 variable。
+
+### 告警
+
+`template.yaml` 里有两个 CloudWatch 告警（Lambda 5 分钟内有报错；被限流 5 次以上），通过 SNS 发邮件。传了 `AlertEmail` 参数才会创建：本地 `ALERT_EMAIL=you@example.com ./deploy.sh …`，或 CI 的 `ALERT_EMAIL` secret。第一次会收到一封 AWS 的「Confirm subscription」邮件，点了才生效。`ALERT_EMAIL=""` 再部署一次就拆掉告警；不传则保持原样。费用提醒不在模板里：Free Tier 账号默认会在用量接近免费额度时发邮件，也可以在 Billing → Budgets 里设一个几美元的预算。
+
 ## 怎么用
 
 **组织者**

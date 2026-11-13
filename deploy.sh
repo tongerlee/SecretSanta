@@ -22,10 +22,14 @@ t=open('template.yaml').read()
 m=re.search(r'CustomDomain:\s*\n(?:.*\n)*?\s*Default:\s*(\S+)',t)
 print(m.group(1) if m else '')")"
 echo "Custom domain from template.yaml: ${CUSTOM_DOMAIN:-(none)}"
+# ALERT_EMAIL (environment) turns on the "API is throwing errors" email alarm. It is only passed when set, so a deploy
+# without it keeps whatever the stack already has; ALERT_EMAIL="" switches the alarm off.
+PARAMS=("CustomDomain=$CUSTOM_DOMAIN")
+[ -n "${ALERT_EMAIL+x}" ] && PARAMS+=("AlertEmail=$ALERT_EMAIL")
 sam deploy \
   --template-file template.yaml \
   --stack-name "$STACK" \
-  --parameter-overrides "CustomDomain=$CUSTOM_DOMAIN" \
+  --parameter-overrides "${PARAMS[@]}" \
   --resolve-s3 \
   --capabilities CAPABILITY_IAM \
   --no-confirm-changeset \
