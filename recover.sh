@@ -10,7 +10,7 @@ cd "$(dirname "$0")"
 STACK="${STACK:-secret-santa}"      # same variable deploy.sh uses
 
 ID="${1:-}"; shift || true
-[[ "$ID" =~ ^[a-z0-9]{12}$ ]] || { echo "usage: $0 <event-id> [aws cli options]   e.g. $0 kr4trywka3y4 --profile santa --region us-east-2"; exit 1; }
+[[ "$ID" =~ ^[a-z0-9]{12}$ ]] || { echo "usage: $0 <event-id> [aws cli options]   e.g. $0 ab12cd34ef56 --profile santa --region us-east-2"; exit 1; }
 
 TABLE="$(aws cloudformation describe-stack-resource --stack-name "$STACK" --logical-resource-id Table --query 'StackResourceDetail.PhysicalResourceId' --output text "$@")"
 SITE="$(aws cloudformation describe-stacks --stack-name "$STACK" --query "Stacks[0].Outputs[?OutputKey=='SiteUrl'].OutputValue" --output text "$@")"
