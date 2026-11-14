@@ -5,6 +5,9 @@
      and one kraft gift tag that flips over for the reveal. Single theme by choice. */
   --night:#0d2a22;
   --night-glow:#1c5641;
+  --night-glow-0:rgba(28,86,65,0);
+  --tint:#f3f7f4;          /* the pale wash behind organizer-only blocks */
+  --stripe-a:var(--berry);--stripe-b:var(--ok);--stripe-c:#fff;     /* the label's edge */
   --on-night:#eef6f0;
   --on-night-soft:#b4cbbf;
   --card:#fbf7ef;          /* cream: an invitation, not a form */
@@ -31,7 +34,7 @@
 [hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;color:var(--pine);font:16px/1.55 var(--font-body);
-  background:var(--night) radial-gradient(130% 460px at 50% 0,var(--night-glow) 0,rgba(28,86,65,0) 100%) no-repeat}
+  background:var(--night) radial-gradient(130% 460px at 50% 0,var(--night-glow) 0,var(--night-glow-0) 100%) no-repeat}
 #snow{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
 .wrap{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:0 16px 56px;display:flex;flex-direction:column;gap:14px}
 h1,h2,p,dl,dd,ul{margin:0}
@@ -55,7 +58,7 @@ h2{font:700 18px/1.3 var(--font-body);text-wrap:balance}
 
 /* parcel label with a candy-stripe edge */
 .label{position:relative;background:var(--paper);padding:30px 16px 0;border:7px solid var(--berry);
-  border-image:repeating-linear-gradient(135deg,var(--berry) 0 9px,#fff 9px 18px,var(--ok) 18px 27px,#fff 27px 36px) 7}
+  border-image:repeating-linear-gradient(135deg,var(--stripe-a) 0 9px,var(--stripe-c) 9px 18px,var(--stripe-b) 18px 27px,var(--stripe-c) 27px 36px) 7}
 .label-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:6px 10px;min-height:26px}
 .eyebrow{display:flex;align-items:center;gap:8px;min-width:0;font-size:11px;letter-spacing:.12em;color:var(--moss);font-weight:600}
 .label h1{font:700 clamp(42px,13.5vw,58px)/.95 var(--font-display);color:var(--berry);margin:8px 0 16px;text-wrap:balance;overflow-wrap:anywhere}
@@ -252,7 +255,7 @@ html.event .langs button{min-height:40px;padding:5px 9px;font-size:12.5px}
 @media (min-width:900px){html.event .stage{width:300px}html.event .nametag.cat{left:31.5%}html.event .nametag.dog{left:70%}}
 
 /* ---- organizer controls look different from what participants see ---- */
-.card.admin{background:#f3f7f4;border:2px dashed var(--pine)}
+.card.admin{background:var(--tint);border:2px dashed var(--pine)}
 .card.admin h2{display:flex;align-items:center;gap:8px}
 .card.admin .only-you{background:var(--card);border-left:3px solid var(--pine);padding:8px 10px;border-radius:0 6px 6px 0}
 /* the organizer's first job, as its own block inside the controls */
@@ -264,7 +267,7 @@ html.event .langs button{min-height:40px;padding:5px 9px;font-size:12.5px}
 
 /* ---- "you're all set": the link for the group, and the one link that stays with the organizer ---- */
 .handoff{display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:12px;background:#fff;border:1.5px solid var(--rule)}
-.handoff.keep{background:#f3f7f4;border:1.5px dashed var(--pine)}
+.handoff.keep{background:var(--tint);border:1.5px dashed var(--pine)}
 .masked{display:flex;gap:8px;align-items:center}
 .masked input{flex:1 1 auto;min-width:0}
 .masked .link{flex:none;align-self:center;min-height:44px}
@@ -307,7 +310,7 @@ html.event .langs button{min-height:40px;padding:5px 9px;font-size:12.5px}
 @media (prefers-reduced-motion:reduce){.card.flash{animation:none;box-shadow:0 0 0 3px var(--gold),0 8px 22px rgba(0,0,0,.13)}}
 
 /* ---- the organizer without their link: PIN brings the controls here ---- */
-.recover{display:flex;flex-direction:column;gap:10px;padding:12px 14px;border-radius:12px;background:#f3f7f4;border:1.5px dashed var(--pine)}
+.recover{display:flex;flex-direction:column;gap:10px;padding:12px 14px;border-radius:12px;background:var(--tint);border:1.5px dashed var(--pine)}
 .card .recover p{color:var(--pine)}
 h3.sub{margin:6px 0 0;font:700 14px/1.3 var(--font-body);color:var(--pine)}
 .btn.danger{border-color:var(--berry);color:var(--berry)}
@@ -336,3 +339,74 @@ footer .stamp{margin-bottom:6px}
 .stamp-main{font:700 13px/1.2 var(--font-body);letter-spacing:.14em;text-transform:uppercase}
 .stamp-sub{font:600 8.5px/1.4 var(--font-body);letter-spacing:.2em;text-transform:uppercase;border-top:1px solid currentColor;margin-top:3px;padding-top:3px}
 #fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50}
+
+/* =====================================================================================
+   Other occasions. Secret Santa keeps the Christmas look above; a wishlist is for a birthday
+   or a wedding and sets data-occasion on <html>, which swaps the palette, the title face and
+   the decorations. The pets, the layout and every control stay the same.
+   ===================================================================================== */
+.deco-birthday,.deco-wedding{display:none}
+html[data-occasion="birthday"] .deco-christmas,html[data-occasion="wedding"] .deco-christmas{display:none}
+html[data-occasion="birthday"] .deco-birthday,html[data-occasion="wedding"] .deco-wedding{display:block}
+html[data-occasion="birthday"] svg .deco-birthday,html[data-occasion="wedding"] svg .deco-wedding{display:inline}
+html[data-occasion="birthday"] .eyebrow svg.deco-birthday,html[data-occasion="wedding"] .eyebrow svg.deco-wedding{display:block}
+
+/* birthday: an indigo evening, bunting and balloons, pink + teal + yellow */
+html[data-occasion="birthday"]{
+  --night:#221a44;--night-glow:#5a3fa0;--night-glow-0:rgba(90,63,160,0);--on-night:#f3effa;--on-night-soft:#c6bbe0;
+  --card:#fdf8f4;--paper:#fffaf6;--field:#f6eff3;--rule:#e9dfe8;--tint:#f4f0fa;
+  --pine:#2b2140;--moss:#6a6280;--berry:#c9356a;--berry-deep:#a82757;--ok:#147a78;--gold:#ffc94d;
+  --stripe-a:#ff5d8f;--stripe-b:#35b8b0;--stripe-c:#fff;
+  --font-display:"Fredoka","PingFang SC","Hiragino Sans GB","Microsoft YaHei","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+}
+html[data-occasion="birthday"] .sc-back{fill:#e7ddf7}
+html[data-occasion="birthday"] .sc-ground{fill:#fff8f0}
+html[data-occasion="birthday"] .sc-shadow{fill:#eadfe8}
+html[data-occasion="birthday"] .gf-a{fill:#ff5d8f}html[data-occasion="birthday"] .gf-a2{fill:#e0457b}
+html[data-occasion="birthday"] .gf-b{fill:#35b8b0}html[data-occasion="birthday"] .gf-b2{fill:#229c95}
+html[data-occasion="birthday"] .gf-r2{fill:#ffc94d}
+
+/* wedding: dusk mauve, a leaf garland and flowers, dusty rose + sage + soft gold */
+html[data-occasion="wedding"]{
+  --night:#2f2731;--night-glow:#6a5163;--night-glow-0:rgba(106,81,99,0);--on-night:#f6f0ea;--on-night-soft:#cdbfc2;
+  --card:#fcf9f4;--paper:#fffdf9;--field:#f6f0e8;--rule:#e9e0d6;--tint:#f4f1ec;
+  --pine:#33292e;--moss:#74676c;--berry:#9d4a5f;--berry-deep:#7f3a4c;--ok:#4f6f5a;--gold:#e3c88c;
+  --stripe-a:#d9a3ad;--stripe-b:#a3b9a2;--stripe-c:#fffaf2;
+  --font-display:"Cormorant Garamond","Songti SC","Noto Serif SC","Nanum Myeongjo",Georgia,serif;
+}
+html[data-occasion="wedding"] .sc-back{fill:#efe4e2}
+html[data-occasion="wedding"] .sc-ground{fill:#fffaf4}
+html[data-occasion="wedding"] .sc-shadow{fill:#ebe0d8}
+html[data-occasion="wedding"] .gf-a{fill:#e8aab4}html[data-occasion="wedding"] .gf-a2{fill:#d98a98}
+html[data-occasion="wedding"] .gf-b{fill:#a3b9a2}html[data-occasion="wedding"] .gf-b2{fill:#7f9c85}
+html[data-occasion="wedding"] .gf-r,html[data-occasion="wedding"] .gf-r2{fill:#fff6ee}
+html[data-occasion="wedding"] .label h1{font-style:italic;font-weight:600;letter-spacing:.005em;line-height:1}
+html[data-occasion="wedding"] .label h1.plain{font-style:normal}
+html[data-occasion] .label h1{color:var(--berry)}
+html[data-occasion] .label h1.plain{color:var(--pine)}
+html[data-occasion] .motion-toggle::before{background:rgba(20,14,30,.4)}
+html[data-occasion] dialog::backdrop{background:rgba(16,10,18,.72)}
+
+/* ---- a choice between two or three things, as one segmented control ---- */
+.seg{display:flex;gap:4px;padding:4px;border-radius:14px;background:var(--field);border:1.5px solid var(--rule)}
+.seg button{flex:1 1 0;min-width:0;min-height:44px;font:600 15px/1.2 var(--font-body);color:var(--moss);background:none;border:0;border-radius:10px;padding:8px 10px;cursor:pointer}
+.seg button[aria-checked="true"]{background:#fff;color:var(--pine);box-shadow:0 1px 3px rgba(0,0,0,.14)}
+.lbl{font-size:13px;font-weight:600;color:var(--moss);margin-top:4px}
+
+/* ---- the wishlist ---- */
+.inset-b{border-bottom:1px solid var(--rule);padding-bottom:14px}
+.items{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.items li{display:flex;align-items:center;gap:10px 12px;flex-wrap:wrap;padding:12px 0;border-top:1px solid var(--rule)}
+.items li:first-child{border-top:0;padding-top:2px}
+.item-main{flex:1 1 130px;min-width:0;display:flex;flex-direction:column;gap:2px}
+.item-text{font-size:16px;font-weight:600;color:var(--pine);overflow-wrap:anywhere}
+.item-link{font-size:13px;font-weight:600;color:var(--moss);overflow-wrap:anywhere;align-self:flex-start;padding:4px 0}
+.item-side{display:flex;align-items:center;gap:6px 10px;flex-wrap:wrap;margin-left:auto}
+.item-by{font-size:13px;color:var(--moss)}
+.item-mine{font-size:12.5px;font-weight:700;color:#fff;background:var(--ok);padding:4px 10px;border-radius:999px;white-space:nowrap}
+.items li.taken .item-text{color:var(--moss);text-decoration:line-through;text-decoration-color:var(--rule);font-weight:500}
+.items li.mine{background:var(--tint);margin:0 -10px;padding-left:10px;padding-right:10px;border-radius:10px;border-top-color:transparent}
+.items li.mine + li{border-top-color:transparent}
+.items .link{align-self:center}
+.items .btn.sm{padding:8px 10px;font-size:13.5px;min-height:40px}
+.items .btn.sm.primary{padding:9px 12px;font-size:14px;min-height:44px}

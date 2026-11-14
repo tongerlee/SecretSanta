@@ -1,0 +1,4 @@
+      <path d="M40 72 Q52 104 60 140 M68 60 Q64 100 61 140 M88 80 Q72 108 62 140" fill="none" stroke="#f3effa" stroke-width="1.6" stroke-linecap="round" opacity=".9"/>
+      <ellipse cx="38" cy="48" rx="19" ry="24" fill="#ff5d8f"/><path d="M34 71 h8 l-4 6z" fill="#ff5d8f"/><ellipse cx="31" cy="38" rx="5" ry="8" fill="#fff" opacity=".35"/>
+      <ellipse cx="90" cy="56" rx="19" ry="24" fill="#35b8b0"/><path d="M86 79 h8 l-4 6z" fill="#35b8b0"/><ellipse cx="83" cy="46" rx="5" ry="8" fill="#fff" opacity=".35"/>
+      <ellipse cx="66" cy="34" rx="20" ry="26" fill="#ffc94d"/><path d="M62 59 h8 l-4 6z" fill="#ffc94d"/><ellipse cx="58" cy="23" rx="5.5" ry="9" fill="#fff" opacity=".4"/>

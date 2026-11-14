@@ -16,7 +16,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Ma+Shan+Zheng&family=Mountains+of+Christmas:wght@700&display=swap" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Patrick+Hand&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Patrick+Hand&family=Fredoka:wght@600&family=Cormorant+Garamond:ital,wght@1,600&display=swap" media="print" onload="this.media='all'">
 <style>
 :root{
   /* One world, on purpose: a snowy pine-green night. String lights on top, the two pets
@@ -24,6 +24,9 @@
      and one kraft gift tag that flips over for the reveal. Single theme by choice. */
   --night:#0d2a22;
   --night-glow:#1c5641;
+  --night-glow-0:rgba(28,86,65,0);
+  --tint:#f3f7f4;          /* the pale wash behind organizer-only blocks */
+  --stripe-a:var(--berry);--stripe-b:var(--ok);--stripe-c:#fff;     /* the label's edge */
   --on-night:#eef6f0;
   --on-night-soft:#b4cbbf;
   --card:#fbf7ef;          /* cream: an invitation, not a form */
@@ -50,7 +53,7 @@
 [hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;color:var(--pine);font:16px/1.55 var(--font-body);
-  background:var(--night) radial-gradient(130% 460px at 50% 0,var(--night-glow) 0,rgba(28,86,65,0) 100%) no-repeat}
+  background:var(--night) radial-gradient(130% 460px at 50% 0,var(--night-glow) 0,var(--night-glow-0) 100%) no-repeat}
 #snow{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
 .wrap{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:0 16px 56px;display:flex;flex-direction:column;gap:14px}
 h1,h2,p,dl,dd,ul{margin:0}
@@ -74,7 +77,7 @@ h2{font:700 18px/1.3 var(--font-body);text-wrap:balance}
 
 /* parcel label with a candy-stripe edge */
 .label{position:relative;background:var(--paper);padding:30px 16px 0;border:7px solid var(--berry);
-  border-image:repeating-linear-gradient(135deg,var(--berry) 0 9px,#fff 9px 18px,var(--ok) 18px 27px,#fff 27px 36px) 7}
+  border-image:repeating-linear-gradient(135deg,var(--stripe-a) 0 9px,var(--stripe-c) 9px 18px,var(--stripe-b) 18px 27px,var(--stripe-c) 27px 36px) 7}
 .label-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:6px 10px;min-height:26px}
 .eyebrow{display:flex;align-items:center;gap:8px;min-width:0;font-size:11px;letter-spacing:.12em;color:var(--moss);font-weight:600}
 .label h1{font:700 clamp(42px,13.5vw,58px)/.95 var(--font-display);color:var(--berry);margin:8px 0 16px;text-wrap:balance;overflow-wrap:anywhere}
@@ -271,7 +274,7 @@ html.event .langs button{min-height:40px;padding:5px 9px;font-size:12.5px}
 @media (min-width:900px){html.event .stage{width:300px}html.event .nametag.cat{left:31.5%}html.event .nametag.dog{left:70%}}
 
 /* ---- organizer controls look different from what participants see ---- */
-.card.admin{background:#f3f7f4;border:2px dashed var(--pine)}
+.card.admin{background:var(--tint);border:2px dashed var(--pine)}
 .card.admin h2{display:flex;align-items:center;gap:8px}
 .card.admin .only-you{background:var(--card);border-left:3px solid var(--pine);padding:8px 10px;border-radius:0 6px 6px 0}
 /* the organizer's first job, as its own block inside the controls */
@@ -283,7 +286,7 @@ html.event .langs button{min-height:40px;padding:5px 9px;font-size:12.5px}
 
 /* ---- "you're all set": the link for the group, and the one link that stays with the organizer ---- */
 .handoff{display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:12px;background:#fff;border:1.5px solid var(--rule)}
-.handoff.keep{background:#f3f7f4;border:1.5px dashed var(--pine)}
+.handoff.keep{background:var(--tint);border:1.5px dashed var(--pine)}
 .masked{display:flex;gap:8px;align-items:center}
 .masked input{flex:1 1 auto;min-width:0}
 .masked .link{flex:none;align-self:center;min-height:44px}
@@ -326,7 +329,7 @@ html.event .langs button{min-height:40px;padding:5px 9px;font-size:12.5px}
 @media (prefers-reduced-motion:reduce){.card.flash{animation:none;box-shadow:0 0 0 3px var(--gold),0 8px 22px rgba(0,0,0,.13)}}
 
 /* ---- the organizer without their link: PIN brings the controls here ---- */
-.recover{display:flex;flex-direction:column;gap:10px;padding:12px 14px;border-radius:12px;background:#f3f7f4;border:1.5px dashed var(--pine)}
+.recover{display:flex;flex-direction:column;gap:10px;padding:12px 14px;border-radius:12px;background:var(--tint);border:1.5px dashed var(--pine)}
 .card .recover p{color:var(--pine)}
 h3.sub{margin:6px 0 0;font:700 14px/1.3 var(--font-body);color:var(--pine)}
 .btn.danger{border-color:var(--berry);color:var(--berry)}
@@ -355,6 +358,77 @@ footer .stamp{margin-bottom:6px}
 .stamp-main{font:700 13px/1.2 var(--font-body);letter-spacing:.14em;text-transform:uppercase}
 .stamp-sub{font:600 8.5px/1.4 var(--font-body);letter-spacing:.2em;text-transform:uppercase;border-top:1px solid currentColor;margin-top:3px;padding-top:3px}
 #fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50}
+
+/* =====================================================================================
+   Other occasions. Secret Santa keeps the Christmas look above; a wishlist is for a birthday
+   or a wedding and sets data-occasion on <html>, which swaps the palette, the title face and
+   the decorations. The pets, the layout and every control stay the same.
+   ===================================================================================== */
+.deco-birthday,.deco-wedding{display:none}
+html[data-occasion="birthday"] .deco-christmas,html[data-occasion="wedding"] .deco-christmas{display:none}
+html[data-occasion="birthday"] .deco-birthday,html[data-occasion="wedding"] .deco-wedding{display:block}
+html[data-occasion="birthday"] svg .deco-birthday,html[data-occasion="wedding"] svg .deco-wedding{display:inline}
+html[data-occasion="birthday"] .eyebrow svg.deco-birthday,html[data-occasion="wedding"] .eyebrow svg.deco-wedding{display:block}
+
+/* birthday: an indigo evening, bunting and balloons, pink + teal + yellow */
+html[data-occasion="birthday"]{
+  --night:#221a44;--night-glow:#5a3fa0;--night-glow-0:rgba(90,63,160,0);--on-night:#f3effa;--on-night-soft:#c6bbe0;
+  --card:#fdf8f4;--paper:#fffaf6;--field:#f6eff3;--rule:#e9dfe8;--tint:#f4f0fa;
+  --pine:#2b2140;--moss:#6a6280;--berry:#c9356a;--berry-deep:#a82757;--ok:#147a78;--gold:#ffc94d;
+  --stripe-a:#ff5d8f;--stripe-b:#35b8b0;--stripe-c:#fff;
+  --font-display:"Fredoka","PingFang SC","Hiragino Sans GB","Microsoft YaHei","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+}
+html[data-occasion="birthday"] .sc-back{fill:#e7ddf7}
+html[data-occasion="birthday"] .sc-ground{fill:#fff8f0}
+html[data-occasion="birthday"] .sc-shadow{fill:#eadfe8}
+html[data-occasion="birthday"] .gf-a{fill:#ff5d8f}html[data-occasion="birthday"] .gf-a2{fill:#e0457b}
+html[data-occasion="birthday"] .gf-b{fill:#35b8b0}html[data-occasion="birthday"] .gf-b2{fill:#229c95}
+html[data-occasion="birthday"] .gf-r2{fill:#ffc94d}
+
+/* wedding: dusk mauve, a leaf garland and flowers, dusty rose + sage + soft gold */
+html[data-occasion="wedding"]{
+  --night:#2f2731;--night-glow:#6a5163;--night-glow-0:rgba(106,81,99,0);--on-night:#f6f0ea;--on-night-soft:#cdbfc2;
+  --card:#fcf9f4;--paper:#fffdf9;--field:#f6f0e8;--rule:#e9e0d6;--tint:#f4f1ec;
+  --pine:#33292e;--moss:#74676c;--berry:#9d4a5f;--berry-deep:#7f3a4c;--ok:#4f6f5a;--gold:#e3c88c;
+  --stripe-a:#d9a3ad;--stripe-b:#a3b9a2;--stripe-c:#fffaf2;
+  --font-display:"Cormorant Garamond","Songti SC","Noto Serif SC","Nanum Myeongjo",Georgia,serif;
+}
+html[data-occasion="wedding"] .sc-back{fill:#efe4e2}
+html[data-occasion="wedding"] .sc-ground{fill:#fffaf4}
+html[data-occasion="wedding"] .sc-shadow{fill:#ebe0d8}
+html[data-occasion="wedding"] .gf-a{fill:#e8aab4}html[data-occasion="wedding"] .gf-a2{fill:#d98a98}
+html[data-occasion="wedding"] .gf-b{fill:#a3b9a2}html[data-occasion="wedding"] .gf-b2{fill:#7f9c85}
+html[data-occasion="wedding"] .gf-r,html[data-occasion="wedding"] .gf-r2{fill:#fff6ee}
+html[data-occasion="wedding"] .label h1{font-style:italic;font-weight:600;letter-spacing:.005em;line-height:1}
+html[data-occasion="wedding"] .label h1.plain{font-style:normal}
+html[data-occasion] .label h1{color:var(--berry)}
+html[data-occasion] .label h1.plain{color:var(--pine)}
+html[data-occasion] .motion-toggle::before{background:rgba(20,14,30,.4)}
+html[data-occasion] dialog::backdrop{background:rgba(16,10,18,.72)}
+
+/* ---- a choice between two or three things, as one segmented control ---- */
+.seg{display:flex;gap:4px;padding:4px;border-radius:14px;background:var(--field);border:1.5px solid var(--rule)}
+.seg button{flex:1 1 0;min-width:0;min-height:44px;font:600 15px/1.2 var(--font-body);color:var(--moss);background:none;border:0;border-radius:10px;padding:8px 10px;cursor:pointer}
+.seg button[aria-checked="true"]{background:#fff;color:var(--pine);box-shadow:0 1px 3px rgba(0,0,0,.14)}
+.lbl{font-size:13px;font-weight:600;color:var(--moss);margin-top:4px}
+
+/* ---- the wishlist ---- */
+.inset-b{border-bottom:1px solid var(--rule);padding-bottom:14px}
+.items{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.items li{display:flex;align-items:center;gap:10px 12px;flex-wrap:wrap;padding:12px 0;border-top:1px solid var(--rule)}
+.items li:first-child{border-top:0;padding-top:2px}
+.item-main{flex:1 1 130px;min-width:0;display:flex;flex-direction:column;gap:2px}
+.item-text{font-size:16px;font-weight:600;color:var(--pine);overflow-wrap:anywhere}
+.item-link{font-size:13px;font-weight:600;color:var(--moss);overflow-wrap:anywhere;align-self:flex-start;padding:4px 0}
+.item-side{display:flex;align-items:center;gap:6px 10px;flex-wrap:wrap;margin-left:auto}
+.item-by{font-size:13px;color:var(--moss)}
+.item-mine{font-size:12.5px;font-weight:700;color:#fff;background:var(--ok);padding:4px 10px;border-radius:999px;white-space:nowrap}
+.items li.taken .item-text{color:var(--moss);text-decoration:line-through;text-decoration-color:var(--rule);font-weight:500}
+.items li.mine{background:var(--tint);margin:0 -10px;padding-left:10px;padding-right:10px;border-radius:10px;border-top-color:transparent}
+.items li.mine + li{border-top-color:transparent}
+.items .link{align-self:center}
+.items .btn.sm{padding:8px 10px;font-size:13.5px;min-height:40px}
+.items .btn.sm.primary{padding:9px 12px;font-size:14px;min-height:44px}
 </style>
 </head>
 <body>
@@ -368,7 +442,7 @@ footer .stamp{margin-bottom:6px}
       <svg class="ic-pause" viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><rect x="4" y="3" width="4" height="14" rx="1"/><rect x="12" y="3" width="4" height="14" rx="1"/></svg>
       <svg class="ic-play" viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M6 3.5v13l10-6.5z"/></svg>
     </button>
-    <svg class="lights" viewBox="0 0 360 40" aria-hidden="true">
+    <svg class="lights deco deco-christmas" viewBox="0 0 360 40" aria-hidden="true">
       <path d="M-5 4 Q40 26 90 8 Q135 26 180 8 Q225 26 270 8 Q315 26 365 4" fill="none" stroke="#08201a" stroke-width="1.6"/>
       <g fill="currentColor">
         <g class="bulb" style="color:#ff5468"><rect x="11.4" y="10" width="3.6" height="4" rx="1" fill="#08201a"/><ellipse cx="13.2" cy="19.5" rx="4" ry="6"/></g>
@@ -385,16 +459,85 @@ footer .stamp{margin-bottom:6px}
         <g class="bulb" style="color:#6ec3f5"><rect x="343.4" y="10" width="3.6" height="4" rx="1" fill="#08201a"/><ellipse cx="345.2" cy="19.5" rx="4" ry="6"/></g>
       </g>
     </svg>
+    <svg class="lights deco deco-birthday" viewBox="0 0 360 40" aria-hidden="true">
+      <path d="M-5 4 Q40 26 90 8 Q135 26 180 8 Q225 26 270 8 Q315 26 365 4" fill="none" stroke="#f3effa" stroke-width="1.4" opacity=".75"/>
+      <path class="bulb" transform="translate(12 10.8) rotate(17.5)" d="M-8.5 0 H8.5 L0 17Z" fill="#ff5d8f"/>
+      <path class="bulb" transform="translate(36 15.7) rotate(5.1)" d="M-8.5 0 H8.5 L0 17Z" fill="#ffc94d"/>
+      <path class="bulb" transform="translate(60 15.3) rotate(-6.8)" d="M-8.5 0 H8.5 L0 17Z" fill="#35b8b0"/>
+      <path class="bulb" transform="translate(84 10.0) rotate(-17.4)" d="M-8.5 0 H8.5 L0 17Z" fill="#8f7bff"/>
+      <path class="bulb" transform="translate(108 13.8) rotate(13.5)" d="M-8.5 0 H8.5 L0 17Z" fill="#ff8a5c"/>
+      <path class="bulb" transform="translate(132 17.0) rotate(1.5)" d="M-8.5 0 H8.5 L0 17Z" fill="#ff5d8f"/>
+      <path class="bulb" transform="translate(156 15.0) rotate(-10.6)" d="M-8.5 0 H8.5 L0 17Z" fill="#ffc94d"/>
+      <path class="bulb" transform="translate(180 8.0) rotate(-21.8)" d="M-8.5 0 H8.5 L0 17Z" fill="#35b8b0"/>
+      <path class="bulb" transform="translate(204 15.0) rotate(10.6)" d="M-8.5 0 H8.5 L0 17Z" fill="#8f7bff"/>
+      <path class="bulb" transform="translate(228 17.0) rotate(-1.5)" d="M-8.5 0 H8.5 L0 17Z" fill="#ff8a5c"/>
+      <path class="bulb" transform="translate(252 13.8) rotate(-13.5)" d="M-8.5 0 H8.5 L0 17Z" fill="#ff5d8f"/>
+      <path class="bulb" transform="translate(276 10.2) rotate(18.7)" d="M-8.5 0 H8.5 L0 17Z" fill="#ffc94d"/>
+      <path class="bulb" transform="translate(300 15.5) rotate(6.0)" d="M-8.5 0 H8.5 L0 17Z" fill="#35b8b0"/>
+      <path class="bulb" transform="translate(324 15.4) rotate(-6.3)" d="M-8.5 0 H8.5 L0 17Z" fill="#8f7bff"/>
+      <path class="bulb" transform="translate(348 10.4) rotate(-17.1)" d="M-8.5 0 H8.5 L0 17Z" fill="#ff8a5c"/>
+    </svg>
+    <svg class="lights deco deco-wedding" viewBox="0 0 360 40" aria-hidden="true">
+      <path d="M-5 4 Q40 26 90 8 Q135 26 180 8 Q225 26 270 8 Q315 26 365 4" fill="none" stroke="#6f8a74" stroke-width="1.6"/>
+      <ellipse transform="translate(4 8.0) rotate(-26.4) translate(5 0)" rx="5.6" ry="2.3" fill="#a3b9a2"/>
+      <ellipse transform="translate(13 11.1) rotate(65.0) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(22 13.5) rotate(-35.6) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(31 15.1) rotate(55.7) translate(5 0)" rx="5.6" ry="2.3" fill="#a3b9a2"/>
+      <ellipse transform="translate(40 15.9) rotate(-45.0) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(49 16.1) rotate(46.5) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(58 15.5) rotate(-53.9) translate(5 0)" rx="5.6" ry="2.3" fill="#a3b9a2"/>
+      <ellipse transform="translate(67 14.2) rotate(37.9) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(76 12.3) rotate(-62.1) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(85 9.7) rotate(30.2) translate(5 0)" rx="5.6" ry="2.3" fill="#a3b9a2"/>
+      <ellipse transform="translate(94 9.5) rotate(-28.0) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(103 12.4) rotate(63.9) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(112 14.6) rotate(-36.4) translate(5 0)" rx="5.6" ry="2.3" fill="#a3b9a2"/>
+      <ellipse transform="translate(121 16.1) rotate(55.1) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(130 16.9) rotate(-45.5) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(139 16.9) rotate(46.0) translate(5 0)" rx="5.6" ry="2.3" fill="#a3b9a2"/>
+      <ellipse transform="translate(148 16.2) rotate(-54.6) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(157 14.8) rotate(36.9) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(166 12.7) rotate(-63.4) translate(5 0)" rx="5.6" ry="2.3" fill="#a3b9a2"/>
+      <ellipse transform="translate(175 9.9) rotate(28.4) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(184 9.5) rotate(-28.0) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(193 12.4) rotate(63.9) translate(5 0)" rx="5.6" ry="2.3" fill="#a3b9a2"/>
+      <ellipse transform="translate(202 14.6) rotate(-36.4) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(211 16.1) rotate(55.1) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(220 16.9) rotate(-45.5) translate(5 0)" rx="5.6" ry="2.3" fill="#a3b9a2"/>
+      <ellipse transform="translate(229 16.9) rotate(46.0) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(238 16.2) rotate(-54.6) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(247 14.8) rotate(36.9) translate(5 0)" rx="5.6" ry="2.3" fill="#a3b9a2"/>
+      <ellipse transform="translate(256 12.7) rotate(-63.4) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(265 9.9) rotate(28.4) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(274 9.5) rotate(-28.3) translate(5 0)" rx="5.6" ry="2.3" fill="#a3b9a2"/>
+      <ellipse transform="translate(283 12.3) rotate(63.0) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(292 14.4) rotate(-37.8) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(301 15.6) rotate(53.5) translate(5 0)" rx="5.6" ry="2.3" fill="#a3b9a2"/>
+      <ellipse transform="translate(310 16.1) rotate(-47.2) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(319 15.9) rotate(44.2) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(328 14.9) rotate(-56.2) translate(5 0)" rx="5.6" ry="2.3" fill="#a3b9a2"/>
+      <ellipse transform="translate(337 13.3) rotate(35.6) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(346 11.0) rotate(-64.3) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(355 8.0) rotate(28.0) translate(5 0)" rx="5.6" ry="2.3" fill="#a3b9a2"/>
+      <g class="bulb"><circle cx="40" cy="17.9" r="5.2" fill="#f3c9cf"/><circle cx="40" cy="17.9" r="2.2" fill="#d98a98"/></g>
+      <g class="bulb"><circle cx="86" cy="11.4" r="3.6" fill="#fff6ee"/><circle cx="86" cy="11.4" r="1.5" fill="#e9c98f"/></g>
+      <g class="bulb"><circle cx="135" cy="19.0" r="5.2" fill="#f3c9cf"/><circle cx="135" cy="19.0" r="2.2" fill="#d98a98"/></g>
+      <g class="bulb"><circle cx="180" cy="10.0" r="3.6" fill="#fff6ee"/><circle cx="180" cy="10.0" r="1.5" fill="#e9c98f"/></g>
+      <g class="bulb"><circle cx="225" cy="19.0" r="5.2" fill="#f3c9cf"/><circle cx="225" cy="19.0" r="2.2" fill="#d98a98"/></g>
+      <g class="bulb"><circle cx="274" cy="11.5" r="3.6" fill="#fff6ee"/><circle cx="274" cy="11.5" r="1.5" fill="#e9c98f"/></g>
+      <g class="bulb"><circle cx="320" cy="17.8" r="5.2" fill="#f3c9cf"/><circle cx="320" cy="17.8" r="2.2" fill="#d98a98"/></g>
+    </svg>
     <div class="stage">
       <svg class="hills" viewBox="0 0 360 215" aria-hidden="true">
-        <path d="M16 190 C18 110 36 34 100 22 C140 14 172 30 204 24 C244 16 296 10 322 50 C340 80 346 150 348 190Z" fill="#dbe8f0"/>
-        <path d="M60 60 C74 40 92 30 112 27 M214 28 C250 22 292 22 312 52" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity=".8"/>
-        <path d="M4 215 C4 190 34 170 100 168 C160 166 210 164 262 166 C322 168 356 190 356 215Z" fill="#ffffff"/>
-        <ellipse cx="118" cy="198" rx="52" ry="5.5" fill="#d5e2ea"/>
-        <ellipse cx="246" cy="198.5" rx="58" ry="6" fill="#d5e2ea"/>
-        <ellipse cx="31" cy="196.5" rx="24" ry="3.5" fill="#d5e2ea"/>
-        <ellipse cx="333" cy="198" rx="25" ry="3.5" fill="#d5e2ea"/>
-        <g transform="translate(-7.6 108) scale(.62)">
+        <!-- the classes let the birthday and wedding looks recolour the scene; the fills here are the Christmas ones -->
+        <path class="sc-back" d="M16 190 C18 110 36 34 100 22 C140 14 172 30 204 24 C244 16 296 10 322 50 C340 80 346 150 348 190Z" fill="#dbe8f0"/>
+        <path class="sc-shine" d="M60 60 C74 40 92 30 112 27 M214 28 C250 22 292 22 312 52" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity=".8"/>
+        <path class="sc-ground" d="M4 215 C4 190 34 170 100 168 C160 166 210 164 262 166 C322 168 356 190 356 215Z" fill="#ffffff"/>
+        <ellipse class="sc-shadow" cx="118" cy="198" rx="52" ry="5.5" fill="#d5e2ea"/>
+        <ellipse class="sc-shadow" cx="246" cy="198.5" rx="58" ry="6" fill="#d5e2ea"/>
+        <ellipse class="sc-shadow" cx="31" cy="196.5" rx="24" ry="3.5" fill="#d5e2ea"/>
+        <ellipse class="sc-shadow" cx="333" cy="198" rx="25" ry="3.5" fill="#d5e2ea"/>
+        <g class="deco deco-christmas" transform="translate(-7.6 108) scale(.62)">
       <rect x="57" y="128" width="10" height="14" fill="#7a4a2a"/>
       <path d="M62 70 L22 132 H102Z" fill="#1f6b4a"/>
       <path d="M62 48 L30 104 H94Z" fill="#26795a"/>
@@ -405,12 +548,26 @@ footer .stamp{margin-bottom:6px}
       <circle cx="38" cy="116" r="3.6" fill="#6ec3f5"/><circle cx="58" cy="120" r="3.6" fill="#ffffff"/><circle cx="78" cy="118" r="3.6" fill="#f2c14e"/><circle cx="92" cy="112" r="3.2" fill="#ff5468"/>
       <path d="M62 11 64.23 16.93 70.56 17.22 65.61 21.17 67.29 27.28 62 23.8 56.71 27.28 58.39 21.17 53.44 17.22 59.77 16.93Z" fill="#f2c14e"/>
         </g>
+        <g class="deco deco-birthday" transform="translate(-10 100) scale(.68)">
+      <path d="M40 72 Q52 104 60 140 M68 60 Q64 100 61 140 M88 80 Q72 108 62 140" fill="none" stroke="#f3effa" stroke-width="1.6" stroke-linecap="round" opacity=".9"/>
+      <ellipse cx="38" cy="48" rx="19" ry="24" fill="#ff5d8f"/><path d="M34 71 h8 l-4 6z" fill="#ff5d8f"/><ellipse cx="31" cy="38" rx="5" ry="8" fill="#fff" opacity=".35"/>
+      <ellipse cx="90" cy="56" rx="19" ry="24" fill="#35b8b0"/><path d="M86 79 h8 l-4 6z" fill="#35b8b0"/><ellipse cx="83" cy="46" rx="5" ry="8" fill="#fff" opacity=".35"/>
+      <ellipse cx="66" cy="34" rx="20" ry="26" fill="#ffc94d"/><path d="M62 59 h8 l-4 6z" fill="#ffc94d"/><ellipse cx="58" cy="23" rx="5.5" ry="9" fill="#fff" opacity=".4"/>
+        </g>
+        <g class="deco deco-wedding" transform="translate(-9 106) scale(.64)">
+      <path d="M62 142 C60 118 56 96 46 78 M62 142 C62 112 66 92 74 70 M62 142 C66 118 76 104 90 92" fill="none" stroke="#6f8a74" stroke-width="2.4" stroke-linecap="round"/>
+      <ellipse cx="40" cy="104" rx="13" ry="5" transform="rotate(34 40 104)" fill="#7f9c85"/><ellipse cx="86" cy="112" rx="13" ry="5" transform="rotate(-30 86 112)" fill="#a3b9a2"/>
+      <ellipse cx="52" cy="124" rx="11" ry="4.5" transform="rotate(20 52 124)" fill="#a3b9a2"/><ellipse cx="76" cy="126" rx="11" ry="4.5" transform="rotate(-22 76 126)" fill="#7f9c85"/>
+      <circle cx="44" cy="70" r="17" fill="#f3c9cf"/><circle cx="44" cy="70" r="10.5" fill="#e8aab4"/><circle cx="44" cy="70" r="4.6" fill="#d98a98"/>
+      <circle cx="76" cy="58" r="19" fill="#fff6ee"/><circle cx="76" cy="58" r="12" fill="#f6e3d2"/><circle cx="76" cy="58" r="5.2" fill="#e9c98f"/>
+      <circle cx="94" cy="88" r="12.5" fill="#f3c9cf"/><circle cx="94" cy="88" r="7.6" fill="#e8aab4"/><circle cx="94" cy="88" r="3.4" fill="#d98a98"/>
+        </g>
         <g transform="translate(312 149) scale(.7)">
-          <rect x="4" y="40" width="52" height="28" rx="2" fill="#c62f45"/><rect x="26" y="40" width="8" height="28" fill="#ffffff"/>
-          <rect x="2" y="35" width="56" height="8" rx="2" fill="#a8233a"/><rect x="26" y="35" width="8" height="8" fill="#ffffff"/>
-          <rect x="16" y="14" width="30" height="21" rx="2" fill="#2f8a66"/><rect x="28" y="14" width="6" height="21" fill="#f2c14e"/>
-          <rect x="14" y="10" width="34" height="7" rx="2" fill="#26795a"/><rect x="28" y="10" width="6" height="7" fill="#f2c14e"/>
-          <path d="M31 10 C22 -1 18 8 31 10 C44 8 40 -1 31 10Z" fill="#f2c14e"/>
+          <rect class="gf-a" x="4" y="40" width="52" height="28" rx="2" fill="#c62f45"/><rect class="gf-r" x="26" y="40" width="8" height="28" fill="#ffffff"/>
+          <rect class="gf-a2" x="2" y="35" width="56" height="8" rx="2" fill="#a8233a"/><rect class="gf-r" x="26" y="35" width="8" height="8" fill="#ffffff"/>
+          <rect class="gf-b" x="16" y="14" width="30" height="21" rx="2" fill="#2f8a66"/><rect class="gf-r2" x="28" y="14" width="6" height="21" fill="#f2c14e"/>
+          <rect class="gf-b2" x="14" y="10" width="34" height="7" rx="2" fill="#26795a"/><rect class="gf-r2" x="28" y="10" width="6" height="7" fill="#f2c14e"/>
+          <path class="gf-r2" d="M31 10 C22 -1 18 8 31 10 C44 8 40 -1 31 10Z" fill="#f2c14e"/>
         </g>
       </svg>
       <img class="pets pet-cat" src="pets.png" alt="" data-i18n-alt="petsAlt" width="1774" height="887">
@@ -425,18 +582,20 @@ footer .stamp{margin-bottom:6px}
   <header class="label">
     <div class="label-top">
       <span class="eyebrow">
-        <svg viewBox="0 0 28 20" width="28" height="20" aria-hidden="true"><path d="M13 11 C8 3 3 5 1 2 C1 8 3 13 13 12Z" fill="#2f8a66"/><path d="M15 11 C20 3 25 5 27 2 C27 8 25 13 15 12Z" fill="#1f6b4a"/><circle cx="11.6" cy="14.6" r="3" fill="#d42a43"/><circle cx="16.6" cy="15" r="3" fill="#b8203a"/><circle cx="14" cy="10.8" r="2.6" fill="#e8495e"/></svg>
-        <span data-i18n="eyebrow"></span>
+        <svg class="deco deco-birthday" viewBox="0 0 28 20" width="28" height="20" aria-hidden="true"><path d="M6 19h16v-7.5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2z" fill="#ff5d8f"/><path d="M6 13.5c2 1.6 3.4 1.6 5.3 0s3.4-1.6 5.4 0 3.3 1.6 5.3 0" fill="none" stroke="#fff" stroke-width="1.5"/><path d="M10 9.5v-3M14 9.5v-3M18 9.5v-3" stroke="#35b8b0" stroke-width="1.7" stroke-linecap="round"/><circle cx="10" cy="4.4" r="1.5" fill="#ffc94d"/><circle cx="14" cy="4.4" r="1.5" fill="#ffc94d"/><circle cx="18" cy="4.4" r="1.5" fill="#ffc94d"/></svg>
+        <svg class="deco deco-wedding" viewBox="0 0 28 20" width="28" height="20" aria-hidden="true"><circle cx="10.5" cy="11.5" r="6" fill="none" stroke="#c9a45c" stroke-width="2"/><circle cx="17.5" cy="11.5" r="6" fill="none" stroke="#b08a43" stroke-width="2"/><path d="M10.5 3.6 9 1.4h3z" fill="#f3c9cf"/></svg>
+        <svg class="deco deco-christmas" viewBox="0 0 28 20" width="28" height="20" aria-hidden="true"><path d="M13 11 C8 3 3 5 1 2 C1 8 3 13 13 12Z" fill="#2f8a66"/><path d="M15 11 C20 3 25 5 27 2 C27 8 25 13 15 12Z" fill="#1f6b4a"/><circle cx="11.6" cy="14.6" r="3" fill="#d42a43"/><circle cx="16.6" cy="15" r="3" fill="#b8203a"/><circle cx="14" cy="10.8" r="2.6" fill="#e8495e"/></svg>
+        <span id="eyebrowText" data-i18n="eyebrow"></span>
       </span>
       <span class="pill" id="statusPill" hidden></span>
     </div>
     <h1 id="title">Secret Santa</h1>
     <dl class="fields" id="eventFields" hidden>
-      <div><dt data-i18n="budget"></dt><dd id="fBudget">—</dd></div>
-      <div><dt data-i18n="exchangeDay"></dt><dd id="fDate">—</dd></div>
+      <div id="fBudgetBox"><dt data-i18n="budget"></dt><dd id="fBudget">—</dd></div>
+      <div><dt id="fDateLabel" data-i18n="exchangeDay"></dt><dd id="fDate">—</dd></div>
     </dl>
     <dl class="fields one" id="homeFields" hidden>
-      <div><dt data-i18n="howTitle"></dt><dd data-i18n="howBody"></dd></div>
+      <div><dt data-i18n="howTitle"></dt><dd id="howBody" data-i18n="howBody"></dd></div>
     </dl>
     <p class="deadline" id="deadline" hidden><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 5.5V10l3 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="deadlineText"></span></p>
     <p class="deadline" id="countdown" hidden><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><rect x="2.5" y="8" width="15" height="9.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M2.5 11h15M10 8v9.5M6 8c-2.2 0-3-1.2-3-2.2S4.2 4 5.4 4.4C7 5 8.3 6.6 10 8c1.7-1.4 3-3 4.6-3.6 1.2-.4 2.4.4 2.4 1.4S16.2 8 14 8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="countdownText"></span></p>
@@ -456,7 +615,7 @@ footer .stamp{margin-bottom:6px}
     <h2 data-i18n="createdTitle"></h2>
     <section class="handoff group" aria-labelledby="groupHead">
       <h3 id="groupHead" data-i18n="forGroup"></h3>
-      <p class="hint" data-i18n="forGroupBody"></p>
+      <p class="hint" id="forGroupBody" data-i18n="forGroupBody"></p>
       <input id="newShare" readonly data-i18n-aria="shareLabel">
       <div class="row2">
         <button type="button" class="btn primary" data-copy="newShare" data-i18n="copyShare"></button>
@@ -465,7 +624,7 @@ footer .stamp{margin-bottom:6px}
     </section>
     <section class="handoff keep" aria-labelledby="keepHead">
       <h3 id="keepHead"><svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><rect x="3" y="8.5" width="14" height="9.5" rx="2" fill="currentColor"/><path d="M6.5 8.5V6a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg> <span data-i18n="forYou"></span></h3>
-      <p class="hint" data-i18n="forYouBody"></p>
+      <p class="hint" id="forYouBody" data-i18n="forYouBody"></p>
       <div class="masked">
         <input id="newAdmin" type="password" readonly data-i18n-aria="adminLinkLabel">
         <button type="button" class="link" id="newAdminShow" data-i18n="reveal"></button>
@@ -487,11 +646,24 @@ footer .stamp{margin-bottom:6px}
   <section class="card" id="createCard" hidden>
     <h2 data-i18n="createTitle"></h2>
     <form id="createForm" class="stack">
-      <label for="newTitle" data-i18n="eventName"></label>
+      <!-- two kinds of event; the gift exchange is the default and its form is exactly what it always was -->
+      <div class="seg" id="kindSeg" role="radiogroup" data-i18n-aria="kindLabel">
+        <button type="button" role="radio" aria-checked="true" data-kind="santa" data-i18n="kindSanta"></button>
+        <button type="button" role="radio" aria-checked="false" data-kind="wishlist" data-i18n="kindWishlist"></button>
+      </div>
+      <p class="hint" id="kindHint" data-i18n="kindSantaHint"></p>
+      <div class="stack" id="occasionBox" hidden>
+        <span class="lbl" id="occasionLabel" data-i18n="occasionLabel"></span>
+        <div class="seg" id="occasionSeg" role="radiogroup" aria-labelledby="occasionLabel">
+          <button type="button" role="radio" aria-checked="true" data-occasion="birthday" data-i18n="occBirthday"></button>
+          <button type="button" role="radio" aria-checked="false" data-occasion="wedding" data-i18n="occWedding"></button>
+        </div>
+      </div>
+      <label for="newTitle" id="newTitleLabel" data-i18n="eventName"></label>
       <input id="newTitle" maxlength="30" autocomplete="off">
-      <label for="newBudget" data-i18n="budget"></label>
+      <label for="newBudget" id="newBudgetLabel" data-i18n="budget"></label>
       <input id="newBudget" maxlength="20" autocomplete="off" data-i18n-ph="budgetPh">
-      <label for="newDate" data-i18n="exchangeDay"></label>
+      <label for="newDate" id="newDateLabel" data-i18n="exchangeDay"></label>
       <input id="newDate" type="date">
       <label for="newOrgPin" data-i18n="orgPinLabel"></label>
       <input id="newOrgPin" class="pin" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" aria-describedby="orgPinHint">
@@ -508,6 +680,33 @@ footer .stamp{margin-bottom:6px}
     <h2 data-i18n="goneTitle"></h2>
     <p data-i18n="goneBody"></p>
     <a class="btn" href="./" data-i18n="goneNew"></a>
+  </section>
+
+  <!-- wishlist events only: who I am here (a signed-in friend), and the list itself -->
+  <section class="card" id="wlMe" hidden>
+    <h2 id="wlMeTitle" tabindex="-1"></h2>
+    <p class="okmsg" id="wlJoinedNote" role="status"></p>
+    <p class="hint" data-i18n="wlMeHint"></p>
+    <p class="hint" id="wlResetNote" hidden></p>
+    <div class="row">
+      <button type="button" class="link" id="wlLogoutBtn" data-i18n="notMe"></button>
+      <button type="button" class="link danger" id="wlLeaveBtn" data-i18n="wlLeave"></button>
+    </div>
+  </section>
+  <section class="card" id="wlCard" hidden>
+    <h2 id="wlTitle"></h2>
+    <p class="hint" id="wlHint"></p>
+    <form id="wlAddForm" class="stack inset-b" hidden>
+      <label for="wlText" data-i18n="wlAddLabel"></label>
+      <input id="wlText" maxlength="80" autocomplete="off" data-i18n-ph="wlAddPh">
+      <label for="wlLink" data-i18n="wlLinkLabel"></label>
+      <input id="wlLink" maxlength="300" autocomplete="off" inputmode="url" autocapitalize="off" spellcheck="false" placeholder="https://">
+      <button class="btn primary" id="wlAddBtn" data-i18n="wlAddBtn"></button>
+      <p class="err" id="wlErr" role="alert"></p>
+    </form>
+    <ul class="items" id="wlItems"></ul>
+    <p class="hint" id="wlEmpty" hidden></p>
+    <button type="button" class="btn primary" id="wlGoJoin" data-i18n="wlGoJoin" hidden></button>
   </section>
 
   <section class="card" id="meCard" hidden>
@@ -548,7 +747,7 @@ footer .stamp{margin-bottom:6px}
 
 
   <section class="card" id="joinCard" hidden>
-    <h2 data-i18n="joinTitle"></h2>
+    <h2 id="joinTitle" data-i18n="joinTitle"></h2>
     <!-- the way back in for someone who signed up on another phone: jumps to their name in "Who's in" -->
     <p class="hint returning" id="returning" hidden><span data-i18n="returningQ"></span> <button type="button" class="link" id="findMeBtn" data-i18n="findMe"></button></p>
     <form id="joinForm" class="stack">
@@ -558,9 +757,11 @@ footer .stamp{margin-bottom:6px}
       <input id="joinPin" class="pin" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" aria-describedby="pinShort">
       <p class="hint" id="pinShort" data-i18n="pinShort"></p>
       <details class="why"><summary data-i18n="pinWhy"></summary><p class="hint" data-i18n="pinWhyBody"></p></details>
-      <label for="joinWish" data-i18n="joinWishLabel"></label>
-      <textarea id="joinWish" rows="2" aria-describedby="wishPrivacy" maxlength="100" autocomplete="off" data-i18n-ph="joinWishPh"></textarea>
-      <p class="hint" id="wishPrivacy" data-i18n="wishPrivacy"></p>
+      <div class="stack" id="joinWishBox">
+        <label for="joinWish" data-i18n="joinWishLabel"></label>
+        <textarea id="joinWish" rows="2" aria-describedby="wishPrivacy" maxlength="100" autocomplete="off" data-i18n-ph="joinWishPh"></textarea>
+        <p class="hint" id="wishPrivacy" data-i18n="wishPrivacy"></p>
+      </div>
       <button class="btn primary" id="joinBtn" data-i18n="joinBtn"></button>
       <p class="err" id="joinErr" role="alert"></p>
     </form>
@@ -571,7 +772,7 @@ footer .stamp{margin-bottom:6px}
     <h2 id="adminTitle"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><rect x="3" y="8.5" width="14" height="9.5" rx="2" fill="currentColor"/><path d="M6.5 8.5V6a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg> <span data-i18n="organizer"></span></h2>
     <p class="hint only-you" data-i18n="adminOnlyYou"></p>
     <div class="stack invite" id="invite">
-      <h3 data-i18n="inviteTitle"></h3>
+      <h3 id="inviteTitle" data-i18n="inviteTitle"></h3>
       <p class="hint" id="adminStatus"></p>
       <input id="shareUrl" readonly data-i18n-aria="shareLabel">
       <div class="row2">
@@ -593,17 +794,21 @@ footer .stamp{margin-bottom:6px}
       <ul class="people" id="adminList"></ul>
     </details>
     <details class="inset" id="settings">
-      <summary data-i18n="settingsSummary"></summary>
+      <summary id="settingsSummary" data-i18n="settingsSummary"></summary>
       <form id="cfgForm" class="stack">
-        <label for="cfgTitle" data-i18n="eventName"></label>
+        <label for="cfgTitle" id="cfgTitleLabel" data-i18n="eventName"></label>
         <input id="cfgTitle" maxlength="30" autocomplete="off">
-        <label for="cfgBudget" data-i18n="budget"></label>
-        <input id="cfgBudget" maxlength="20" autocomplete="off">
-        <label for="cfgExchangeOn" data-i18n="cfgDateLabel"></label>
+        <div class="stack" id="cfgBudgetBox">
+          <label for="cfgBudget" data-i18n="budget"></label>
+          <input id="cfgBudget" maxlength="20" autocomplete="off">
+        </div>
+        <label for="cfgExchangeOn" id="cfgDateLabel" data-i18n="cfgDateLabel"></label>
         <input id="cfgExchangeOn" type="date">
-        <label for="cfgDrawAt" data-i18n="cfgDrawAtLabel"></label>
-        <input id="cfgDrawAt" type="datetime-local">
-        <p class="hint" id="cfgDrawAtHint"></p>
+        <div class="stack" id="cfgDrawBox">
+          <label for="cfgDrawAt" data-i18n="cfgDrawAtLabel"></label>
+          <input id="cfgDrawAt" type="datetime-local">
+          <p class="hint" id="cfgDrawAtHint"></p>
+        </div>
         <button class="btn" id="cfgSave" data-i18n="saveSettings"></button>
       </form>
     </details>
@@ -633,7 +838,7 @@ footer .stamp{margin-bottom:6px}
       <span class="stamp-main">Unnecessary Things</span>
       <span class="stamp-sub">★ Gift Division ★</span>
     </a>
-    <p class="foot-line" data-i18n="merry"></p>
+    <p class="foot-line" id="footCheer" data-i18n="merry"></p>
     <p class="foot-line" id="retention"></p>
     <button type="button" class="foot-link" id="orgClaimBtn" data-i18n="orgClaim" hidden></button>
     <a class="foot-line" id="homeLink" href="./" data-i18n="makeOwn" hidden></a>
@@ -761,6 +966,83 @@ const SANTA_I18N = (() => {
     orgUnlinkBtn: '解除绑定',
     orgUnlinkedOk: '已解除绑定。现在只有组织者链接能管理这个活动。',
     merry: 'Merry Christmas！',
+    // ---- 心愿清单 ----
+    kindLabel: '要建什么',
+    kindSanta: '交换礼物',
+    kindWishlist: '心愿清单',
+    kindSantaHint: '大家各自报名，抽签后每人给一个人准备礼物。',
+    kindWishlistHint: '你列出想要的东西，朋友各自认领，不会买重。谁认领了什么，你自己看不到。',
+    occasionLabel: '是什么场合',
+    occBirthday: '生日',
+    occWedding: '婚礼 / 订婚',
+    wlNameLabel: '清单名称',
+    wlNamePhBirthday: '比如：Mia 的 30 岁生日',
+    wlNamePhWedding: '比如：Mia 和 Sam 的婚礼',
+    wlDateBirthday: '生日',
+    wlDateWedding: '婚礼日',
+    wlHomeTitle: '心愿清单',
+    wlHow: '列一张清单，把链接发给朋友，大家各自认领要送的东西。谁认领了什么你看不到，惊喜留到当天。',
+    wlDefaultBirthday: '生日心愿清单',
+    wlDefaultWedding: '新婚心愿清单',
+    wlForGroupBody: '把这个链接发给亲友。他们点开、留个名字，就能从清单里认领。',
+    wlForYouBody: '加东西、改清单都靠这条链接，只给你自己。这里默认把它遮住了：复制存好，或者发一封邮件给自己。真弄丢了也不怕：在任何设备上用你刚设的组织者 PIN 就能拿回来。',
+    wlOpen: '打开清单，开始写心愿',
+    wlEyebrowBirthday: '生日心愿单 · BIRTHDAY WISHLIST',
+    wlEyebrowWedding: '新婚心愿单 · WEDDING WISHLIST',
+    wlDaysLeft: (n) => `还有 ${n} 天`,
+    wlTomorrow: '就是明天啦！',
+    wlTodayBirthday: '就是今天，生日快乐！🎂',
+    wlTodayWedding: '就是今天，新婚快乐！💐',
+    wlCheerBirthday: '生日快乐！',
+    wlCheerWedding: '新婚快乐！',
+    wlTitleOwner: '你的清单',
+    wlTitle: (n) => `心愿清单（${n}）`,
+    wlHintOwner: '朋友看得到这张清单，并从里面认领。谁认领了什么，你这里看不到，惊喜留到当天。',
+    wlHintVisitor: '留个名字，就能看到哪些已经有人认领，再挑一样你想送的。',
+    wlHintFriend: '挑你想送的。其他朋友看得到已经有人认领，清单的主人看不到。',
+    wlAddLabel: '加一个心愿',
+    wlAddPh: '比如：手冲咖啡壶',
+    wlLinkLabel: '链接（可不填）',
+    wlAddBtn: '加到清单',
+    wlEmptyOwner: '还是空的。先写上几样你想要的吧。',
+    wlEmpty: '清单还是空的，过一会儿再来看看。',
+    wlGoJoin: '留个名字，开始认领',
+    wlPick: '我来送',
+    wlMine: '你认领的',
+    wlUnpick: '放回去',
+    wlTakenBy: (name) => `${name} 认领了`,
+    wlTaken: '已有人认领',
+    wlPicked: (text) => `记下了：「${text}」归你送。`,
+    wlUnpicked: '放回清单了。',
+    wlTooLate: (text) => `晚了一步，「${text}」刚被别人认领了。`,
+    wlSeeLink: '看看是什么 ↗',
+    wlEdit: '修改',
+    wlEditTitle: '修改这个心愿',
+    wlRemoveTitle: (text) => `从清单里删掉「${text}」？`,
+    wlRemoveBody: '如果已经有朋友认领了，TA 会发现它不见了。',
+    wlAdded: '加上了。',
+    wlRemoved: '删掉了。',
+    wlMeNone: (name) => `${name}，在下面挑一样吧`,
+    wlMeSome: (name, n) => `${name}，你认领了 ${n} 样`,
+    wlJoinedNote: '进来了。记住你刚设的 PIN，换设备改认领时要用。',
+    wlMeHint: '其他朋友看得到你认领了什么，清单的主人看不到。',
+    wlLeave: '退出，并把我认领的放回去',
+    wlLeaveTitle: '退出这张清单？',
+    wlLeaveBody: '你认领的东西会放回清单，留给别人。',
+    wlLeaveOk: '退出',
+    wlLeft: '已退出，你认领的都放回清单了。',
+    wlJoinTitle: '留个名字，再认领',
+    wlJoinBtn: '看看还有哪些没人送',
+    wlPinShort: '换设备改认领时要用。随便编一个，别用银行卡密码。',
+    wlRoster: (n) => `来过的朋友（${n}）`,
+    wlRosterHint: '之前来过？点你的名字、输入 PIN 就能回来',
+    wlInviteTitle: '把清单发给朋友',
+    wlAdminStatus: (n) => `已经有 ${n} 位朋友来过。`,
+    wlAdminNone: '还没有人来过，把链接发出去吧。',
+    wlMsg: (title, date, link) => `🎁 ${title}｜这是我的心愿清单（${date}）。点链接、留个名字，就能认领你想送的，免得买重。谁认领了什么我看不到。\n${link}`,
+    wlSettings: '清单设置',
+    wlNeedDate: '先选日期。',
+    wlManage: (n) => `来过的朋友（${n}）`,
     makeOwn: '建一个自己的活动',
     cancel: '取消',
     ok: '确定',
@@ -779,6 +1061,10 @@ const SANTA_I18N = (() => {
     e_not_organizer: '这个报名没有绑定组织者权限。',
     e_no_org_pin: '这个活动还没有设组织者 PIN。',
     e_not_found: '这个活动不在了。',
+    e_bad_item: '写一下这个心愿是什么。',
+    e_bad_link: '这个链接不太对，应该以 https:// 开头。',
+    e_full_list: '清单满了（最多 40 样）。',
+    e_no_such_item: '这一样已经不在清单上了。',
     e_bad_date: '先选交换日。',
     e_date_past: '交换日不能选已经过去太久的日期。',
     e_date_far: '交换日太远了，选一年以内的日期。',
@@ -973,6 +1259,83 @@ const SANTA_I18N = (() => {
     orgUnlinkBtn: 'Untie',
     orgUnlinkedOk: 'Untied. Only the organizer link runs this event now.',
     merry: 'Merry Christmas!',
+    // ---- wishlists ----
+    kindLabel: 'What to set up',
+    kindSanta: 'Gift exchange',
+    kindWishlist: 'Wishlist',
+    kindSantaHint: 'Everyone signs up, names are drawn, and each person gets a gift for one other.',
+    kindWishlistHint: 'You list what you’d love; friends each pick something, so nothing is bought twice. You never see who picked what.',
+    occasionLabel: 'What’s the occasion?',
+    occBirthday: 'Birthday',
+    occWedding: 'Wedding',
+    wlNameLabel: 'Name of the list',
+    wlNamePhBirthday: 'e.g. Mia turns 30',
+    wlNamePhWedding: 'e.g. Mia & Sam’s wedding',
+    wlDateBirthday: 'Birthday',
+    wlDateWedding: 'Wedding day',
+    wlHomeTitle: 'Wishlist',
+    wlHow: 'Make a list, send the link to friends, and each of them picks what to bring. You never see who picked what, so the surprise holds until the day.',
+    wlDefaultBirthday: 'Birthday wishlist',
+    wlDefaultWedding: 'Wedding wishlist',
+    wlForGroupBody: 'Send this to friends and family. They open it, leave a name, and pick from your list.',
+    wlForYouBody: 'This one adds to and edits the list, so keep it to yourself. It’s hidden here by default: copy it somewhere safe or email it to yourself. If it ever goes missing, the organizer PIN you just set brings it back on any device.',
+    wlOpen: 'Open the list and add your wishes',
+    wlEyebrowBirthday: 'BIRTHDAY WISHLIST',
+    wlEyebrowWedding: 'WEDDING WISHLIST',
+    wlDaysLeft: (n) => `${n} days to go`,
+    wlTomorrow: 'It’s tomorrow!',
+    wlTodayBirthday: 'It’s today. Happy birthday! 🎂',
+    wlTodayWedding: 'It’s today. Congratulations! 💐',
+    wlCheerBirthday: 'Happy birthday!',
+    wlCheerWedding: 'Congratulations!',
+    wlTitleOwner: 'Your list',
+    wlTitle: (n) => `The wishlist (${n})`,
+    wlHintOwner: 'Friends see this list and pick from it. Who picked what stays hidden from you, so the surprise holds until the day.',
+    wlHintVisitor: 'Leave your name to see what’s already taken, then pick something to give.',
+    wlHintFriend: 'Pick what you’d like to give. Other friends see it’s taken; the list’s owner doesn’t.',
+    wlAddLabel: 'Add a wish',
+    wlAddPh: 'e.g. A pour-over coffee set',
+    wlLinkLabel: 'Link (optional)',
+    wlAddBtn: 'Add to the list',
+    wlEmptyOwner: 'Nothing here yet. Start with a few things you’d love.',
+    wlEmpty: 'The list is still empty. Check back in a little while.',
+    wlGoJoin: 'Leave your name to pick',
+    wlPick: 'I’ll get this',
+    wlMine: 'Yours',
+    wlUnpick: 'Put it back',
+    wlTakenBy: (name) => `${name} has this`,
+    wlTaken: 'Taken',
+    wlPicked: (text) => `Noted: “${text}” is yours to give.`,
+    wlUnpicked: 'Back on the list.',
+    wlTooLate: (text) => `Just missed it: someone picked “${text}” a moment ago.`,
+    wlSeeLink: 'See it ↗',
+    wlEdit: 'Edit',
+    wlEditTitle: 'Edit this wish',
+    wlRemoveTitle: (text) => `Remove “${text}” from the list?`,
+    wlRemoveBody: 'If a friend has already picked it, they’ll see it’s gone.',
+    wlAdded: 'Added.',
+    wlRemoved: 'Removed.',
+    wlMeNone: (name) => `${name}, pick something below`,
+    wlMeSome: (name, n) => `${name}, you’re bringing ${Number(n) === 1 ? '1 thing' : n + ' things'}`,
+    wlJoinedNote: 'You’re in. Remember the PIN you just picked: it gets you back to your picks from another device.',
+    wlMeHint: 'Other friends can see what you picked. The list’s owner can’t.',
+    wlLeave: 'Leave and put my picks back',
+    wlLeaveTitle: 'Leave this list?',
+    wlLeaveBody: 'Your picks go back on the list for someone else.',
+    wlLeaveOk: 'Leave',
+    wlLeft: 'You’ve left. Your picks are back on the list.',
+    wlJoinTitle: 'Leave your name to pick',
+    wlJoinBtn: 'Show me what’s still free',
+    wlPinShort: 'You’ll need it to change your picks from another device. Make one up; don’t reuse a bank PIN.',
+    wlRoster: (n) => `Friends who’ve been here (${n})`,
+    wlRosterHint: 'Been here before? Tap your name and enter your PIN to get back in',
+    wlInviteTitle: 'Send your list to friends',
+    wlAdminStatus: (n) => (Number(n) === 1 ? '1 friend has opened it so far.' : `${n} friends have opened it so far.`),
+    wlAdminNone: 'No one has opened it yet. Send the link around.',
+    wlMsg: (title, date, link) => `🎁 ${title}: here’s my wishlist (${date}). Open the link, leave your name and pick what you’d like to give, so nothing gets bought twice. I can’t see who picks what.\n${link}`,
+    wlSettings: 'List settings',
+    wlNeedDate: 'Pick the date first.',
+    wlManage: (n) => `Friends who’ve been here (${n})`,
     makeOwn: 'Start your own event',
     cancel: 'Cancel',
     ok: 'OK',
@@ -991,6 +1354,10 @@ const SANTA_I18N = (() => {
     e_not_organizer: 'This sign-up isn’t tied to the organizer controls.',
     e_no_org_pin: 'This event has no organizer PIN yet.',
     e_not_found: 'This event is gone.',
+    e_bad_item: 'Write what the wish is.',
+    e_bad_link: 'That link doesn’t look right. It should start with https://',
+    e_full_list: 'The list is full (40 things at most).',
+    e_no_such_item: 'That one is no longer on the list.',
     e_bad_date: 'Pick an exchange day first.',
     e_date_past: 'That date is too far in the past. Pick a later one.',
     e_date_far: 'That’s too far out. Pick a date within a year.',
@@ -1185,6 +1552,83 @@ const SANTA_I18N = (() => {
     orgUnlinkBtn: '연결 해제',
     orgUnlinkedOk: '연결을 해제했어요. 이제 주최자 링크로만 이벤트를 관리할 수 있어요.',
     merry: '메리 크리스마스!',
+    // ---- 위시리스트 ----
+    kindLabel: '무엇을 만들까요',
+    kindSanta: '선물 교환',
+    kindWishlist: '위시리스트',
+    kindSantaHint: '각자 참가하고, 뽑기를 하면 한 사람씩 선물할 상대가 정해져요.',
+    kindWishlistHint: '받고 싶은 것을 적어 두면 친구들이 하나씩 골라서 겹치지 않아요. 누가 무엇을 골랐는지는 나에게 보이지 않아요.',
+    occasionLabel: '어떤 자리인가요',
+    occBirthday: '생일',
+    occWedding: '결혼 / 약혼',
+    wlNameLabel: '리스트 이름',
+    wlNamePhBirthday: '예: 미아의 서른 살 생일',
+    wlNamePhWedding: '예: 미아 ♥ 샘 결혼식',
+    wlDateBirthday: '생일',
+    wlDateWedding: '결혼식 날',
+    wlHomeTitle: '위시리스트',
+    wlHow: '리스트를 만들어 링크를 친구들에게 보내면, 각자 선물할 것을 골라요. 누가 무엇을 골랐는지는 나에게 보이지 않아서 당일까지 깜짝 선물이에요.',
+    wlDefaultBirthday: '생일 위시리스트',
+    wlDefaultWedding: '결혼 위시리스트',
+    wlForGroupBody: '이 링크를 가족과 친구에게 보내세요. 열어서 이름만 남기면 리스트에서 고를 수 있어요.',
+    wlForYouBody: '리스트에 추가하거나 고칠 때 쓰는 링크예요. 혼자만 간직하세요. 여기서는 가려 두었어요. 복사해서 안전한 곳에 저장하거나, 내 메일로 보내 두세요. 잃어버려도 괜찮아요. 방금 정한 주최자 PIN으로 어느 기기에서든 되찾을 수 있어요.',
+    wlOpen: '리스트 열고 받고 싶은 것 적기',
+    wlEyebrowBirthday: '생일 위시리스트 · BIRTHDAY WISHLIST',
+    wlEyebrowWedding: '결혼 위시리스트 · WEDDING WISHLIST',
+    wlDaysLeft: (n) => `${n}일 남았어요`,
+    wlTomorrow: '바로 내일이에요!',
+    wlTodayBirthday: '바로 오늘, 생일 축하해요! 🎂',
+    wlTodayWedding: '바로 오늘, 결혼 축하해요! 💐',
+    wlCheerBirthday: '생일 축하해요!',
+    wlCheerWedding: '결혼 축하해요!',
+    wlTitleOwner: '내 리스트',
+    wlTitle: (n) => `위시리스트 (${n})`,
+    wlHintOwner: '친구들이 이 리스트를 보고 골라요. 누가 무엇을 골랐는지는 여기에 보이지 않아서, 당일까지 깜짝 선물이에요.',
+    wlHintVisitor: '이름을 남기면 이미 누가 고른 것이 보여요. 그다음 선물할 것을 골라 주세요.',
+    wlHintFriend: '선물하고 싶은 것을 골라 주세요. 다른 친구들에게는 고른 것이 보이지만, 리스트 주인에게는 보이지 않아요.',
+    wlAddLabel: '받고 싶은 것 추가',
+    wlAddPh: '예: 핸드드립 커피 세트',
+    wlLinkLabel: '링크 (선택)',
+    wlAddBtn: '리스트에 추가',
+    wlEmptyOwner: '아직 비어 있어요. 받고 싶은 것부터 몇 가지 적어 보세요.',
+    wlEmpty: '리스트가 아직 비어 있어요. 조금 뒤에 다시 와 주세요.',
+    wlGoJoin: '이름 남기고 고르기',
+    wlPick: '내가 선물할게요',
+    wlMine: '내가 고름',
+    wlUnpick: '다시 내려놓기',
+    wlTakenBy: (name) => `${name} 님이 골랐어요`,
+    wlTaken: '이미 누가 골랐어요',
+    wlPicked: (text) => `적어 뒀어요. “${text}” 선물은 내가 준비해요.`,
+    wlUnpicked: '리스트에 다시 올렸어요.',
+    wlTooLate: (text) => `한발 늦었어요. “${text}” 항목은 방금 다른 분이 골랐어요.`,
+    wlSeeLink: '어떤 건지 보기 ↗',
+    wlEdit: '수정',
+    wlEditTitle: '이 항목 수정',
+    wlRemoveTitle: (text) => `“${text}” 항목을 리스트에서 지울까요?`,
+    wlRemoveBody: '이미 고른 친구가 있다면, 항목이 사라진 걸 알게 돼요.',
+    wlAdded: '추가했어요.',
+    wlRemoved: '지웠어요.',
+    wlMeNone: (name) => `${name} 님, 아래에서 하나 골라 보세요`,
+    wlMeSome: (name, n) => `${name} 님, ${n}개를 골랐어요`,
+    wlJoinedNote: '들어왔어요! 방금 정한 PIN을 꼭 기억해 두세요. 다른 기기에서 고른 것을 바꿀 때 필요해요.',
+    wlMeHint: '내가 고른 것은 다른 친구들에게 보여요. 리스트 주인에게는 보이지 않아요.',
+    wlLeave: '나가기 (고른 것은 다시 내려놓기)',
+    wlLeaveTitle: '이 리스트에서 나갈까요?',
+    wlLeaveBody: '내가 고른 것은 다른 사람이 고를 수 있게 리스트로 돌아가요.',
+    wlLeaveOk: '나가기',
+    wlLeft: '나왔어요. 고른 것은 리스트로 돌아갔어요.',
+    wlJoinTitle: '고르기 전에 이름부터',
+    wlJoinBtn: '아직 남은 것 보기',
+    wlPinShort: '다른 기기에서 고른 것을 바꿀 때 필요해요. 아무 숫자나 정하되, 은행 비밀번호는 쓰지 마세요.',
+    wlRoster: (n) => `다녀간 친구 (${n})`,
+    wlRosterHint: '전에 왔었나요? 이름을 누르고 PIN을 입력하면 다시 들어갈 수 있어요',
+    wlInviteTitle: '친구들에게 리스트 보내기',
+    wlAdminStatus: (n) => `지금까지 친구 ${n}명이 다녀갔어요.`,
+    wlAdminNone: '아직 아무도 열어 보지 않았어요. 링크를 보내 보세요.',
+    wlMsg: (title, date, link) => `🎁 ${title} 위시리스트예요 (${date}). 링크 열고 이름만 남기면 선물할 것을 고를 수 있어서 겹치지 않아요. 누가 무엇을 골랐는지 저는 볼 수 없어요.\n${link}`,
+    wlSettings: '리스트 설정',
+    wlNeedDate: '날짜를 먼저 골라 주세요.',
+    wlManage: (n) => `다녀간 친구 (${n})`,
     makeOwn: '내 이벤트 만들기',
     cancel: '취소',
     ok: '확인',
@@ -1203,6 +1647,10 @@ const SANTA_I18N = (() => {
     e_not_organizer: '이 참가는 주최자 메뉴와 연결되어 있지 않아요.',
     e_no_org_pin: '이 이벤트에는 아직 주최자 PIN이 없어요.',
     e_not_found: '이벤트를 찾을 수 없어요.',
+    e_bad_item: '받고 싶은 것을 적어 주세요.',
+    e_bad_link: '링크가 올바르지 않아요. https:// 로 시작해야 해요.',
+    e_full_list: '리스트가 가득 찼어요 (최대 40개).',
+    e_no_such_item: '그 항목은 이제 리스트에 없어요.',
     e_bad_date: '교환 날짜를 먼저 골라 주세요.',
     e_date_past: '너무 지난 날짜예요. 다른 날짜를 골라 주세요.',
     e_date_far: '너무 먼 날짜예요. 1년 이내로 골라 주세요.',
@@ -1396,6 +1844,83 @@ const SANTA_I18N = (() => {
     orgUnlinkBtn: 'Bỏ gắn',
     orgUnlinkedOk: 'Đã bỏ gắn. Giờ chỉ link quản lý mới điều hành được sự kiện này.',
     merry: 'Giáng sinh vui vẻ!',
+    // ---- danh sách quà mong muốn ----
+    kindLabel: 'Bạn muốn tạo gì',
+    kindSanta: 'Đổi quà',
+    kindWishlist: 'Danh sách quà',
+    kindSantaHint: 'Mọi người tự đăng ký, bốc thăm xong mỗi người chuẩn bị quà cho một người.',
+    kindWishlistHint: 'Bạn ghi những món mình thích; bạn bè mỗi người nhận một món nên không ai mua trùng. Bạn không thấy ai nhận món nào.',
+    occasionLabel: 'Dịp gì vậy',
+    occBirthday: 'Sinh nhật',
+    occWedding: 'Đám cưới',
+    wlNameLabel: 'Tên danh sách',
+    wlNamePhBirthday: 'Ví dụ: Sinh nhật 30 của Mia',
+    wlNamePhWedding: 'Ví dụ: Đám cưới Mia & Sam',
+    wlDateBirthday: 'Ngày sinh nhật',
+    wlDateWedding: 'Ngày cưới',
+    wlHomeTitle: 'Danh sách quà',
+    wlHow: 'Tạo danh sách, gửi link cho bạn bè, mỗi người tự nhận món mình sẽ tặng. Bạn không thấy ai nhận món nào, nên đến ngày mới biết.',
+    wlDefaultBirthday: 'Danh sách quà sinh nhật',
+    wlDefaultWedding: 'Danh sách quà cưới',
+    wlForGroupBody: 'Gửi link này cho người thân, bạn bè. Mọi người mở ra, để lại tên là chọn được món trong danh sách.',
+    wlForYouBody: 'Thêm món, sửa danh sách đều cần link này, nên bạn giữ riêng nhé. Ở đây link được che sẵn: bạn sao chép cất đi hoặc gửi email cho chính mình. Lỡ mất cũng không sao: mã PIN quản lý bạn vừa đặt sẽ lấy lại được trên bất kỳ thiết bị nào.',
+    wlOpen: 'Mở danh sách và ghi món bạn thích',
+    wlEyebrowBirthday: 'QUÀ SINH NHẬT · WISHLIST',
+    wlEyebrowWedding: 'QUÀ CƯỚI · WISHLIST',
+    wlDaysLeft: (n) => `Còn ${n} ngày nữa`,
+    wlTomorrow: 'Ngày mai rồi!',
+    wlTodayBirthday: 'Hôm nay đó, chúc mừng sinh nhật! 🎂',
+    wlTodayWedding: 'Hôm nay đó, chúc mừng hạnh phúc! 💐',
+    wlCheerBirthday: 'Chúc mừng sinh nhật!',
+    wlCheerWedding: 'Chúc mừng hạnh phúc!',
+    wlTitleOwner: 'Danh sách của bạn',
+    wlTitle: (n) => `Danh sách quà (${n})`,
+    wlHintOwner: 'Bạn bè xem danh sách này rồi nhận món. Ai nhận món nào thì bạn không thấy ở đây, để đến ngày mới bất ngờ.',
+    wlHintVisitor: 'Để lại tên là thấy món nào đã có người nhận, rồi chọn một món bạn muốn tặng.',
+    wlHintFriend: 'Chọn món bạn muốn tặng. Bạn bè khác thấy món đã có người nhận, còn chủ danh sách thì không.',
+    wlAddLabel: 'Thêm một món',
+    wlAddPh: 'Ví dụ: Bộ pha cà phê pour-over',
+    wlLinkLabel: 'Link (không bắt buộc)',
+    wlAddBtn: 'Thêm vào danh sách',
+    wlEmptyOwner: 'Chưa có gì. Bạn ghi vài món mình thích trước nhé.',
+    wlEmpty: 'Danh sách còn trống. Lát nữa bạn quay lại xem nhé.',
+    wlGoJoin: 'Để lại tên để chọn món',
+    wlPick: 'Để mình tặng',
+    wlMine: 'Bạn nhận',
+    wlUnpick: 'Trả lại',
+    wlTakenBy: (name) => `${name} đã nhận`,
+    wlTaken: 'Đã có người nhận',
+    wlPicked: (text) => `Đã ghi: “${text}” là món bạn tặng.`,
+    wlUnpicked: 'Đã trả lại danh sách.',
+    wlTooLate: (text) => `Chậm một chút rồi: “${text}” vừa có người nhận.`,
+    wlSeeLink: 'Xem món này ↗',
+    wlEdit: 'Sửa',
+    wlEditTitle: 'Sửa món này',
+    wlRemoveTitle: (text) => `Xóa “${text}” khỏi danh sách?`,
+    wlRemoveBody: 'Nếu đã có bạn nhận món này, bạn ấy sẽ thấy nó biến mất.',
+    wlAdded: 'Đã thêm.',
+    wlRemoved: 'Đã xóa.',
+    wlMeNone: (name) => `${name} ơi, chọn một món bên dưới nhé`,
+    wlMeSome: (name, n) => `${name} ơi, bạn đã nhận ${n} món`,
+    wlJoinedNote: 'Bạn vào rồi. Nhớ kỹ mã PIN vừa đặt nhé, đổi món trên thiết bị khác sẽ cần đến.',
+    wlMeHint: 'Bạn bè khác thấy bạn nhận món nào. Chủ danh sách thì không.',
+    wlLeave: 'Rời đi và trả lại các món đã nhận',
+    wlLeaveTitle: 'Rời danh sách này?',
+    wlLeaveBody: 'Các món bạn đã nhận sẽ quay lại danh sách cho người khác.',
+    wlLeaveOk: 'Rời đi',
+    wlLeft: 'Bạn đã rời đi. Các món đã nhận quay lại danh sách rồi.',
+    wlJoinTitle: 'Để lại tên rồi chọn món',
+    wlJoinBtn: 'Xem món nào còn trống',
+    wlPinShort: 'Cần mã này khi đổi món trên thiết bị khác. Tự nghĩ một mã, đừng dùng mã PIN ngân hàng.',
+    wlRoster: (n) => `Bạn bè đã ghé (${n})`,
+    wlRosterHint: 'Ghé rồi? Bấm vào tên bạn rồi nhập mã PIN để vào lại',
+    wlInviteTitle: 'Gửi danh sách cho bạn bè',
+    wlAdminStatus: (n) => `Đã có ${n} người bạn ghé xem.`,
+    wlAdminNone: 'Chưa ai mở cả. Bạn gửi link đi nhé.',
+    wlMsg: (title, date, link) => `🎁 ${title}: đây là danh sách quà của mình (${date}). Bấm link, để lại tên rồi nhận món bạn muốn tặng để khỏi mua trùng. Mình không thấy ai nhận món nào đâu.\n${link}`,
+    wlSettings: 'Cài đặt danh sách',
+    wlNeedDate: 'Bạn chọn ngày trước nhé.',
+    wlManage: (n) => `Bạn bè đã ghé (${n})`,
     makeOwn: 'Tạo sự kiện của riêng bạn',
     cancel: 'Hủy',
     ok: 'Đồng ý',
@@ -1414,6 +1939,10 @@ const SANTA_I18N = (() => {
     e_not_organizer: 'Đăng ký này không gắn với quyền quản lý.',
     e_no_org_pin: 'Sự kiện này chưa có mã PIN quản lý.',
     e_not_found: 'Sự kiện này không còn nữa.',
+    e_bad_item: 'Bạn ghi món mình thích nhé.',
+    e_bad_link: 'Link chưa đúng. Link nên bắt đầu bằng https://',
+    e_full_list: 'Danh sách đầy rồi (tối đa 40 món).',
+    e_no_such_item: 'Món đó không còn trong danh sách nữa.',
     e_bad_date: 'Bạn chọn ngày đổi quà trước nhé.',
     e_date_past: 'Ngày này qua lâu rồi. Bạn chọn ngày khác nhé.',
     e_date_far: 'Ngày này xa quá. Bạn chọn trong vòng một năm nhé.',
@@ -1638,7 +2167,8 @@ async function api(path, body) {
 }
 // Error codes the server sends that have their own sentence (key "e_<code>" in i18n.js). Anything else reads as a network hiccup.
 const ERR_CODES = ['bad_name', 'bad_pin_format', 'name_taken', 'closed', 'full', 'no_such_person', 'too_few', 'already_drawn',
-  'forbidden', 'not_found', 'bad_date', 'date_past', 'date_far', 'slow_down', 'not_organizer', 'no_org_pin'];
+  'forbidden', 'not_found', 'bad_date', 'date_past', 'date_far', 'slow_down', 'not_organizer', 'no_org_pin',
+  'bad_item', 'bad_link', 'full_list', 'no_such_item'];
 function errText(d) {
   const code = d && d.error;
   if (code === 'bad_pin') return t('e_bad_pin', d.left || 0);
@@ -1814,6 +2344,18 @@ function buildTag(a) {
   return tag;
 }
 
+/* ---------- occasions ----------
+   A Secret Santa event wears the Christmas look. A wishlist is for a birthday or a wedding: data-occasion on <html>
+   swaps the palette, title face and decorations (style.css), and the falling snow becomes confetti or petals. */
+function applyOccasion(occ) {
+  const root = document.documentElement;
+  if ((root.dataset.occasion || '') === (occ || '')) return;
+  if (occ) root.dataset.occasion = occ; else delete root.dataset.occasion;
+  document.dispatchEvent(new Event('santa:occasion'));
+}
+const eyebrowFor = (occ) => (occ === 'wedding' ? t('wlEyebrowWedding') : t('wlEyebrowBirthday'));
+const dateLabelFor = (occ) => (occ === 'wedding' ? t('wlDateWedding') : t('wlDateBirthday'));
+
 /* =====================================================================================
    Home page (no ?e=): create an event
    ===================================================================================== */
@@ -1829,6 +2371,36 @@ function renderMine() {
     li.append(avatar(e.title || 'S'), who); $('mineList').append(li);
   }
   renderCreated();
+  renderKind();
+}
+/* What is being created: a gift exchange (the default; its form is the one it always was) or a wishlist for an occasion.
+   Choosing a wishlist previews its look on the spot. Each kind keeps its own half-typed name and date. */
+let newKind = 'santa', newOccasion = 'birthday';
+const drafts = { santa: { title: '', date: '' }, wishlist: { title: '', date: '' } };
+function renderKind() {
+  if (EVENT_ID) return;
+  const wl = newKind === 'wishlist';
+  for (const b of $('kindSeg').children) b.setAttribute('aria-checked', String(b.dataset.kind === newKind));
+  for (const b of $('occasionSeg').children) b.setAttribute('aria-checked', String(b.dataset.occasion === newOccasion));
+  $('kindHint').textContent = wl ? t('kindWishlistHint') : t('kindSantaHint');
+  $('occasionBox').hidden = !wl;
+  $('newBudget').hidden = $('newBudgetLabel').hidden = wl;
+  $('newTitleLabel').textContent = wl ? t('wlNameLabel') : t('eventName');
+  $('newTitle').placeholder = wl ? (newOccasion === 'wedding' ? t('wlNamePhWedding') : t('wlNamePhBirthday')) : '';
+  $('newDateLabel').textContent = wl ? dateLabelFor(newOccasion) : t('exchangeDay');
+  const head = wl ? t('wlHomeTitle') : 'Secret Santa';
+  $('title').textContent = head; $('title').classList.toggle('plain', titleNeedsPlain(head));
+  $('howBody').textContent = wl ? t('wlHow') : t('howBody');
+  $('eyebrowText').textContent = wl ? eyebrowFor(newOccasion) : t('eyebrow');
+  $('footCheer').textContent = wl ? (newOccasion === 'wedding' ? t('wlCheerWedding') : t('wlCheerBirthday')) : t('merry');
+  applyOccasion(wl ? newOccasion : '');
+}
+function setKind(kind) {
+  if (kind === newKind) return;
+  drafts[newKind] = { title: $('newTitle').value, date: $('newDate').value };
+  newKind = kind;
+  $('newTitle').value = drafts[kind].title; $('newDate').value = drafts[kind].date; $('createErr').textContent = '';
+  renderKind();
 }
 /* The "you're all set" screen: two hand-offs. The group link is for everyone; the organizer link is for one person only,
    so it starts masked (like a password) and offers a mail-to-self, which is the one place most people never lose a link. */
@@ -1843,6 +2415,10 @@ function renderCreated() {
   $('newAdminShow').setAttribute('aria-pressed', String(created.shown));
   $('newAdminMail').href = 'mailto:?subject=' + encodeURIComponent(t('mailSubject', created.title)) + '&body=' + encodeURIComponent(t('mailBody', created.title, adminLink));
   $('newOpen').href = share;
+  const wl = created.kind === 'wishlist';
+  $('forGroupBody').textContent = wl ? t('wlForGroupBody') : t('forGroupBody');
+  $('forYouBody').textContent = wl ? t('wlForYouBody') : t('forYouBody');
+  $('newOpen').textContent = wl ? t('wlOpen') : t('openEvent');
 }
 function startHome() {
   const now = new Date();
@@ -1855,21 +2431,26 @@ function startHome() {
   $('newDate').min = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
   rerender = renderMine;
   renderMine();
+  $('kindSeg').addEventListener('click', (ev) => { const b = ev.target.closest('button[data-kind]'); if (b) setKind(b.dataset.kind); });
+  $('occasionSeg').addEventListener('click', (ev) => { const b = ev.target.closest('button[data-occasion]'); if (b) { newOccasion = b.dataset.occasion; renderKind(); } });
 
   $('createForm').addEventListener('submit', async (ev) => {
     ev.preventDefault();
     if ($('createBtn').disabled) return;
-    if (!$('newDate').value) { $('createErr').textContent = t('e_bad_date'); return; }
+    const wl = newKind === 'wishlist';
+    if (!$('newDate').value) { $('createErr').textContent = wl ? t('wlNeedDate') : t('e_bad_date'); if (wl) $('newDate').focus(); return; }
     if (!/^\d{4,8}$/.test($('newOrgPin').value.trim())) { $('createErr').textContent = t('e_bad_pin_format'); $('newOrgPin').focus(); return; }
     $('createBtn').disabled = true; $('createBtn').textContent = t('loading'); $('createForm').setAttribute('aria-busy', 'true'); $('createErr').textContent = '';
-    const r = await api('create', { title: $('newTitle').value, budget: $('newBudget').value, exchangeOn: $('newDate').value, orgPin: $('newOrgPin').value.trim() });
+    const r = await api('create', wl
+      ? { kind: 'wishlist', occasion: newOccasion, title: $('newTitle').value.trim() || (newOccasion === 'wedding' ? t('wlDefaultWedding') : t('wlDefaultBirthday')), exchangeOn: $('newDate').value, orgPin: $('newOrgPin').value.trim() }
+      : { title: $('newTitle').value, budget: $('newBudget').value, exchangeOn: $('newDate').value, orgPin: $('newOrgPin').value.trim() });
     $('newOrgPin').value = '';
     $('createBtn').disabled = false; $('createBtn').textContent = t('createBtn'); $('createForm').removeAttribute('aria-busy');
     if (!r.ok) { $('createErr').textContent = errText(r.data); return; }
     const { id, adminKey, state } = r.data;
     store.set('santa:' + id + ':admin', adminKey);
     remember(id, state.title, true);
-    created = { id, adminKey, title: state.title, shown: false };
+    created = { id, adminKey, title: state.title, shown: false, kind: state.kind || 'santa' };
     renderCreated();
     $('createCard').hidden = true; $('mineCard').hidden = true; $('createdCard').hidden = false;
     $('createdCard').scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' });
@@ -1896,9 +2477,10 @@ function render() {
   const note = S.gone ? '' : (st ? (S.loadError ? t('staleNote') : '') : (S.loadError ? t('offlineNote') : ''));
   $('notice').textContent = note; $('notice').hidden = !note;
   $('skeleton').hidden = S.gone || !!st || S.loadError;          // grey bars stand in for the cards until the first answer arrives
-  for (const id of ['meCard', 'joinCard', 'rosterCard', 'adminCard']) if (S.gone || !st) $(id).hidden = true;
+  for (const id of ['meCard', 'joinCard', 'rosterCard', 'adminCard', 'wlMe', 'wlCard']) if (S.gone || !st) $(id).hidden = true;
   $('eventFields').hidden = S.gone || !st;
   if (S.gone || !st) { $('statusPill').hidden = true; $('deadline').hidden = true; $('retention').textContent = ''; return; }
+  if (st.kind === 'wishlist') { renderWishlist(st); return; }      // its own page; everything below is the gift exchange
 
   const drawn = st.status === 'drawn';
   $('title').textContent = st.title; document.title = st.title;
@@ -1967,10 +2549,99 @@ function render() {
   for (const name of st.people) box.append(chip(name, !v));
   renderAdmin();
 }
+/* ---------- the wishlist page ----------
+   Three ways to look at it: the owner (this device holds the organizer key) edits the list and never sees picks;
+   a signed-in friend sees who picked what and picks or puts back; anyone else sees the items and is asked for a name. */
+function itemRow(it, mode, pick) {
+  const li = el('li'); li.dataset.id = it.id;
+  const main = el('div', 'item-main'); main.append(el('span', 'item-text', it.text));
+  if (it.link && /^https?:[/][/]/i.test(it.link)) { const a = el('a', 'item-link', t('wlSeeLink')); a.href = it.link; a.target = '_blank'; a.rel = 'noopener noreferrer'; main.append(a); }
+  const side = el('div', 'item-side');
+  const btn = (cls, text, act) => { const b = el('button', cls, text); b.type = 'button'; b.dataset.act = act; b.dataset.id = it.id; return b; };
+  if (mode === 'owner') side.append(btn('btn sm', t('wlEdit'), 'edit'), btn('btn sm', t('remove'), 'removeItem'));
+  else if (mode === 'friend') {
+    if (!pick) side.append(btn('btn sm primary', t('wlPick'), 'pick'));
+    else if (pick.mine) { li.classList.add('mine'); side.append(el('span', 'item-mine', t('wlMine')), btn('link', t('wlUnpick'), 'unpick')); }
+    else { li.classList.add('taken'); side.append(el('span', 'item-by', pick.by ? t('wlTakenBy', pick.by) : t('wlTaken'))); }
+  }
+  li.append(main); if (side.children.length) li.append(side);
+  return li;
+}
+function renderWishlist(st) {
+  const occ = st.occasion === 'wedding' ? 'wedding' : 'birthday';
+  applyOccasion(occ);
+  $('title').textContent = st.title; document.title = st.title;
+  $('title').classList.toggle('plain', titleNeedsPlain(st.title));
+  $('title').classList.toggle('long', Array.from(st.title).length > 16);
+  $('eyebrowText').textContent = eyebrowFor(occ);
+  $('statusPill').hidden = true; $('deadline').hidden = true;
+  $('fBudgetBox').hidden = true; $('eventFields').classList.add('one');
+  $('fDateLabel').textContent = dateLabelFor(occ);
+  $('fDate').textContent = dayText(st.exchangeOn);
+  const left = daysUntil(st.exchangeOn);
+  $('countdown').hidden = left === null || left < 0;
+  if (left !== null && left >= 0) {
+    $('countdownText').textContent = left > 1 ? t('wlDaysLeft', left) : left === 1 ? t('wlTomorrow') : (occ === 'wedding' ? t('wlTodayWedding') : t('wlTodayBirthday'));
+    $('countdown').classList.toggle('today', left === 0);
+    if (left === 0 && !S.cheered) {
+      S.cheered = true;
+      setTimeout(() => { const r = $('countdown').getBoundingClientRect(); confetti(r.left + r.width / 2, r.top + r.height / 2); }, 700);
+    }
+  }
+  $('retention').textContent = t('retention', dateText(st.deleteAt));
+  $('footCheer').textContent = occ === 'wedding' ? t('wlCheerWedding') : t('wlCheerBirthday');
+
+  const owner = !!S.adminKey;                      // the owner's device: no sign-in, no picks, ever
+  const v = owner ? null : S.view;
+  const items = st.items || [], picks = (v && v.picks) || {}, n = st.people.length;
+  const mode = owner ? 'owner' : (v ? 'friend' : 'visitor');
+  $('meCard').hidden = true;
+  $('wlMe').hidden = !v;
+  if (v) {
+    const mine = Object.values(picks).filter((x) => x.mine).length;
+    $('wlMeTitle').textContent = mine ? t('wlMeSome', v.me.name, mine) : t('wlMeNone', v.me.name);
+    $('wlJoinedNote').textContent = S.justJoined ? t('wlJoinedNote') : '';
+    $('wlResetNote').hidden = !v.me.pinResetAt;
+    if (v.me.pinResetAt) $('wlResetNote').textContent = t('pinWasReset', timeText(v.me.pinResetAt));
+  }
+  $('wlCard').hidden = false;
+  $('wlTitle').textContent = owner ? t('wlTitleOwner') : t('wlTitle', items.length);
+  $('wlHint').textContent = owner ? t('wlHintOwner') : (v ? t('wlHintFriend') : t('wlHintVisitor'));
+  $('wlAddForm').hidden = !S.admin;
+  $('wlEmpty').hidden = items.length > 0;
+  $('wlEmpty').textContent = owner ? t('wlEmptyOwner') : t('wlEmpty');
+  $('wlGoJoin').hidden = mode !== 'visitor' || items.length === 0;
+  // Rebuilt only when something on it changed, so a button under a finger is not swapped out by the half-minute refresh.
+  const sig = JSON.stringify([lang, mode, owner && !!S.admin, items, picks]);
+  if (sig !== S.wlSig) {
+    S.wlSig = sig;
+    $('wlItems').replaceChildren(...items.map((it) => itemRow(it, owner && !S.admin ? 'visitor' : mode, picks[it.id])));
+  }
+
+  // a friend's way in: name + PIN, the same card and the same "tap your name" as the gift exchange, with its own words
+  $('joinCard').hidden = owner || !!v;
+  $('joinTitle').textContent = t('wlJoinTitle');
+  if (!S.busy) $('joinBtn').textContent = t('wlJoinBtn');
+  $('pinShort').textContent = t('wlPinShort');
+  $('joinWishBox').hidden = true;
+  $('returning').hidden = owner || !!v || n === 0;
+  $('rosterCard').hidden = owner || n === 0;
+  $('rosterCard').classList.toggle('after-join', !v);
+  $('rosterTitle').textContent = t('wlRoster', n);
+  $('rosterHint').textContent = v ? '' : t('wlRosterHint');
+  $('rosterHint').hidden = !!v;
+  $('names').hidden = !!v; $('roster').hidden = !v; $('names').classList.remove('big');
+  const box = v ? $('roster') : $('names'); box.replaceChildren();
+  for (const name of st.people) box.append(chip(name, !v));
+  $('adminCard').classList.remove('lead');
+  $('orgClaimBtn').hidden = !st.orgPin || !!S.adminKey;
+  renderAdmin();
+}
 function renderAdmin() {
   const a = S.admin, st = S.state;
   $('adminCard').hidden = !a;
   if (!a) return;
+  const wl = st.kind === 'wishlist';
   const drawn = st.status === 'drawn', n = a.people.length;
   // While sign-ups are open the invite block leads and "copy the group link" is the red button, until there are enough
   // people; then "draw names" takes the red. After the draw there is nothing to invite to, so the block goes away.
@@ -1981,9 +2652,12 @@ function renderAdmin() {
   const list = $('adminList'); list.replaceChildren();
   for (const p of a.people) {
     const li = el('li'); const who = el('div', 'who'); who.append(el('b', '', p.name)); li.append(avatar(p.name));
-    const line = el('small', '', (p.wish ? t('wishOf', p.wish) : t('noWish')) + (p.locked ? t('pinLocked') : ''));
-    const tr = translateLink(p.wish); if (tr) line.append(' ', tr);
-    who.append(line);
+    if (wl) { if (p.locked) who.append(el('small', '', t('pinLocked').replace(/^[\s·]+/, ''))); }      // friends on a wishlist have no wish of their own
+    else {
+      const line = el('small', '', (p.wish ? t('wishOf', p.wish) : t('noWish')) + (p.locked ? t('pinLocked') : ''));
+      const tr = translateLink(p.wish); if (tr) line.append(' ', tr);
+      who.append(line);
+    }
     const acts = el('div', 'row');
     const pin = el('button', 'btn sm', t('resetPin')); pin.type = 'button'; pin.dataset.act = 'setPin'; pin.dataset.name = p.name;
     acts.append(pin);
@@ -2009,6 +2683,18 @@ function renderAdmin() {
   if (tied) $('orgLinkText').textContent = t('orgLinked', tied);
   if (!$('settings').open) {
     $('cfgTitle').value = st.title; $('cfgBudget').value = st.budget; $('cfgExchangeOn').value = st.exchangeOn; $('cfgDrawAt').value = localInputValue(st.drawAt);
+  }
+  if (wl) {
+    // The same controls minus everything about a draw: share the list, look after the friends, rename or move the date.
+    $('inviteTitle').textContent = t('wlInviteTitle');
+    $('adminStatus').textContent = n ? t('wlAdminStatus', n) : t('wlAdminNone');
+    $('copyShareBtn').classList.add('primary');
+    $('invite').hidden = false; $('drawnBox').hidden = true; $('drawBtn').hidden = true; $('reopenBtn').hidden = true;
+    $('manageSummary').textContent = t('wlManage', n);
+    $('settingsSummary').textContent = t('wlSettings');
+    $('cfgTitleLabel').textContent = t('wlNameLabel');
+    $('cfgDateLabel').textContent = dateLabelFor(st.occasion);
+    $('cfgBudgetBox').hidden = true; $('cfgDrawBox').hidden = true;
   }
 }
 
@@ -2058,14 +2744,94 @@ function wireEvent() {
     if (!/^\d{4,8}$/.test(pin)) { $('joinErr').textContent = t('e_bad_pin_format'); $('joinPin').focus(); return; }
     S.busy = true; $('joinBtn').disabled = true; $('joinBtn').textContent = t('loading'); $('joinForm').setAttribute('aria-busy', 'true'); $('joinErr').textContent = '';
     const r = await api('join', { id: EVENT_ID, name, pin, wish });
-    S.busy = false; $('joinBtn').disabled = false; $('joinBtn').textContent = t('joinBtn'); $('joinForm').removeAttribute('aria-busy');
+    const wl = !!S.state && S.state.kind === 'wishlist';
+    S.busy = false; $('joinBtn').disabled = false; $('joinBtn').textContent = wl ? t('wlJoinBtn') : t('joinBtn'); $('joinForm').removeAttribute('aria-busy');
     if (!r.ok) { if (r.data.error === 'not_found') { gone(); render(); } else $('joinErr').textContent = errText(r.data); return; }
     $('joinName').value = ''; $('joinPin').value = ''; $('joinWish').value = ''; fitTextarea($('joinWish'));
     S.justJoined = true;                      // the confirmation sits in the card itself (no PIN on screen), and focus moves to it
     signedIn(r.data);
+    if (wl) {
+      $('wlMeTitle').focus({ preventScroll: true });
+      $('wlMe').scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' });
+      return;
+    }
     $('meTitle').focus({ preventScroll: true });
     $('meCard').scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' });
     if (S.adminKey) refresh();
+  });
+
+  /* ---- wishlist: a friend picks or puts back; the owner adds, edits, removes ---- */
+  const itemText = (id) => { const it = ((S.state && S.state.items) || []).find((x) => x.id === id); return it ? it.text : ''; };
+  async function ownerDo(body) {
+    if (S.busy || !S.adminKey) return null;
+    S.busy = true;
+    const r = await api('admin', Object.assign({ id: EVENT_ID, adminKey: S.adminKey }, body));
+    S.busy = false;
+    if (r.ok && r.data.state) { S.admin = r.data; S.state = r.data.state; }
+    else if (r.data.error === 'not_found') gone();
+    render();
+    return r;
+  }
+  $('wlAddForm').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const text = $('wlText').value.trim(), link = $('wlLink').value.trim();
+    $('wlErr').textContent = '';
+    if (!text) { $('wlErr').textContent = t('e_bad_item'); $('wlText').focus(); return; }
+    const r = await ownerDo({ action: 'addItem', text, link });
+    if (!r) return;
+    if (!r.ok) { $('wlErr').textContent = errText(r.data); return; }
+    $('wlText').value = ''; $('wlLink').value = ''; $('wlText').focus(); toast(t('wlAdded'));
+  });
+  $('wlItems').addEventListener('click', async (ev) => {
+    const btn = ev.target.closest('button[data-act]');
+    if (!btn || S.busy) return;
+    const id = btn.dataset.id, act = btn.dataset.act, text = itemText(id);
+    if (act === 'pick' || act === 'unpick') {
+      if (!S.me) return;
+      const at = btn.getBoundingClientRect();
+      S.busy = true; btn.disabled = true;
+      const r = await api(act, Object.assign({ id: EVENT_ID, itemId: id }, S.me));
+      S.busy = false;
+      if (r.ok) {
+        S.view = r.data; S.state = r.data.state; S.justJoined = false;
+        toast(act === 'pick' ? t('wlPicked', text) : t('wlUnpicked'), 3500);
+        if (act === 'pick') confetti(at.left + at.width / 2, at.top + at.height / 2);
+        render(); return;
+      }
+      if (r.data.error === 'taken' && r.data.state) { S.view = r.data; S.state = r.data.state; toast(t('wlTooLate', text), 4500); render(); return; }
+      if (r.data.error === 'not_found') { gone(); render(); return; }
+      toast(errText(r.data), 4000); S.wlSig = ''; refresh();
+    } else if (act === 'removeItem') {
+      const yes = await openDialog({ title: t('wlRemoveTitle', text), body: t('wlRemoveBody'), ok: t('remove') });
+      if (!yes) return;
+      const r = await ownerDo({ action: 'removeItem', itemId: id });
+      if (r && r.ok) toast(t('wlRemoved')); else if (r) toast(errText(r.data), 4000);
+    } else if (act === 'edit') {
+      const it = (S.state.items || []).find((x) => x.id === id); if (!it) return;
+      const a = el('input'); a.maxLength = 80; a.value = it.text; a.autocomplete = 'off'; a.setAttribute('aria-label', t('wlAddLabel'));
+      const b = el('input'); b.maxLength = 300; b.value = it.link || ''; b.placeholder = 'https://'; b.autocomplete = 'off'; b.inputMode = 'url'; b.setAttribute('aria-label', t('wlLinkLabel'));
+      const asked = openDialog({ title: t('wlEditTitle'), body: [a, b], ok: t('save') }); a.focus();
+      const yes = await asked;
+      if (!yes) return;
+      const r = await ownerDo({ action: 'editItem', itemId: id, text: a.value.trim(), link: b.value.trim() });
+      if (r && r.ok) toast(t('saved')); else if (r) toast(errText(r.data), 4000);
+    }
+  });
+  $('wlGoJoin').addEventListener('click', () => {
+    $('joinCard').scrollIntoView({ block: 'center', behavior: reduced ? 'auto' : 'smooth' });
+    $('joinName').focus({ preventScroll: true });
+  });
+  $('wlLogoutBtn').addEventListener('click', () => {
+    if (S.me) api('logout', Object.assign({ id: EVENT_ID }, S.me));
+    forget(); S.wlSig = ''; refresh();
+  });
+  $('wlLeaveBtn').addEventListener('click', async () => {
+    if (!S.me) return;
+    const yes = await openDialog({ title: t('wlLeaveTitle'), body: t('wlLeaveBody'), ok: t('wlLeaveOk') });
+    if (!yes) return;
+    const r = await api('leave', Object.assign({ id: EVENT_ID }, S.me));
+    if (!r.ok) { toast(errText(r.data), 4000); return; }
+    forget(); S.state = r.data.state; remember(EVENT_ID, S.state.title, false, null); toast(t('wlLeft'), 3500); render();
   });
   /** Ask for a PIN until it is right or the sheet is closed; a fresh organizer key lands on this device. */
   async function claim(title, firstNote, body) {
@@ -2120,6 +2886,7 @@ function wireEvent() {
   // A ready-made message for the group chat: an invite while sign-ups are open, a "names are drawn" reminder after.
   const groupMessage = () => {
     const st = S.state, link = eventUrl(EVENT_ID), budget = st.budget || '—', date = dayText(st.exchangeOn);
+    if (st.kind === 'wishlist') return t('wlMsg', st.title, date, link);
     return st.status === 'drawn' ? t('msgDrawn', st.title, budget, date, link) : t('msgOpen', st.title, budget, date, link);
   };
   const copyMsg = async () => {
@@ -2229,7 +2996,9 @@ function startEvent() {
   if (!ctx) return;
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   let w = 0, h = 0, flakes = [], raf = 0, last = 0;
-  const flake = (anywhere) => ({ x: Math.random() * w, y: anywhere ? Math.random() * h : -4, r: 1 + Math.random() * 2.2, v: 14 + Math.random() * 26, sway: Math.random() * 6.28, o: .4 + Math.random() * .55 });
+  const flake = (anywhere) => ({ x: Math.random() * w, y: anywhere ? Math.random() * h : -4, r: 1 + Math.random() * 2.2, v: 14 + Math.random() * 26, sway: Math.random() * 6.28, o: .4 + Math.random() * .55, k: (Math.random() * 97) | 0 });
+  // Snow for Christmas; the same slow fall in other colours for a birthday (confetti dots) or a wedding (petals).
+  const TINTS = { birthday: ['#ff5d8f', '#ffc94d', '#35b8b0', '#8f7bff', '#ffffff'], wedding: ['#f3c9cf', '#fff6ee', '#e8aab4'] };
   function size() {
     w = cv.clientWidth; h = cv.clientHeight;
     cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
@@ -2240,8 +3009,14 @@ function startEvent() {
     for (const f of flakes) { if (f.x > w) f.x = Math.random() * w; if (f.y > h) f.y = Math.random() * h; }
   }
   function draw() {
+    const tints = TINTS[document.documentElement.dataset.occasion];
     ctx.clearRect(0, 0, w, h); ctx.fillStyle = '#fff';
-    for (const f of flakes) { ctx.globalAlpha = f.o; ctx.beginPath(); ctx.arc(f.x + Math.sin(f.sway) * 6, f.y, f.r, 0, 6.2832); ctx.fill(); }
+    for (const f of flakes) {
+      if (tints) ctx.fillStyle = tints[f.k % tints.length];
+      ctx.globalAlpha = f.o; ctx.beginPath();
+      if (tints) ctx.ellipse(f.x + Math.sin(f.sway) * 6, f.y, f.r * 1.5, f.r * .95, f.sway, 0, 6.2832); else ctx.arc(f.x + Math.sin(f.sway) * 6, f.y, f.r, 0, 6.2832);
+      ctx.fill();
+    }
   }
   function tick(now) {
     const dt = last ? Math.min(.05, (now - last) / 1000) : 0; last = now;
@@ -2250,6 +3025,7 @@ function startEvent() {
   }
   size(); draw();
   addEventListener('resize', () => { size(); draw(); });
+  document.addEventListener('santa:occasion', draw);
   if (reduced) return;
   const running = () => !document.hidden && !motionPaused;
   const restart = () => { cancelAnimationFrame(raf); if (running()) { last = 0; raf = requestAnimationFrame(tick); } };

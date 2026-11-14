@@ -117,7 +117,8 @@ async function api(path, body) {
 }
 // Error codes the server sends that have their own sentence (key "e_<code>" in i18n.js). Anything else reads as a network hiccup.
 const ERR_CODES = ['bad_name', 'bad_pin_format', 'name_taken', 'closed', 'full', 'no_such_person', 'too_few', 'already_drawn',
-  'forbidden', 'not_found', 'bad_date', 'date_past', 'date_far', 'slow_down', 'not_organizer', 'no_org_pin'];
+  'forbidden', 'not_found', 'bad_date', 'date_past', 'date_far', 'slow_down', 'not_organizer', 'no_org_pin',
+  'bad_item', 'bad_link', 'full_list', 'no_such_item'];
 function errText(d) {
   const code = d && d.error;
   if (code === 'bad_pin') return t('e_bad_pin', d.left || 0);
@@ -293,6 +294,18 @@ function buildTag(a) {
   return tag;
 }
 
+/* ---------- occasions ----------
+   A Secret Santa event wears the Christmas look. A wishlist is for a birthday or a wedding: data-occasion on <html>
+   swaps the palette, title face and decorations (style.css), and the falling snow becomes confetti or petals. */
+function applyOccasion(occ) {
+  const root = document.documentElement;
+  if ((root.dataset.occasion || '') === (occ || '')) return;
+  if (occ) root.dataset.occasion = occ; else delete root.dataset.occasion;
+  document.dispatchEvent(new Event('santa:occasion'));
+}
+const eyebrowFor = (occ) => (occ === 'wedding' ? t('wlEyebrowWedding') : t('wlEyebrowBirthday'));
+const dateLabelFor = (occ) => (occ === 'wedding' ? t('wlDateWedding') : t('wlDateBirthday'));
+
 /* =====================================================================================
    Home page (no ?e=): create an event
    ===================================================================================== */
@@ -308,6 +321,36 @@ function renderMine() {
     li.append(avatar(e.title || 'S'), who); $('mineList').append(li);
   }
   renderCreated();
+  renderKind();
+}
+/* What is being created: a gift exchange (the default; its form is the one it always was) or a wishlist for an occasion.
+   Choosing a wishlist previews its look on the spot. Each kind keeps its own half-typed name and date. */
+let newKind = 'santa', newOccasion = 'birthday';
+const drafts = { santa: { title: '', date: '' }, wishlist: { title: '', date: '' } };
+function renderKind() {
+  if (EVENT_ID) return;
+  const wl = newKind === 'wishlist';
+  for (const b of $('kindSeg').children) b.setAttribute('aria-checked', String(b.dataset.kind === newKind));
+  for (const b of $('occasionSeg').children) b.setAttribute('aria-checked', String(b.dataset.occasion === newOccasion));
+  $('kindHint').textContent = wl ? t('kindWishlistHint') : t('kindSantaHint');
+  $('occasionBox').hidden = !wl;
+  $('newBudget').hidden = $('newBudgetLabel').hidden = wl;
+  $('newTitleLabel').textContent = wl ? t('wlNameLabel') : t('eventName');
+  $('newTitle').placeholder = wl ? (newOccasion === 'wedding' ? t('wlNamePhWedding') : t('wlNamePhBirthday')) : '';
+  $('newDateLabel').textContent = wl ? dateLabelFor(newOccasion) : t('exchangeDay');
+  const head = wl ? t('wlHomeTitle') : 'Secret Santa';
+  $('title').textContent = head; $('title').classList.toggle('plain', titleNeedsPlain(head));
+  $('howBody').textContent = wl ? t('wlHow') : t('howBody');
+  $('eyebrowText').textContent = wl ? eyebrowFor(newOccasion) : t('eyebrow');
+  $('footCheer').textContent = wl ? (newOccasion === 'wedding' ? t('wlCheerWedding') : t('wlCheerBirthday')) : t('merry');
+  applyOccasion(wl ? newOccasion : '');
+}
+function setKind(kind) {
+  if (kind === newKind) return;
+  drafts[newKind] = { title: $('newTitle').value, date: $('newDate').value };
+  newKind = kind;
+  $('newTitle').value = drafts[kind].title; $('newDate').value = drafts[kind].date; $('createErr').textContent = '';
+  renderKind();
 }
 /* The "you're all set" screen: two hand-offs. The group link is for everyone; the organizer link is for one person only,
    so it starts masked (like a password) and offers a mail-to-self, which is the one place most people never lose a link. */
@@ -322,6 +365,10 @@ function renderCreated() {
   $('newAdminShow').setAttribute('aria-pressed', String(created.shown));
   $('newAdminMail').href = 'mailto:?subject=' + encodeURIComponent(t('mailSubject', created.title)) + '&body=' + encodeURIComponent(t('mailBody', created.title, adminLink));
   $('newOpen').href = share;
+  const wl = created.kind === 'wishlist';
+  $('forGroupBody').textContent = wl ? t('wlForGroupBody') : t('forGroupBody');
+  $('forYouBody').textContent = wl ? t('wlForYouBody') : t('forYouBody');
+  $('newOpen').textContent = wl ? t('wlOpen') : t('openEvent');
 }
 function startHome() {
   const now = new Date();
@@ -334,21 +381,26 @@ function startHome() {
   $('newDate').min = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
   rerender = renderMine;
   renderMine();
+  $('kindSeg').addEventListener('click', (ev) => { const b = ev.target.closest('button[data-kind]'); if (b) setKind(b.dataset.kind); });
+  $('occasionSeg').addEventListener('click', (ev) => { const b = ev.target.closest('button[data-occasion]'); if (b) { newOccasion = b.dataset.occasion; renderKind(); } });
 
   $('createForm').addEventListener('submit', async (ev) => {
     ev.preventDefault();
     if ($('createBtn').disabled) return;
-    if (!$('newDate').value) { $('createErr').textContent = t('e_bad_date'); return; }
+    const wl = newKind === 'wishlist';
+    if (!$('newDate').value) { $('createErr').textContent = wl ? t('wlNeedDate') : t('e_bad_date'); if (wl) $('newDate').focus(); return; }
     if (!/^\d{4,8}$/.test($('newOrgPin').value.trim())) { $('createErr').textContent = t('e_bad_pin_format'); $('newOrgPin').focus(); return; }
     $('createBtn').disabled = true; $('createBtn').textContent = t('loading'); $('createForm').setAttribute('aria-busy', 'true'); $('createErr').textContent = '';
-    const r = await api('create', { title: $('newTitle').value, budget: $('newBudget').value, exchangeOn: $('newDate').value, orgPin: $('newOrgPin').value.trim() });
+    const r = await api('create', wl
+      ? { kind: 'wishlist', occasion: newOccasion, title: $('newTitle').value.trim() || (newOccasion === 'wedding' ? t('wlDefaultWedding') : t('wlDefaultBirthday')), exchangeOn: $('newDate').value, orgPin: $('newOrgPin').value.trim() }
+      : { title: $('newTitle').value, budget: $('newBudget').value, exchangeOn: $('newDate').value, orgPin: $('newOrgPin').value.trim() });
     $('newOrgPin').value = '';
     $('createBtn').disabled = false; $('createBtn').textContent = t('createBtn'); $('createForm').removeAttribute('aria-busy');
     if (!r.ok) { $('createErr').textContent = errText(r.data); return; }
     const { id, adminKey, state } = r.data;
     store.set('santa:' + id + ':admin', adminKey);
     remember(id, state.title, true);
-    created = { id, adminKey, title: state.title, shown: false };
+    created = { id, adminKey, title: state.title, shown: false, kind: state.kind || 'santa' };
     renderCreated();
     $('createCard').hidden = true; $('mineCard').hidden = true; $('createdCard').hidden = false;
     $('createdCard').scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' });
@@ -375,9 +427,10 @@ function render() {
   const note = S.gone ? '' : (st ? (S.loadError ? t('staleNote') : '') : (S.loadError ? t('offlineNote') : ''));
   $('notice').textContent = note; $('notice').hidden = !note;
   $('skeleton').hidden = S.gone || !!st || S.loadError;          // grey bars stand in for the cards until the first answer arrives
-  for (const id of ['meCard', 'joinCard', 'rosterCard', 'adminCard']) if (S.gone || !st) $(id).hidden = true;
+  for (const id of ['meCard', 'joinCard', 'rosterCard', 'adminCard', 'wlMe', 'wlCard']) if (S.gone || !st) $(id).hidden = true;
   $('eventFields').hidden = S.gone || !st;
   if (S.gone || !st) { $('statusPill').hidden = true; $('deadline').hidden = true; $('retention').textContent = ''; return; }
+  if (st.kind === 'wishlist') { renderWishlist(st); return; }      // its own page; everything below is the gift exchange
 
   const drawn = st.status === 'drawn';
   $('title').textContent = st.title; document.title = st.title;
@@ -446,10 +499,99 @@ function render() {
   for (const name of st.people) box.append(chip(name, !v));
   renderAdmin();
 }
+/* ---------- the wishlist page ----------
+   Three ways to look at it: the owner (this device holds the organizer key) edits the list and never sees picks;
+   a signed-in friend sees who picked what and picks or puts back; anyone else sees the items and is asked for a name. */
+function itemRow(it, mode, pick) {
+  const li = el('li'); li.dataset.id = it.id;
+  const main = el('div', 'item-main'); main.append(el('span', 'item-text', it.text));
+  if (it.link && /^https?:[/][/]/i.test(it.link)) { const a = el('a', 'item-link', t('wlSeeLink')); a.href = it.link; a.target = '_blank'; a.rel = 'noopener noreferrer'; main.append(a); }
+  const side = el('div', 'item-side');
+  const btn = (cls, text, act) => { const b = el('button', cls, text); b.type = 'button'; b.dataset.act = act; b.dataset.id = it.id; return b; };
+  if (mode === 'owner') side.append(btn('btn sm', t('wlEdit'), 'edit'), btn('btn sm', t('remove'), 'removeItem'));
+  else if (mode === 'friend') {
+    if (!pick) side.append(btn('btn sm primary', t('wlPick'), 'pick'));
+    else if (pick.mine) { li.classList.add('mine'); side.append(el('span', 'item-mine', t('wlMine')), btn('link', t('wlUnpick'), 'unpick')); }
+    else { li.classList.add('taken'); side.append(el('span', 'item-by', pick.by ? t('wlTakenBy', pick.by) : t('wlTaken'))); }
+  }
+  li.append(main); if (side.children.length) li.append(side);
+  return li;
+}
+function renderWishlist(st) {
+  const occ = st.occasion === 'wedding' ? 'wedding' : 'birthday';
+  applyOccasion(occ);
+  $('title').textContent = st.title; document.title = st.title;
+  $('title').classList.toggle('plain', titleNeedsPlain(st.title));
+  $('title').classList.toggle('long', Array.from(st.title).length > 16);
+  $('eyebrowText').textContent = eyebrowFor(occ);
+  $('statusPill').hidden = true; $('deadline').hidden = true;
+  $('fBudgetBox').hidden = true; $('eventFields').classList.add('one');
+  $('fDateLabel').textContent = dateLabelFor(occ);
+  $('fDate').textContent = dayText(st.exchangeOn);
+  const left = daysUntil(st.exchangeOn);
+  $('countdown').hidden = left === null || left < 0;
+  if (left !== null && left >= 0) {
+    $('countdownText').textContent = left > 1 ? t('wlDaysLeft', left) : left === 1 ? t('wlTomorrow') : (occ === 'wedding' ? t('wlTodayWedding') : t('wlTodayBirthday'));
+    $('countdown').classList.toggle('today', left === 0);
+    if (left === 0 && !S.cheered) {
+      S.cheered = true;
+      setTimeout(() => { const r = $('countdown').getBoundingClientRect(); confetti(r.left + r.width / 2, r.top + r.height / 2); }, 700);
+    }
+  }
+  $('retention').textContent = t('retention', dateText(st.deleteAt));
+  $('footCheer').textContent = occ === 'wedding' ? t('wlCheerWedding') : t('wlCheerBirthday');
+
+  const owner = !!S.adminKey;                      // the owner's device: no sign-in, no picks, ever
+  const v = owner ? null : S.view;
+  const items = st.items || [], picks = (v && v.picks) || {}, n = st.people.length;
+  const mode = owner ? 'owner' : (v ? 'friend' : 'visitor');
+  $('meCard').hidden = true;
+  $('wlMe').hidden = !v;
+  if (v) {
+    const mine = Object.values(picks).filter((x) => x.mine).length;
+    $('wlMeTitle').textContent = mine ? t('wlMeSome', v.me.name, mine) : t('wlMeNone', v.me.name);
+    $('wlJoinedNote').textContent = S.justJoined ? t('wlJoinedNote') : '';
+    $('wlResetNote').hidden = !v.me.pinResetAt;
+    if (v.me.pinResetAt) $('wlResetNote').textContent = t('pinWasReset', timeText(v.me.pinResetAt));
+  }
+  $('wlCard').hidden = false;
+  $('wlTitle').textContent = owner ? t('wlTitleOwner') : t('wlTitle', items.length);
+  $('wlHint').textContent = owner ? t('wlHintOwner') : (v ? t('wlHintFriend') : t('wlHintVisitor'));
+  $('wlAddForm').hidden = !S.admin;
+  $('wlEmpty').hidden = items.length > 0;
+  $('wlEmpty').textContent = owner ? t('wlEmptyOwner') : t('wlEmpty');
+  $('wlGoJoin').hidden = mode !== 'visitor' || items.length === 0;
+  // Rebuilt only when something on it changed, so a button under a finger is not swapped out by the half-minute refresh.
+  const sig = JSON.stringify([lang, mode, owner && !!S.admin, items, picks]);
+  if (sig !== S.wlSig) {
+    S.wlSig = sig;
+    $('wlItems').replaceChildren(...items.map((it) => itemRow(it, owner && !S.admin ? 'visitor' : mode, picks[it.id])));
+  }
+
+  // a friend's way in: name + PIN, the same card and the same "tap your name" as the gift exchange, with its own words
+  $('joinCard').hidden = owner || !!v;
+  $('joinTitle').textContent = t('wlJoinTitle');
+  if (!S.busy) $('joinBtn').textContent = t('wlJoinBtn');
+  $('pinShort').textContent = t('wlPinShort');
+  $('joinWishBox').hidden = true;
+  $('returning').hidden = owner || !!v || n === 0;
+  $('rosterCard').hidden = owner || n === 0;
+  $('rosterCard').classList.toggle('after-join', !v);
+  $('rosterTitle').textContent = t('wlRoster', n);
+  $('rosterHint').textContent = v ? '' : t('wlRosterHint');
+  $('rosterHint').hidden = !!v;
+  $('names').hidden = !!v; $('roster').hidden = !v; $('names').classList.remove('big');
+  const box = v ? $('roster') : $('names'); box.replaceChildren();
+  for (const name of st.people) box.append(chip(name, !v));
+  $('adminCard').classList.remove('lead');
+  $('orgClaimBtn').hidden = !st.orgPin || !!S.adminKey;
+  renderAdmin();
+}
 function renderAdmin() {
   const a = S.admin, st = S.state;
   $('adminCard').hidden = !a;
   if (!a) return;
+  const wl = st.kind === 'wishlist';
   const drawn = st.status === 'drawn', n = a.people.length;
   // While sign-ups are open the invite block leads and "copy the group link" is the red button, until there are enough
   // people; then "draw names" takes the red. After the draw there is nothing to invite to, so the block goes away.
@@ -460,9 +602,12 @@ function renderAdmin() {
   const list = $('adminList'); list.replaceChildren();
   for (const p of a.people) {
     const li = el('li'); const who = el('div', 'who'); who.append(el('b', '', p.name)); li.append(avatar(p.name));
-    const line = el('small', '', (p.wish ? t('wishOf', p.wish) : t('noWish')) + (p.locked ? t('pinLocked') : ''));
-    const tr = translateLink(p.wish); if (tr) line.append(' ', tr);
-    who.append(line);
+    if (wl) { if (p.locked) who.append(el('small', '', t('pinLocked').replace(/^[\s·]+/, ''))); }      // friends on a wishlist have no wish of their own
+    else {
+      const line = el('small', '', (p.wish ? t('wishOf', p.wish) : t('noWish')) + (p.locked ? t('pinLocked') : ''));
+      const tr = translateLink(p.wish); if (tr) line.append(' ', tr);
+      who.append(line);
+    }
     const acts = el('div', 'row');
     const pin = el('button', 'btn sm', t('resetPin')); pin.type = 'button'; pin.dataset.act = 'setPin'; pin.dataset.name = p.name;
     acts.append(pin);
@@ -488,6 +633,18 @@ function renderAdmin() {
   if (tied) $('orgLinkText').textContent = t('orgLinked', tied);
   if (!$('settings').open) {
     $('cfgTitle').value = st.title; $('cfgBudget').value = st.budget; $('cfgExchangeOn').value = st.exchangeOn; $('cfgDrawAt').value = localInputValue(st.drawAt);
+  }
+  if (wl) {
+    // The same controls minus everything about a draw: share the list, look after the friends, rename or move the date.
+    $('inviteTitle').textContent = t('wlInviteTitle');
+    $('adminStatus').textContent = n ? t('wlAdminStatus', n) : t('wlAdminNone');
+    $('copyShareBtn').classList.add('primary');
+    $('invite').hidden = false; $('drawnBox').hidden = true; $('drawBtn').hidden = true; $('reopenBtn').hidden = true;
+    $('manageSummary').textContent = t('wlManage', n);
+    $('settingsSummary').textContent = t('wlSettings');
+    $('cfgTitleLabel').textContent = t('wlNameLabel');
+    $('cfgDateLabel').textContent = dateLabelFor(st.occasion);
+    $('cfgBudgetBox').hidden = true; $('cfgDrawBox').hidden = true;
   }
 }
 
@@ -537,14 +694,94 @@ function wireEvent() {
     if (!/^\d{4,8}$/.test(pin)) { $('joinErr').textContent = t('e_bad_pin_format'); $('joinPin').focus(); return; }
     S.busy = true; $('joinBtn').disabled = true; $('joinBtn').textContent = t('loading'); $('joinForm').setAttribute('aria-busy', 'true'); $('joinErr').textContent = '';
     const r = await api('join', { id: EVENT_ID, name, pin, wish });
-    S.busy = false; $('joinBtn').disabled = false; $('joinBtn').textContent = t('joinBtn'); $('joinForm').removeAttribute('aria-busy');
+    const wl = !!S.state && S.state.kind === 'wishlist';
+    S.busy = false; $('joinBtn').disabled = false; $('joinBtn').textContent = wl ? t('wlJoinBtn') : t('joinBtn'); $('joinForm').removeAttribute('aria-busy');
     if (!r.ok) { if (r.data.error === 'not_found') { gone(); render(); } else $('joinErr').textContent = errText(r.data); return; }
     $('joinName').value = ''; $('joinPin').value = ''; $('joinWish').value = ''; fitTextarea($('joinWish'));
     S.justJoined = true;                      // the confirmation sits in the card itself (no PIN on screen), and focus moves to it
     signedIn(r.data);
+    if (wl) {
+      $('wlMeTitle').focus({ preventScroll: true });
+      $('wlMe').scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' });
+      return;
+    }
     $('meTitle').focus({ preventScroll: true });
     $('meCard').scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' });
     if (S.adminKey) refresh();
+  });
+
+  /* ---- wishlist: a friend picks or puts back; the owner adds, edits, removes ---- */
+  const itemText = (id) => { const it = ((S.state && S.state.items) || []).find((x) => x.id === id); return it ? it.text : ''; };
+  async function ownerDo(body) {
+    if (S.busy || !S.adminKey) return null;
+    S.busy = true;
+    const r = await api('admin', Object.assign({ id: EVENT_ID, adminKey: S.adminKey }, body));
+    S.busy = false;
+    if (r.ok && r.data.state) { S.admin = r.data; S.state = r.data.state; }
+    else if (r.data.error === 'not_found') gone();
+    render();
+    return r;
+  }
+  $('wlAddForm').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const text = $('wlText').value.trim(), link = $('wlLink').value.trim();
+    $('wlErr').textContent = '';
+    if (!text) { $('wlErr').textContent = t('e_bad_item'); $('wlText').focus(); return; }
+    const r = await ownerDo({ action: 'addItem', text, link });
+    if (!r) return;
+    if (!r.ok) { $('wlErr').textContent = errText(r.data); return; }
+    $('wlText').value = ''; $('wlLink').value = ''; $('wlText').focus(); toast(t('wlAdded'));
+  });
+  $('wlItems').addEventListener('click', async (ev) => {
+    const btn = ev.target.closest('button[data-act]');
+    if (!btn || S.busy) return;
+    const id = btn.dataset.id, act = btn.dataset.act, text = itemText(id);
+    if (act === 'pick' || act === 'unpick') {
+      if (!S.me) return;
+      const at = btn.getBoundingClientRect();
+      S.busy = true; btn.disabled = true;
+      const r = await api(act, Object.assign({ id: EVENT_ID, itemId: id }, S.me));
+      S.busy = false;
+      if (r.ok) {
+        S.view = r.data; S.state = r.data.state; S.justJoined = false;
+        toast(act === 'pick' ? t('wlPicked', text) : t('wlUnpicked'), 3500);
+        if (act === 'pick') confetti(at.left + at.width / 2, at.top + at.height / 2);
+        render(); return;
+      }
+      if (r.data.error === 'taken' && r.data.state) { S.view = r.data; S.state = r.data.state; toast(t('wlTooLate', text), 4500); render(); return; }
+      if (r.data.error === 'not_found') { gone(); render(); return; }
+      toast(errText(r.data), 4000); S.wlSig = ''; refresh();
+    } else if (act === 'removeItem') {
+      const yes = await openDialog({ title: t('wlRemoveTitle', text), body: t('wlRemoveBody'), ok: t('remove') });
+      if (!yes) return;
+      const r = await ownerDo({ action: 'removeItem', itemId: id });
+      if (r && r.ok) toast(t('wlRemoved')); else if (r) toast(errText(r.data), 4000);
+    } else if (act === 'edit') {
+      const it = (S.state.items || []).find((x) => x.id === id); if (!it) return;
+      const a = el('input'); a.maxLength = 80; a.value = it.text; a.autocomplete = 'off'; a.setAttribute('aria-label', t('wlAddLabel'));
+      const b = el('input'); b.maxLength = 300; b.value = it.link || ''; b.placeholder = 'https://'; b.autocomplete = 'off'; b.inputMode = 'url'; b.setAttribute('aria-label', t('wlLinkLabel'));
+      const asked = openDialog({ title: t('wlEditTitle'), body: [a, b], ok: t('save') }); a.focus();
+      const yes = await asked;
+      if (!yes) return;
+      const r = await ownerDo({ action: 'editItem', itemId: id, text: a.value.trim(), link: b.value.trim() });
+      if (r && r.ok) toast(t('saved')); else if (r) toast(errText(r.data), 4000);
+    }
+  });
+  $('wlGoJoin').addEventListener('click', () => {
+    $('joinCard').scrollIntoView({ block: 'center', behavior: reduced ? 'auto' : 'smooth' });
+    $('joinName').focus({ preventScroll: true });
+  });
+  $('wlLogoutBtn').addEventListener('click', () => {
+    if (S.me) api('logout', Object.assign({ id: EVENT_ID }, S.me));
+    forget(); S.wlSig = ''; refresh();
+  });
+  $('wlLeaveBtn').addEventListener('click', async () => {
+    if (!S.me) return;
+    const yes = await openDialog({ title: t('wlLeaveTitle'), body: t('wlLeaveBody'), ok: t('wlLeaveOk') });
+    if (!yes) return;
+    const r = await api('leave', Object.assign({ id: EVENT_ID }, S.me));
+    if (!r.ok) { toast(errText(r.data), 4000); return; }
+    forget(); S.state = r.data.state; remember(EVENT_ID, S.state.title, false, null); toast(t('wlLeft'), 3500); render();
   });
   /** Ask for a PIN until it is right or the sheet is closed; a fresh organizer key lands on this device. */
   async function claim(title, firstNote, body) {
@@ -599,6 +836,7 @@ function wireEvent() {
   // A ready-made message for the group chat: an invite while sign-ups are open, a "names are drawn" reminder after.
   const groupMessage = () => {
     const st = S.state, link = eventUrl(EVENT_ID), budget = st.budget || '—', date = dayText(st.exchangeOn);
+    if (st.kind === 'wishlist') return t('wlMsg', st.title, date, link);
     return st.status === 'drawn' ? t('msgDrawn', st.title, budget, date, link) : t('msgOpen', st.title, budget, date, link);
   };
   const copyMsg = async () => {
@@ -708,7 +946,9 @@ function startEvent() {
   if (!ctx) return;
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   let w = 0, h = 0, flakes = [], raf = 0, last = 0;
-  const flake = (anywhere) => ({ x: Math.random() * w, y: anywhere ? Math.random() * h : -4, r: 1 + Math.random() * 2.2, v: 14 + Math.random() * 26, sway: Math.random() * 6.28, o: .4 + Math.random() * .55 });
+  const flake = (anywhere) => ({ x: Math.random() * w, y: anywhere ? Math.random() * h : -4, r: 1 + Math.random() * 2.2, v: 14 + Math.random() * 26, sway: Math.random() * 6.28, o: .4 + Math.random() * .55, k: (Math.random() * 97) | 0 });
+  // Snow for Christmas; the same slow fall in other colours for a birthday (confetti dots) or a wedding (petals).
+  const TINTS = { birthday: ['#ff5d8f', '#ffc94d', '#35b8b0', '#8f7bff', '#ffffff'], wedding: ['#f3c9cf', '#fff6ee', '#e8aab4'] };
   function size() {
     w = cv.clientWidth; h = cv.clientHeight;
     cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
@@ -719,8 +959,14 @@ function startEvent() {
     for (const f of flakes) { if (f.x > w) f.x = Math.random() * w; if (f.y > h) f.y = Math.random() * h; }
   }
   function draw() {
+    const tints = TINTS[document.documentElement.dataset.occasion];
     ctx.clearRect(0, 0, w, h); ctx.fillStyle = '#fff';
-    for (const f of flakes) { ctx.globalAlpha = f.o; ctx.beginPath(); ctx.arc(f.x + Math.sin(f.sway) * 6, f.y, f.r, 0, 6.2832); ctx.fill(); }
+    for (const f of flakes) {
+      if (tints) ctx.fillStyle = tints[f.k % tints.length];
+      ctx.globalAlpha = f.o; ctx.beginPath();
+      if (tints) ctx.ellipse(f.x + Math.sin(f.sway) * 6, f.y, f.r * 1.5, f.r * .95, f.sway, 0, 6.2832); else ctx.arc(f.x + Math.sin(f.sway) * 6, f.y, f.r, 0, 6.2832);
+      ctx.fill();
+    }
   }
   function tick(now) {
     const dt = last ? Math.min(.05, (now - last) / 1000) : 0; last = now;
@@ -729,6 +975,7 @@ function startEvent() {
   }
   size(); draw();
   addEventListener('resize', () => { size(); draw(); });
+  document.addEventListener('santa:occasion', draw);
   if (reduced) return;
   const running = () => !document.hidden && !motionPaused;
   const restart = () => { cancelAnimationFrame(raf); if (running()) { last = 0; raf = requestAnimationFrame(tick); } };
