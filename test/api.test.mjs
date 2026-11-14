@@ -290,3 +290,132 @@ test('an organizer PIN set at creation (or later) brings the controls back from 
   assert.equal((await post('/api/claimAdmin', { id: p.id, orgPin: '9876' })).status, 401);
   assert.equal((await post('/api/claimAdmin', { id: p.id, orgPin: '5555' })).status, 200);
 });
+
+// ---- the promise to events that already exist ---------------------------------------------------------------
+// A record exactly as the first version of the site wrote it: none of the fields added since (organizer, orgPin,
+// kind, occasion, items). Everything a Secret Santa event does must keep working on it, answer shapes included.
+test('an event stored by the first version keeps working unchanged', async () => {
+  const { DynamoDBDocumentClient, GetCommand, PutCommand } = await import('@aws-sdk/lib-dynamodb');
+  const docs = DynamoDBDocumentClient.from(s.raw);
+  const p = await party();
+  const old = (await docs.send(new GetCommand({ TableName: s.table, Key: { pk: 'E#' + p.id } }))).Item;
+  for (const k of ['organizer', 'orgPin', 'kind', 'occasion', 'items']) delete old[k];
+  assert.deepEqual(Object.keys(old).sort(), ['adminHash', 'budget', 'createdAt', 'draw', 'drawAt', 'drawId', 'exchangeOn', 'id', 'people', 'pk', 'status', 'title', 'ttl', 'v']);
+  assert.deepEqual(Object.keys(old.people[0]).sort(), ['at', 'fails', 'hash', 'key', 'lockUntil', 'name', 'salt', 'sessions', 'wish']);
+  await docs.send(new PutCommand({ TableName: s.table, Item: old }));
+
+  // what anyone with the link gets: the same keys as ever, plus only the "is there an organizer PIN" flag
+  const pub = (await post('/api/state', { id: p.id })).data;
+  assert.deepEqual(Object.keys(pub).sort(), ['budget', 'deleteAt', 'drawAt', 'exchangeOn', 'id', 'keepDays', 'min', 'orgPin', 'people', 'status', 'title']);
+  assert.equal(pub.orgPin, false);
+  // devices that were signed in stay signed in; a new device signs in with name + PIN
+  assert.deepEqual(Object.keys((await p.me('Jennifer')).data).sort(), ['giftTo', 'me', 'missed', 'state']);
+  assert.equal((await post('/api/login', { id: p.id, name: 'Mia', pin: '3333' })).status, 200);
+  assert.equal((await post('/api/login', { id: p.id, name: 'Mia', pin: '0000' })).data.left, 4);
+  // wishes, a late sign-up, the organizer's list, the draw, each person's own result, a reopen, a PIN reset
+  assert.equal((await post('/api/wish', { id: p.id, name: 'Jennifer', token: p.tokens.Jennifer, wish: '新的心愿' })).data.me.wish, '新的心愿');
+  assert.equal((await post('/api/join', { id: p.id, name: 'Late', pin: '6666', wish: '' })).status, 200);
+  assert.equal((await p.admin({ action: 'list' })).data.people.length, 6);
+  assert.equal((await p.admin({ action: 'draw' })).data.state.status, 'drawn');
+  const gives = {};
+  for (const [name] of PEOPLE) { const r = await p.me(name); assert.equal(r.status, 200); gives[name] = r.data.giftTo.name; assert.notEqual(gives[name], name); }
+  assert.equal(new Set(Object.values(gives)).size, PEOPLE.length);
+  assert.equal((await post('/api/join', { id: p.id, name: 'Too late', pin: '7777' })).data.error, 'closed');
+  assert.equal((await p.admin({ action: 'reopen' })).data.state.status, 'open');
+  assert.equal((await p.admin({ action: 'setPin', name: 'Leo', pin: '9999' })).status, 200);
+  assert.equal((await post('/api/login', { id: p.id, name: 'Leo', pin: '9999' })).status, 200);
+  assert.equal((await p.admin({ action: 'settings', title: 'Renamed', budget: '$40', exchangeOn: '2026-12-25', drawAt: 0 })).data.state.title, 'Renamed');
+  // the newer safety nets can be added to it, and none of the wishlist calls apply
+  assert.equal((await post('/api/claimAdmin', { id: p.id, orgPin: '1234' })).data.error, 'no_org_pin');
+  assert.equal((await p.admin({ action: 'setOrgPin', pin: '1234' })).data.orgPin, true);
+  assert.equal((await post('/api/pick', { id: p.id, name: 'Jennifer', token: p.tokens.Jennifer, itemId: 'x' })).data.error, 'not_wishlist');
+  assert.equal((await p.admin({ action: 'addItem', text: 'a thing' })).data.error, 'not_wishlist');
+  assert.equal((await p.admin({ action: 'destroy' })).data.ok, true);
+});
+
+// ---- wishlists -------------------------------------------------------------------------------------------------
+const wishlist = async (extra = {}) => (await post('/api/create', { kind: 'wishlist', occasion: 'birthday', title: 'Mia turns 30', exchangeOn: '2026-12-20', orgPin: '2468', ...extra }, '10.1.0.' + (++ip))).data;
+
+test('a wishlist: the owner keeps the items, friends pick them, and nobody but the friends sees the picks', async () => {
+  assert.equal((await post('/api/create', { kind: 'raffle', exchangeOn: '2026-12-20' }, '10.2.0.1')).data.error, 'bad_kind');
+  assert.equal((await post('/api/create', { kind: 'wishlist', occasion: 'funeral', exchangeOn: '2026-12-20' }, '10.2.0.1')).data.error, 'bad_occasion');
+  const w = await wishlist();
+  assert.equal(w.state.kind, 'wishlist'); assert.equal(w.state.occasion, 'birthday'); assert.deepEqual(w.state.items, []); assert.equal(w.state.budget, '');
+  const admin = (body) => post('/api/admin', { id: w.id, adminKey: w.adminKey, ...body });
+
+  // the owner fills the list: text is tidied, a link must be a web address
+  assert.equal((await admin({ action: 'addItem', text: '   ' })).data.error, 'bad_item');
+  assert.equal((await admin({ action: 'addItem', text: 'Kettle', link: 'javascript:alert(1)' })).data.error, 'bad_link');
+  assert.equal((await admin({ action: 'addItem', text: 'Kettle', link: 'not a link' })).data.error, 'bad_link');
+  assert.equal((await post('/api/admin', { id: w.id, adminKey: 'f'.repeat(32), action: 'addItem', text: 'x' })).status, 403);
+  let st = (await admin({ action: 'addItem', text: '  A  good   kettle ', link: 'example.com/kettle?id=1' })).data.state;
+  assert.deepEqual(st.items.map((i) => [i.text, i.link]), [['A good kettle', 'https://example.com/kettle?id=1']]);
+  await admin({ action: 'addItem', text: '手冲咖啡壶' }); await admin({ action: 'addItem', text: 'Cookbook' });
+  st = (await admin({ action: 'list' })).data.state;
+  const [kettle, pot, book] = st.items.map((i) => i.id);
+  assert.equal((await admin({ action: 'editItem', itemId: book, text: 'A cookbook, any', link: '' })).data.state.items[2].text, 'A cookbook, any');
+  assert.equal((await admin({ action: 'editItem', itemId: 'nope', text: 'x' })).data.error, 'no_such_item');
+
+  // friends sign in like participants (name + PIN), with no draw and no closing
+  const join = async (name, pin) => (await post('/api/join', { id: w.id, name, pin })).data;
+  const zoe = await join('Zoë', '1111'), sam = await join('Sam', '2222');
+  assert.deepEqual(zoe.picks, {});
+  const as = (who, name) => (path, body = {}) => post(path, { id: w.id, name, token: who.token, ...body });
+  const Z = as(zoe, 'Zoë'), S = as(sam, 'Sam');
+
+  // picking: first come, first served; only your own pick can be put back
+  let r = await Z('/api/pick', { itemId: kettle });
+  assert.deepEqual(r.data.picks, { [kettle]: { by: 'Zoë', mine: true } });
+  r = await S('/api/pick', { itemId: kettle });
+  assert.equal(r.status, 409); assert.equal(r.data.error, 'taken'); assert.deepEqual(r.data.picks, { [kettle]: { by: 'Zoë', mine: false } });
+  assert.equal((await S('/api/unpick', { itemId: kettle })).data.error, 'not_yours');
+  assert.equal((await S('/api/pick', { itemId: 'nope' })).data.error, 'no_such_item');
+  assert.equal((await S('/api/pick', { itemId: pot })).status, 200);
+  assert.equal((await Z('/api/pick', { itemId: kettle })).status, 200, 'picking your own pick again is fine');
+  assert.equal((await post('/api/pick', { id: w.id, name: 'Sam', token: 'x'.repeat(32), itemId: book })).data.error, 'bad_token');
+  assert.deepEqual((await S('/api/me')).data.picks, { [kettle]: { by: 'Zoë', mine: false }, [pot]: { by: 'Sam', mine: true } });
+
+  // the surprise: neither the link alone nor the owner's key ever shows a pick
+  const pub = (await post('/api/state', { id: w.id })).data;
+  const own = (await admin({ action: 'list' })).data;
+  for (const view of [pub, own]) {
+    const text = JSON.stringify(view);
+    assert.ok(!text.includes('picks') && !text.includes('"by"') && !text.includes('mine'), text);
+    assert.deepEqual(Object.keys((view.state || view).items[0]).sort(), ['id', 'link', 'text']);
+  }
+  assert.deepEqual(own.people.map((x) => x.name), ['Zoë', 'Sam']);
+  assert.ok(!JSON.stringify(await rawItem(w.id)).includes('1111'));
+
+  // rewording an item keeps its pick; removing it, or the friend leaving, lets go of it
+  await admin({ action: 'editItem', itemId: kettle, text: 'A really good kettle' });
+  assert.equal((await S('/api/me')).data.picks[kettle].by, 'Zoë');
+  await admin({ action: 'removeItem', itemId: pot });
+  assert.deepEqual(Object.keys((await S('/api/me')).data.picks), [kettle]);
+  assert.equal((await Z('/api/leave')).status, 200);
+  assert.deepEqual((await S('/api/me')).data.picks, {});
+  assert.equal((await S('/api/pick', { itemId: kettle })).status, 200);
+  await admin({ action: 'remove', name: 'Sam' });
+  const amy = await join('Amy', '3333');
+  assert.deepEqual(amy.picks, {});
+
+  // nothing Secret-Santa applies, the usual owner tools do, and the list has a size limit
+  assert.equal((await admin({ action: 'draw' })).data.error, 'not_santa');
+  assert.equal((await admin({ action: 'reopen' })).data.error, 'not_santa');
+  const renamed = (await admin({ action: 'settings', title: 'Mia is 30!', exchangeOn: '2026-12-21', budget: '$1', drawAt: Date.now() + 1000 })).data.state;
+  assert.deepEqual([renamed.title, renamed.exchangeOn, renamed.budget, renamed.drawAt, renamed.status], ['Mia is 30!', '2026-12-21', '', 0, 'open']);
+  assert.equal((await post('/api/claimAdmin', { id: w.id, orgPin: '2468' })).status, 200);
+  const w2 = await wishlist({ occasion: 'wedding' });
+  for (let i = 0; i < 40; i++) assert.equal((await post('/api/admin', { id: w2.id, adminKey: w2.adminKey, action: 'addItem', text: 'thing ' + i })).status, 200);
+  assert.equal((await post('/api/admin', { id: w2.id, adminKey: w2.adminKey, action: 'addItem', text: 'one more' })).data.error, 'full_list');
+});
+
+test('two friends reaching for the same item at once: exactly one gets it', async () => {
+  const w = await wishlist();
+  const id = (await post('/api/admin', { id: w.id, adminKey: w.adminKey, action: 'addItem', text: 'The one thing' })).data.state.items[0].id;
+  const names = ['a', 'b', 'c', 'd', 'e', 'f'];
+  const friends = [];
+  for (const n of names) friends.push({ n, token: (await post('/api/join', { id: w.id, name: n, pin: '1234' })).data.token });
+  const results = await Promise.all(friends.map((f) => post('/api/pick', { id: w.id, name: f.n, token: f.token, itemId: id })));
+  assert.equal(results.filter((r) => r.status === 200).length, 1);
+  assert.equal(results.filter((r) => r.data.error === 'taken').length, names.length - 1);
+});
