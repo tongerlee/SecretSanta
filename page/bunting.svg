@@ -1,0 +1,18 @@
+<svg class="lights deco deco-birthday" viewBox="0 0 360 40" aria-hidden="true">
+      <path d="M-5 4 Q40 26 90 8 Q135 26 180 8 Q225 26 270 8 Q315 26 365 4" fill="none" stroke="#f3effa" stroke-width="1.4" opacity=".75"/>
+      <path class="bulb" transform="translate(12 10.8) rotate(17.5)" d="M-8.5 0 H8.5 L0 17Z" fill="#ff5d8f"/>
+      <path class="bulb" transform="translate(36 15.7) rotate(5.1)" d="M-8.5 0 H8.5 L0 17Z" fill="#ffc94d"/>
+      <path class="bulb" transform="translate(60 15.3) rotate(-6.8)" d="M-8.5 0 H8.5 L0 17Z" fill="#35b8b0"/>
+      <path class="bulb" transform="translate(84 10.0) rotate(-17.4)" d="M-8.5 0 H8.5 L0 17Z" fill="#8f7bff"/>
+      <path class="bulb" transform="translate(108 13.8) rotate(13.5)" d="M-8.5 0 H8.5 L0 17Z" fill="#ff8a5c"/>
+      <path class="bulb" transform="translate(132 17.0) rotate(1.5)" d="M-8.5 0 H8.5 L0 17Z" fill="#ff5d8f"/>
+      <path class="bulb" transform="translate(156 15.0) rotate(-10.6)" d="M-8.5 0 H8.5 L0 17Z" fill="#ffc94d"/>
+      <path class="bulb" transform="translate(180 8.0) rotate(-21.8)" d="M-8.5 0 H8.5 L0 17Z" fill="#35b8b0"/>
+      <path class="bulb" transform="translate(204 15.0) rotate(10.6)" d="M-8.5 0 H8.5 L0 17Z" fill="#8f7bff"/>
+      <path class="bulb" transform="translate(228 17.0) rotate(-1.5)" d="M-8.5 0 H8.5 L0 17Z" fill="#ff8a5c"/>
+      <path class="bulb" transform="translate(252 13.8) rotate(-13.5)" d="M-8.5 0 H8.5 L0 17Z" fill="#ff5d8f"/>
+      <path class="bulb" transform="translate(276 10.2) rotate(18.7)" d="M-8.5 0 H8.5 L0 17Z" fill="#ffc94d"/>
+      <path class="bulb" transform="translate(300 15.5) rotate(6.0)" d="M-8.5 0 H8.5 L0 17Z" fill="#35b8b0"/>
+      <path class="bulb" transform="translate(324 15.4) rotate(-6.3)" d="M-8.5 0 H8.5 L0 17Z" fill="#8f7bff"/>
+      <path class="bulb" transform="translate(348 10.4) rotate(-17.1)" d="M-8.5 0 H8.5 L0 17Z" fill="#ff8a5c"/>
+    </svg>

@@ -3,6 +3,9 @@ import pathlib
 here = pathlib.Path(__file__).parent
 read = lambda n: (here / n).read_text()
 body = read('body.html').replace('@@LIGHTS@@', read('lights.svg')).replace('@@TREE@@', read('tree.svg'))
+# decorations for the other occasions (birthday, wedding); the Christmas ones above are the default
+for mark, part in (('@@BUNTING@@', 'bunting.svg'), ('@@GARLAND@@', 'garland.svg'), ('@@BALLOONS@@', 'balloons.svg'), ('@@FLOWERS@@', 'flowers.svg')):
+    body = body.replace(mark, read(part))
 icon = ("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d2a22'/%3E"
         "%3Cpath d='M16 5 6 22h20z' fill='%232f8a66'/%3E%3Crect x='14' y='22' width='4' height='5' fill='%237a4a2a'/%3E%3Ccircle cx='16' cy='6' r='2.4' fill='%23f2c14e'/%3E"
         "%3Ccircle cx='13' cy='15' r='1.6' fill='%23ff5468'/%3E%3Ccircle cx='19' cy='18' r='1.6' fill='%23f2c14e'/%3E%3C/svg%3E")
@@ -26,7 +29,7 @@ page = f'''<!DOCTYPE html>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Ma+Shan+Zheng&family=Mountains+of+Christmas:wght@700&display=swap" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Patrick+Hand&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Patrick+Hand&family=Fredoka:wght@600&family=Cormorant+Garamond:ital,wght@1,600&display=swap" media="print" onload="this.media='all'">
 <style>{read('style.css')}</style>
 </head>
 <body>
@@ -39,7 +42,7 @@ page = f'''<!DOCTYPE html>
 </html>
 '''
 import unicodedata
-assert '@@LIGHTS@@' not in page and '@@TREE@@' not in page
+assert '@@' not in page.replace('@@ORIGIN@@', ''), 'a placeholder was left in the page'
 for part in ('app.js', 'i18n.js'):
     assert '</script' not in read(part).lower(), part
 # Vietnamese letters must be stored as single composed characters, or some phones draw the marks beside the letter.

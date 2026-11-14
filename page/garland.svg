@@ -1,0 +1,50 @@
+<svg class="lights deco deco-wedding" viewBox="0 0 360 40" aria-hidden="true">
+      <path d="M-5 4 Q40 26 90 8 Q135 26 180 8 Q225 26 270 8 Q315 26 365 4" fill="none" stroke="#6f8a74" stroke-width="1.6"/>
+      <ellipse transform="translate(4 8.0) rotate(-26.4) translate(5 0)" rx="5.6" ry="2.3" fill="#a3b9a2"/>
+      <ellipse transform="translate(13 11.1) rotate(65.0) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(22 13.5) rotate(-35.6) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(31 15.1) rotate(55.7) translate(5 0)" rx="5.6" ry="2.3" fill="#a3b9a2"/>
+      <ellipse transform="translate(40 15.9) rotate(-45.0) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(49 16.1) rotate(46.5) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(58 15.5) rotate(-53.9) translate(5 0)" rx="5.6" ry="2.3" fill="#a3b9a2"/>
+      <ellipse transform="translate(67 14.2) rotate(37.9) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(76 12.3) rotate(-62.1) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(85 9.7) rotate(30.2) translate(5 0)" rx="5.6" ry="2.3" fill="#a3b9a2"/>
+      <ellipse transform="translate(94 9.5) rotate(-28.0) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(103 12.4) rotate(63.9) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(112 14.6) rotate(-36.4) translate(5 0)" rx="5.6" ry="2.3" fill="#a3b9a2"/>
+      <ellipse transform="translate(121 16.1) rotate(55.1) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(130 16.9) rotate(-45.5) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(139 16.9) rotate(46.0) translate(5 0)" rx="5.6" ry="2.3" fill="#a3b9a2"/>
+      <ellipse transform="translate(148 16.2) rotate(-54.6) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(157 14.8) rotate(36.9) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(166 12.7) rotate(-63.4) translate(5 0)" rx="5.6" ry="2.3" fill="#a3b9a2"/>
+      <ellipse transform="translate(175 9.9) rotate(28.4) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(184 9.5) rotate(-28.0) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(193 12.4) rotate(63.9) translate(5 0)" rx="5.6" ry="2.3" fill="#a3b9a2"/>
+      <ellipse transform="translate(202 14.6) rotate(-36.4) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(211 16.1) rotate(55.1) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(220 16.9) rotate(-45.5) translate(5 0)" rx="5.6" ry="2.3" fill="#a3b9a2"/>
+      <ellipse transform="translate(229 16.9) rotate(46.0) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(238 16.2) rotate(-54.6) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(247 14.8) rotate(36.9) translate(5 0)" rx="5.6" ry="2.3" fill="#a3b9a2"/>
+      <ellipse transform="translate(256 12.7) rotate(-63.4) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(265 9.9) rotate(28.4) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(274 9.5) rotate(-28.3) translate(5 0)" rx="5.6" ry="2.3" fill="#a3b9a2"/>
+      <ellipse transform="translate(283 12.3) rotate(63.0) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(292 14.4) rotate(-37.8) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(301 15.6) rotate(53.5) translate(5 0)" rx="5.6" ry="2.3" fill="#a3b9a2"/>
+      <ellipse transform="translate(310 16.1) rotate(-47.2) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(319 15.9) rotate(44.2) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(328 14.9) rotate(-56.2) translate(5 0)" rx="5.6" ry="2.3" fill="#a3b9a2"/>
+      <ellipse transform="translate(337 13.3) rotate(35.6) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(346 11.0) rotate(-64.3) translate(5 0)" rx="5.6" ry="2.3" fill="#7f9c85"/>
+      <ellipse transform="translate(355 8.0) rotate(28.0) translate(5 0)" rx="5.6" ry="2.3" fill="#a3b9a2"/>
+      <g class="bulb"><circle cx="40" cy="17.9" r="5.2" fill="#f3c9cf"/><circle cx="40" cy="17.9" r="2.2" fill="#d98a98"/></g>
+      <g class="bulb"><circle cx="86" cy="11.4" r="3.6" fill="#fff6ee"/><circle cx="86" cy="11.4" r="1.5" fill="#e9c98f"/></g>
+      <g class="bulb"><circle cx="135" cy="19.0" r="5.2" fill="#f3c9cf"/><circle cx="135" cy="19.0" r="2.2" fill="#d98a98"/></g>
+      <g class="bulb"><circle cx="180" cy="10.0" r="3.6" fill="#fff6ee"/><circle cx="180" cy="10.0" r="1.5" fill="#e9c98f"/></g>
+      <g class="bulb"><circle cx="225" cy="19.0" r="5.2" fill="#f3c9cf"/><circle cx="225" cy="19.0" r="2.2" fill="#d98a98"/></g>
+      <g class="bulb"><circle cx="274" cy="11.5" r="3.6" fill="#fff6ee"/><circle cx="274" cy="11.5" r="1.5" fill="#e9c98f"/></g>
+      <g class="bulb"><circle cx="320" cy="17.8" r="5.2" fill="#f3c9cf"/><circle cx="320" cy="17.8" r="2.2" fill="#d98a98"/></g>
+    </svg>
