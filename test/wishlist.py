@@ -1,5 +1,5 @@
 """Wishlist walk-through in a real browser: the owner makes a list, friends pick from it, and the owner never sees
-the picks. Also checks that choosing "wishlist" on the home page leaves the gift-exchange form exactly as it was.
+the picks. Also walks the front page: gift exchange or wishlist first, then the form, with the gift-exchange form as it was.
 Run through ./test/browser.sh (it starts the local site + API)."""
 import json, os, pathlib, sys, urllib.request
 from playwright.sync_api import sync_playwright
@@ -31,28 +31,52 @@ def spill(page):
 with sync_playwright() as p:
     browser = p.chromium.launch(executable_path=os.environ.get("CHROME") or "/usr/bin/google-chrome", args=["--no-sandbox"])
 
-    # ---- home: the gift exchange is the default and its form is untouched; wishlist is one tap away and previews its look
-    o = phone(browser, "owner"); o.goto(SITE); o.wait_for_selector("#createCard:not([hidden])")
-    assert o.get_attribute("html", "data-occasion") is None and o.inner_text("#title") == "Secret Santa"
-    assert o.input_value("#newTitle").startswith("Secret Santa 20") and o.input_value("#newDate").endswith("-12-24") and o.is_visible("#newBudget")
+    # ---- front page: first what to make. "Gift exchange" goes straight to the form the home page always had; "wishlist"
+    #      asks for the occasion, and the form then wears that look. Back returns to the choice without leaving the site.
+    vis = lambda sel: o.evaluate("s => [...document.querySelectorAll(s)].map(n => getComputedStyle(n).visibility).join()", sel)
+    o = phone(browser, "owner"); o.goto(SITE); o.wait_for_selector("#frontCard:not([hidden])")
+    assert o.is_hidden("#createCard") and o.is_hidden("#occasionChoices") and o.is_hidden("#homeFields")
+    assert o.get_attribute("html", "data-occasion") is None and o.inner_text("#title") == "Gifts" and "WISHLIST" in o.inner_text("#eyebrowText")
     assert o.is_visible("svg.lights.deco-christmas") and o.is_hidden("svg.lights.deco-birthday") and o.is_hidden("svg.lights.deco-wedding")
-    o.click("#kindSeg button[data-kind=wishlist]")
-    assert o.get_attribute("html", "data-occasion") == "birthday" and o.is_hidden("#newBudget") and o.is_visible("#occasionBox")
-    assert o.inner_text("#title") == "Wishlist" and o.input_value("#newTitle") == "" and o.is_visible("svg.lights.deco-birthday") and o.is_hidden("svg.lights.deco-christmas")
-    o.click("#occasionSeg button[data-occasion=wedding]")
-    assert o.get_attribute("html", "data-occasion") == "wedding" and "Wedding day" in o.inner_text("#newDateLabel") and o.is_visible("svg.lights.deco-wedding")
-    o.screenshot(path=str(OUT / "wl-1-home-wedding.png"))
+    assert vis(".pet-acc") == "hidden,hidden"                       # no flower crowns outside a wedding
+    o.screenshot(path=str(OUT / "wl-0-front.png"))
+    o.click("#pickSanta"); o.wait_for_selector("#createCard:not([hidden])")
+    assert o.is_hidden("#frontCard") and o.get_attribute("html", "data-occasion") is None and o.inner_text("#title") == "Secret Santa"
+    assert o.input_value("#newTitle").startswith("Secret Santa 20") and o.input_value("#newDate").endswith("-12-24") and o.is_visible("#newBudget")
+    assert "Exchange day" in o.inner_text("#newDateLabel") and o.inner_text("#createHead") == "Start a new event" and o.is_visible("#homeFields")
+    o.fill("#newTitle", "Office swap")
+    o.go_back(); o.wait_for_selector("#frontCard:not([hidden])")     # the browser's own Back button
+    assert o.url == SITE and o.is_hidden("#createCard") and o.inner_text("#title") == "Gifts"
+    o.click("#pickWishlist")
+    assert o.is_visible("#occasionChoices") and o.get_attribute("#pickWishlist", "aria-expanded") == "true" and o.is_hidden("#createCard")
+    o.screenshot(path=str(OUT / "wl-0-front-occasions.png"))
+    o.click("#occasionChoices button[data-occasion=wedding]"); o.wait_for_selector("#createCard:not([hidden])")
+    assert o.get_attribute("html", "data-occasion") == "wedding" and o.is_hidden("#newBudget") and "Wedding day" in o.inner_text("#newDateLabel")
+    assert o.inner_text("#title") == "Wishlist" and o.input_value("#newTitle") == "" and o.inner_text("#createHead") == "Start a wishlist"
+    assert o.is_visible("svg.lights.deco-wedding") and o.is_hidden("svg.lights.deco-christmas")
+    # the wedding look dresses the two pets as flower kids: drawn over the artwork, which is still the same two <img>s of the same file
+    assert vis(".pet-acc") == "visible,visible"
+    assert o.evaluate("[...document.querySelectorAll('img.pets')].map(n => n.getAttribute('src')).join()") == "pets.png,pets.png"
+    o.wait_for_timeout(500); o.screenshot(path=str(OUT / "wl-1-home-wedding.png"))
     o.fill("#newTitle", "half typed")
-    o.click("#kindSeg button[data-kind=santa]")                     # back: Christmas again, and the exchange's own values are back
-    assert o.get_attribute("html", "data-occasion") is None and o.input_value("#newTitle").startswith("Secret Santa 20") and o.is_visible("#newBudget")
-    assert o.inner_text("#title") == "Secret Santa" and "Exchange day" in o.inner_text("#newDateLabel") and o.is_hidden("#occasionBox")
-    o.click("#kindSeg button[data-kind=wishlist]"); assert o.input_value("#newTitle") == "half typed"      # and the wishlist draft was kept
+    o.click("#backBtn"); o.wait_for_selector("#frontCard:not([hidden])")          # the link on the form does the same as Back
+    assert o.get_attribute("html", "data-occasion") is None and o.is_visible("#occasionChoices") and vis(".pet-acc") == "hidden,hidden"
+    o.click("#pickSanta"); o.wait_for_selector("#createCard:not([hidden])")
+    assert o.input_value("#newTitle") == "Office swap" and o.is_visible("#newBudget")           # each kind keeps its own half-typed form
+    o.click("#backBtn"); o.wait_for_selector("#frontCard:not([hidden])")
+    o.click("#occasionChoices button[data-occasion=wedding]"); o.wait_for_selector("#createCard:not([hidden])"); assert o.input_value("#newTitle") == "half typed"
     for lang in ("zh", "ko", "vi", "en"):
-        o.click(f"#langs button[data-lang={lang}]"); assert o.get_attribute("html", "data-occasion") == "wedding" and o.inner_text("#kindHint").strip()
+        o.click(f"#langs button[data-lang={lang}]"); assert o.get_attribute("html", "data-occasion") == "wedding" and o.inner_text("#kindHint").strip() and o.inner_text("#createHead").strip()
     wide, cut = spill(o); assert wide <= 0 and not cut, (wide, cut)
+    o.reload(); o.wait_for_selector("#createCard:not([hidden])"); assert o.get_attribute("html", "data-occasion") == "wedding"      # a reload stays on the step that was showing
+    o.click("#backBtn"); o.wait_for_selector("#frontCard:not([hidden])")
+    for lang in ("zh", "ko", "vi", "en"):
+        o.click(f"#langs button[data-lang={lang}]"); assert o.inner_text("#title").strip() and o.inner_text("#pickSanta").strip() and o.inner_text("#pickWishlist").strip()
+    o.click("#pickWishlist"); wide, cut = spill(o); assert wide <= 0 and not cut, (wide, cut)
 
     # ---- create a birthday list
-    o.click("#occasionSeg button[data-occasion=birthday]")
+    o.click("#occasionChoices button[data-occasion=birthday]"); o.wait_for_selector("#createCard:not([hidden])")
+    assert o.get_attribute("html", "data-occasion") == "birthday" and o.is_visible("svg.lights.deco-birthday") and vis(".pet-acc") == "hidden,hidden"
     o.click("#createBtn"); o.wait_for_selector("#createErr:not(:empty)"); assert "date" in o.inner_text("#createErr").lower()
     o.fill("#newTitle", "Mia turns 30"); o.fill("#newDate", "2026-12-20"); o.fill("#newOrgPin", "2468"); o.click("#createBtn")
     o.wait_for_selector("#createdCard:not([hidden])")

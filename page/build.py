@@ -4,7 +4,7 @@ here = pathlib.Path(__file__).parent
 read = lambda n: (here / n).read_text()
 body = read('body.html').replace('@@LIGHTS@@', read('lights.svg')).replace('@@TREE@@', read('tree.svg'))
 # decorations for the other occasions (birthday, wedding); the Christmas ones above are the default
-for mark, part in (('@@BUNTING@@', 'bunting.svg'), ('@@GARLAND@@', 'garland.svg'), ('@@BALLOONS@@', 'balloons.svg'), ('@@FLOWERS@@', 'flowers.svg')):
+for mark, part in (('@@BUNTING@@', 'bunting.svg'), ('@@GARLAND@@', 'garland.svg'), ('@@BALLOONS@@', 'balloons.svg'), ('@@FLOWERS@@', 'flowers.svg'), ('@@FLOWERKIDS@@', 'flowerkids.svg')):
     body = body.replace(mark, read(part))
 icon = ("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d2a22'/%3E"
         "%3Cpath d='M16 5 6 22h20z' fill='%232f8a66'/%3E%3Crect x='14' y='22' width='4' height='5' fill='%237a4a2a'/%3E%3Ccircle cx='16' cy='6' r='2.4' fill='%23f2c14e'/%3E"

@@ -104,6 +104,10 @@ const SANTA_I18N = (() => {
     orgUnlinkedOk: '已解除绑定。现在只有组织者链接能管理这个活动。',
     merry: 'Merry Christmas！',
     // ---- 心愿清单 ----
+    frontHead: '礼物',
+    frontEyebrow: '交换礼物 · 心愿清单',
+    backToPick: '重新选择',
+    wlCreateTitle: '新建一张心愿清单',
     kindLabel: '要建什么',
     kindSanta: '交换礼物',
     kindWishlist: '心愿清单',
@@ -397,6 +401,10 @@ const SANTA_I18N = (() => {
     orgUnlinkedOk: 'Untied. Only the organizer link runs this event now.',
     merry: 'Merry Christmas!',
     // ---- wishlists ----
+    frontHead: 'Gifts',
+    frontEyebrow: 'GIFT EXCHANGE · WISHLIST',
+    backToPick: 'Choose something else',
+    wlCreateTitle: 'Start a wishlist',
     kindLabel: 'What to set up',
     kindSanta: 'Gift exchange',
     kindWishlist: 'Wishlist',
@@ -690,6 +698,10 @@ const SANTA_I18N = (() => {
     orgUnlinkedOk: '연결을 해제했어요. 이제 주최자 링크로만 이벤트를 관리할 수 있어요.',
     merry: '메리 크리스마스!',
     // ---- 위시리스트 ----
+    frontHead: '선물',
+    frontEyebrow: '선물 교환 · 위시리스트',
+    backToPick: '다시 고르기',
+    wlCreateTitle: '위시리스트 만들기',
     kindLabel: '무엇을 만들까요',
     kindSanta: '선물 교환',
     kindWishlist: '위시리스트',
@@ -982,6 +994,10 @@ const SANTA_I18N = (() => {
     orgUnlinkedOk: 'Đã bỏ gắn. Giờ chỉ link quản lý mới điều hành được sự kiện này.',
     merry: 'Giáng sinh vui vẻ!',
     // ---- danh sách quà mong muốn ----
+    frontHead: 'Quà tặng',
+    frontEyebrow: 'ĐỔI QUÀ · DANH SÁCH QUÀ',
+    backToPick: 'Chọn loại khác',
+    wlCreateTitle: 'Tạo danh sách quà',
     kindLabel: 'Bạn muốn tạo gì',
     kindSanta: 'Đổi quà',
     kindWishlist: 'Danh sách quà',

@@ -234,6 +234,16 @@ input::placeholder,textarea::placeholder{opacity:1}
 .stage.dog-curious .pet-dog{animation:dog-perk .65s ease-in-out both}
 .stage .pet-cat.is-petted{animation:cat-petted .85s ease-in-out both}
 .stage .pet-dog.is-petted{animation:dog-petted .85s ease-in-out both}
+/* Wedding: the flower kids. Each overlay sits in the same box as its pet, with the same origin and the same motion,
+   and runs from the first moment (hidden, not removed) so the two never fall out of step. */
+.pet-acc{visibility:hidden;pointer-events:none}
+html[data-occasion="wedding"] .pet-acc{visibility:visible}
+.acc-cat{transform-origin:30.5% 94%;animation:cat-breathe 5.8s ease-in-out infinite}
+.acc-dog{transform-origin:68% 94%;animation:waffle-sway 4.6s ease-in-out infinite;animation-delay:-1.3s}
+.stage.cat-curious .acc-cat{animation:cat-perk .65s ease-in-out both}
+.stage.dog-curious .acc-dog{animation:dog-perk .65s ease-in-out both}
+.stage .pet-cat.is-petted~.acc-cat{animation:cat-petted .85s ease-in-out both}
+.stage .pet-dog.is-petted~.acc-dog{animation:dog-petted .85s ease-in-out both}
 @keyframes cat-perk{50%,100%{transform:rotate(-2deg) scaleY(1.025)}}
 @keyframes dog-perk{50%,100%{transform:rotate(2deg) scaleY(1.025)}}
 @keyframes cat-petted{0%,100%{transform:none}25%{transform:rotate(-3deg) scaleY(.97)}55%{transform:rotate(2deg) scaleY(1.02)}78%{transform:rotate(-1.5deg)}}
@@ -241,6 +251,7 @@ input::placeholder,textarea::placeholder{opacity:1}
 @keyframes pet-heart{0%{opacity:0;transform:translate(-50%,0) scale(.7)}20%{opacity:1}100%{opacity:0;transform:translate(-50%,-35px) scale(1.15)}}
 @media (prefers-reduced-motion:reduce){
   .stage .pets,.stage .pets.is-petted{animation:none}
+  .stage .pets.is-petted~.pet-acc{animation:none}
   .pet-touch.loved::after{animation:none;opacity:1}
 }
 
@@ -412,6 +423,25 @@ html[data-occasion] dialog::backdrop{background:rgba(16,10,18,.72)}
 .seg button[aria-checked="true"]{background:#fff;color:var(--pine);box-shadow:0 1px 3px rgba(0,0,0,.14)}
 .lbl{font-size:13px;font-weight:600;color:var(--moss);margin-top:4px}
 
+/* ---- front page: what to make, as big tappable rows; a wishlist opens its occasions underneath ---- */
+.choices{display:flex;flex-direction:column;gap:10px}
+.choice{display:flex;align-items:center;gap:12px;width:100%;min-height:64px;text-align:left;padding:13px 14px;border-radius:14px;border:1.5px solid var(--rule);background:var(--field);color:var(--pine);font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.choice:hover,.choice[aria-expanded="true"]{border-color:var(--pine);background:#fff}
+.choice:active{transform:scale(.99)}
+.choice-ico{flex:none;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:#fff;color:var(--berry);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.choice-txt{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:3px}
+.choice-txt b{font:700 16px/1.25 var(--font-body)}
+.choice-txt small{font-size:13px;line-height:1.4;color:var(--moss)}
+.choice-go{flex:none;color:var(--moss);transition:transform .15s ease}
+.choice[aria-expanded="true"] .choice-go{transform:rotate(90deg)}
+.occasions{display:flex;flex-direction:column;gap:8px;margin-left:21px;padding-left:16px;border-left:2px solid var(--rule)}
+.occasion-row{display:flex;gap:8px}
+.choice.sm{flex:1 1 0;min-width:0;min-height:76px;flex-direction:column;justify-content:center;gap:6px;padding:10px 8px;text-align:center;background:#fff}
+.choice.sm b{font:700 15px/1.25 var(--font-body)}
+.link.back{gap:4px;color:var(--moss);padding:2px 2px;margin:-4px 0 -2px;text-decoration:none}
+.link.back span{text-decoration:underline;text-underline-offset:3px}
+@media (prefers-reduced-motion:reduce){.choice-go{transition:none}.choice:active{transform:none}}
+
 /* ---- the wishlist ---- */
 .inset-b{border-bottom:1px solid var(--rule);padding-bottom:14px}
 .items{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
@@ -572,6 +602,67 @@ html[data-occasion] dialog::backdrop{background:rgba(16,10,18,.72)}
       </svg>
       <img class="pets pet-cat" src="pets.png" alt="" data-i18n-alt="petsAlt" width="1774" height="887">
       <img class="pets pet-dog" src="pets.png" alt="" aria-hidden="true" width="1774" height="887">
+      <!-- wedding only: flower crowns for both, and a bow tie for Waffle. They are drawn over the artwork in boxes of the
+           same size and move with each pet; pets.png itself is never changed. -->
+      <svg class="pets pet-acc acc-cat" viewBox="0 0 1774 887" aria-hidden="true">
+  <path d="M395 288 L406.8 279.4 L418.7 271.5 L430.5 264.4 L442.3 258 L454.2 252.4 L466 247.5 L477.8 243.4 L489.7 240 L501.5 237.4 L513.3 235.5 L525.2 234.4 L537 234 L548.8 234.4 L560.7 235.5 L572.5 237.4 L584.3 240 L596.2 243.4 L608 247.5 L619.8 252.4 L631.7 258 L643.5 264.4 L655.3 271.5 L667.2 279.4 L679 288" fill="none" stroke="#7f9c85" stroke-width="9" stroke-linecap="round"/>
+  <ellipse cx="414.7" cy="254.5" rx="21" ry="9.5" fill="#a3b9a2" transform="rotate(-84.4 414.7 254.5)"/>
+  <ellipse cx="423.7" cy="287.5" rx="19" ry="8.5" fill="#7f9c85" transform="rotate(15.6 423.7 287.5)"/>
+  <ellipse cx="462" cy="230.5" rx="21" ry="9.5" fill="#a3b9a2" transform="rotate(-72.8 462 230.5)"/>
+  <ellipse cx="471" cy="263.5" rx="19" ry="8.5" fill="#7f9c85" transform="rotate(27.2 471 263.5)"/>
+  <ellipse cx="509.3" cy="218.5" rx="21" ry="9.5" fill="#a3b9a2" transform="rotate(-59.2 509.3 218.5)"/>
+  <ellipse cx="518.3" cy="251.5" rx="19" ry="8.5" fill="#7f9c85" transform="rotate(40.8 518.3 251.5)"/>
+  <ellipse cx="556.7" cy="218.5" rx="21" ry="9.5" fill="#a3b9a2" transform="rotate(-44.8 556.7 218.5)"/>
+  <ellipse cx="565.7" cy="251.5" rx="19" ry="8.5" fill="#7f9c85" transform="rotate(55.2 565.7 251.5)"/>
+  <ellipse cx="604" cy="230.5" rx="21" ry="9.5" fill="#a3b9a2" transform="rotate(-31.2 604 230.5)"/>
+  <ellipse cx="613" cy="263.5" rx="19" ry="8.5" fill="#7f9c85" transform="rotate(68.8 613 263.5)"/>
+  <ellipse cx="651.3" cy="254.5" rx="21" ry="9.5" fill="#a3b9a2" transform="rotate(-19.6 651.3 254.5)"/>
+  <ellipse cx="660.3" cy="287.5" rx="19" ry="8.5" fill="#7f9c85" transform="rotate(80.4 660.3 287.5)"/>
+  <ellipse cx="371" cy="314" rx="22" ry="9.5" fill="#a3b9a2" transform="rotate(-99.3 371 314)"/>
+  <ellipse cx="361" cy="292" rx="18" ry="8" fill="#7f9c85" transform="rotate(-57.3 361 292)"/>
+  <ellipse cx="703" cy="314" rx="22" ry="9.5" fill="#a3b9a2" transform="rotate(99.3 703 314)"/>
+  <ellipse cx="713" cy="292" rx="18" ry="8" fill="#7f9c85" transform="rotate(57.3 713 292)"/>
+  <circle cx="395" cy="272.9" r="13.5" fill="#e8aab4"/><circle cx="409.4" cy="283.3" r="13.5" fill="#e8aab4"/><circle cx="403.9" cy="300.2" r="13.5" fill="#e8aab4"/><circle cx="386.1" cy="300.2" r="13.5" fill="#e8aab4"/><circle cx="380.6" cy="283.3" r="13.5" fill="#e8aab4"/><circle cx="395" cy="288" r="8.1" fill="#fff6ee"/>
+  <circle cx="449.6" cy="241" r="16.5" fill="#fff6ee"/><circle cx="460.7" cy="259.6" r="16.5" fill="#fff6ee"/><circle cx="446.5" cy="276" r="16.5" fill="#fff6ee"/><circle cx="426.5" cy="267.5" r="16.5" fill="#fff6ee"/><circle cx="428.4" cy="245.9" r="16.5" fill="#fff6ee"/><circle cx="442.3" cy="258" r="9.9" fill="#e3c88c"/>
+  <circle cx="505" cy="225.2" r="19" fill="#f3c9cf"/><circle cx="508.5" cy="250" r="19" fill="#f3c9cf"/><circle cx="486" cy="261" r="19" fill="#f3c9cf"/><circle cx="468.6" cy="243" r="19" fill="#f3c9cf"/><circle cx="480.3" cy="220.9" r="19" fill="#f3c9cf"/><circle cx="489.7" cy="240" r="11.4" fill="#e3c88c"/>
+  <circle cx="560" cy="225.2" r="22" fill="#fff6ee"/><circle cx="552.5" cy="253.1" r="22" fill="#fff6ee"/><circle cx="523.6" cy="254.7" r="22" fill="#fff6ee"/><circle cx="513.2" cy="227.6" r="22" fill="#fff6ee"/><circle cx="535.7" cy="209.4" r="22" fill="#fff6ee"/><circle cx="537" cy="234" r="13.2" fill="#e3c88c"/>
+  <circle cx="605.6" cy="240.7" r="19" fill="#f3c9cf"/><circle cx="590.2" cy="260.5" r="19" fill="#f3c9cf"/><circle cx="566.7" cy="251.9" r="19" fill="#f3c9cf"/><circle cx="567.6" cy="226.9" r="19" fill="#f3c9cf"/><circle cx="591.6" cy="220" r="19" fill="#f3c9cf"/><circle cx="584.3" cy="240" r="11.4" fill="#e3c88c"/>
+  <circle cx="648.4" cy="265.8" r="16.5" fill="#fff6ee"/><circle cx="629.4" cy="276.3" r="16.5" fill="#fff6ee"/><circle cx="613.5" cy="261.5" r="16.5" fill="#fff6ee"/><circle cx="622.7" cy="241.8" r="16.5" fill="#fff6ee"/><circle cx="644.3" cy="244.5" r="16.5" fill="#fff6ee"/><circle cx="631.7" cy="258" r="9.9" fill="#e3c88c"/>
+  <circle cx="689.1" cy="299.2" r="13.5" fill="#e8aab4"/><circle cx="671.4" cy="301.1" r="13.5" fill="#e8aab4"/><circle cx="664.2" cy="284.9" r="13.5" fill="#e8aab4"/><circle cx="677.4" cy="273" r="13.5" fill="#e8aab4"/><circle cx="692.8" cy="281.9" r="13.5" fill="#e8aab4"/><circle cx="679" cy="288" r="8.1" fill="#fff6ee"/>
+</svg>
+<svg class="pets pet-acc acc-dog" viewBox="0 0 1774 887" aria-hidden="true">
+  <path d="M1058 210 L1070.7 200.7 L1083.3 192.3 L1096 184.6 L1108.7 177.8 L1121.3 171.7 L1134 166.5 L1146.7 162.1 L1159.3 158.4 L1172 155.6 L1184.7 153.6 L1197.3 152.4 L1210 152 L1222.7 152.4 L1235.3 153.6 L1248 155.6 L1260.7 158.4 L1273.3 162.1 L1286 166.5 L1298.7 171.7 L1311.3 177.8 L1324 184.6 L1336.7 192.3 L1349.3 200.7 L1362 210" fill="none" stroke="#7f9c85" stroke-width="9" stroke-linecap="round"/>
+  <ellipse cx="1079.3" cy="175.3" rx="21" ry="9.5" fill="#a3b9a2" transform="rotate(-84.5 1079.3 175.3)"/>
+  <ellipse cx="1088.3" cy="208.3" rx="19" ry="8.5" fill="#7f9c85" transform="rotate(15.5 1088.3 208.3)"/>
+  <ellipse cx="1130" cy="149.5" rx="21" ry="9.5" fill="#a3b9a2" transform="rotate(-72.9 1130 149.5)"/>
+  <ellipse cx="1139" cy="182.5" rx="19" ry="8.5" fill="#7f9c85" transform="rotate(27.1 1139 182.5)"/>
+  <ellipse cx="1180.7" cy="136.6" rx="21" ry="9.5" fill="#a3b9a2" transform="rotate(-59.2 1180.7 136.6)"/>
+  <ellipse cx="1189.7" cy="169.6" rx="19" ry="8.5" fill="#7f9c85" transform="rotate(40.8 1189.7 169.6)"/>
+  <ellipse cx="1231.3" cy="136.6" rx="21" ry="9.5" fill="#a3b9a2" transform="rotate(-44.8 1231.3 136.6)"/>
+  <ellipse cx="1240.3" cy="169.6" rx="19" ry="8.5" fill="#7f9c85" transform="rotate(55.2 1240.3 169.6)"/>
+  <ellipse cx="1282" cy="149.5" rx="21" ry="9.5" fill="#a3b9a2" transform="rotate(-31.1 1282 149.5)"/>
+  <ellipse cx="1291" cy="182.5" rx="19" ry="8.5" fill="#7f9c85" transform="rotate(68.9 1291 182.5)"/>
+  <ellipse cx="1332.7" cy="175.3" rx="21" ry="9.5" fill="#a3b9a2" transform="rotate(-19.5 1332.7 175.3)"/>
+  <ellipse cx="1341.7" cy="208.3" rx="19" ry="8.5" fill="#7f9c85" transform="rotate(80.5 1341.7 208.3)"/>
+  <ellipse cx="1034" cy="236" rx="22" ry="9.5" fill="#a3b9a2" transform="rotate(-99.3 1034 236)"/>
+  <ellipse cx="1024" cy="214" rx="18" ry="8" fill="#7f9c85" transform="rotate(-57.3 1024 214)"/>
+  <ellipse cx="1386" cy="236" rx="22" ry="9.5" fill="#a3b9a2" transform="rotate(99.3 1386 236)"/>
+  <ellipse cx="1396" cy="214" rx="18" ry="8" fill="#7f9c85" transform="rotate(57.3 1396 214)"/>
+  <circle cx="1058" cy="193.8" r="14.5" fill="#e8aab4"/><circle cx="1073.4" cy="205" r="14.5" fill="#e8aab4"/><circle cx="1067.5" cy="223.1" r="14.5" fill="#e8aab4"/><circle cx="1048.5" cy="223.1" r="14.5" fill="#e8aab4"/><circle cx="1042.6" cy="205" r="14.5" fill="#e8aab4"/><circle cx="1058" cy="210" r="8.7" fill="#fff6ee"/>
+  <circle cx="1116.3" cy="159.7" r="17.5" fill="#fff6ee"/><circle cx="1128.2" cy="179.5" r="17.5" fill="#fff6ee"/><circle cx="1113.1" cy="196.9" r="17.5" fill="#fff6ee"/><circle cx="1091.9" cy="187.9" r="17.5" fill="#fff6ee"/><circle cx="1093.9" cy="164.9" r="17.5" fill="#fff6ee"/><circle cx="1108.7" cy="177.8" r="10.5" fill="#e3c88c"/>
+  <circle cx="1175.4" cy="142.9" r="20" fill="#f3c9cf"/><circle cx="1179.1" cy="169" r="20" fill="#f3c9cf"/><circle cx="1155.4" cy="180.5" r="20" fill="#f3c9cf"/><circle cx="1137.2" cy="161.6" r="20" fill="#f3c9cf"/><circle cx="1149.5" cy="138.3" r="20" fill="#f3c9cf"/><circle cx="1159.3" cy="158.4" r="12" fill="#e3c88c"/>
+  <circle cx="1234" cy="142.8" r="23" fill="#fff6ee"/><circle cx="1226.2" cy="172" r="23" fill="#fff6ee"/><circle cx="1196" cy="173.6" r="23" fill="#fff6ee"/><circle cx="1185.1" cy="145.3" r="23" fill="#fff6ee"/><circle cx="1208.7" cy="126.3" r="23" fill="#fff6ee"/><circle cx="1210" cy="152" r="13.8" fill="#e3c88c"/>
+  <circle cx="1283.1" cy="159.2" r="20" fill="#f3c9cf"/><circle cx="1266.8" cy="180" r="20" fill="#f3c9cf"/><circle cx="1242.1" cy="171" r="20" fill="#f3c9cf"/><circle cx="1243" cy="144.7" r="20" fill="#f3c9cf"/><circle cx="1268.3" cy="137.4" r="20" fill="#f3c9cf"/><circle cx="1260.7" cy="158.4" r="12" fill="#e3c88c"/>
+  <circle cx="1329.1" cy="186.1" r="17.5" fill="#fff6ee"/><circle cx="1308.9" cy="197.2" r="17.5" fill="#fff6ee"/><circle cx="1292.1" cy="181.5" r="17.5" fill="#fff6ee"/><circle cx="1301.8" cy="160.6" r="17.5" fill="#fff6ee"/><circle cx="1324.7" cy="163.4" r="17.5" fill="#fff6ee"/><circle cx="1311.3" cy="177.8" r="10.5" fill="#e3c88c"/>
+  <circle cx="1372.9" cy="222.1" r="14.5" fill="#e8aab4"/><circle cx="1353.9" cy="224.1" r="14.5" fill="#e8aab4"/><circle cx="1346.1" cy="206.6" r="14.5" fill="#e8aab4"/><circle cx="1360.3" cy="193.8" r="14.5" fill="#e8aab4"/><circle cx="1376.8" cy="203.4" r="14.5" fill="#e8aab4"/><circle cx="1362" cy="210" r="8.7" fill="#fff6ee"/>
+  <path d="M1212 530 C1185 500 1140 488 1126 496 C1118 514 1118 546 1126 564 C1140 572 1185 560 1212 530Z" fill="#7f9c85"/>
+  <path d="M1212 530 C1185 500 1140 488 1126 496 C1118 514 1118 546 1126 564 C1140 572 1185 560 1212 530Z" fill="#7f9c85" transform="translate(2424 0) scale(-1 1)"/>
+  <path d="M1194 530 C1172 518 1150 514 1136 516 M1194 530 C1172 542 1150 546 1136 544" fill="none" stroke="#688670" stroke-width="5" stroke-linecap="round"/>
+  <path d="M1194 530 C1172 518 1150 514 1136 516 M1194 530 C1172 542 1150 546 1136 544" fill="none" stroke="#688670" stroke-width="5" stroke-linecap="round" transform="translate(2424 0) scale(-1 1)"/>
+  <rect x="1195" y="508" width="34" height="44" rx="11" fill="#5f7d68"/>
+  <circle cx="1212" cy="530" r="6" fill="#e3c88c"/>
+</svg>
+
       <button type="button" class="pet-touch cat-touch" data-pet="cat" data-i18n-aria="petCat"></button>
       <button type="button" class="pet-touch dog-touch" data-pet="dog" data-i18n-aria="petDog"></button>
       <span class="nametag cat" lang="zh-CN">蛋饼 · Eggs Benedict</span>
@@ -643,22 +734,42 @@ html[data-occasion] dialog::backdrop{background:rgba(16,10,18,.72)}
     <p class="hint" data-i18n="mineHint"></p>
   </section>
 
-  <section class="card" id="createCard" hidden>
-    <h2 data-i18n="createTitle"></h2>
-    <form id="createForm" class="stack">
-      <!-- two kinds of event; the gift exchange is the default and its form is exactly what it always was -->
-      <div class="seg" id="kindSeg" role="radiogroup" data-i18n-aria="kindLabel">
-        <button type="button" role="radio" aria-checked="true" data-kind="santa" data-i18n="kindSanta"></button>
-        <button type="button" role="radio" aria-checked="false" data-kind="wishlist" data-i18n="kindWishlist"></button>
-      </div>
-      <p class="hint" id="kindHint" data-i18n="kindSantaHint"></p>
-      <div class="stack" id="occasionBox" hidden>
+  <!-- front page: first what kind of thing, then (for a wishlist) which occasion; the form comes after the choice -->
+  <section class="card" id="frontCard" hidden>
+    <h2 id="frontTitle" data-i18n="kindLabel"></h2>
+    <div class="choices" id="kindChoices">
+      <button type="button" class="choice" id="pickSanta" data-kind="santa">
+        <span class="choice-ico"><svg viewBox="0 0 20 20" width="22" height="22" aria-hidden="true"><rect x="2.5" y="8" width="15" height="9.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M2.5 11h15M10 8v9.5M6 8c-2.2 0-3-1.2-3-2.2S4.2 4 5.4 4.4C7 5 8.3 6.6 10 8c1.7-1.4 3-3 4.6-3.6 1.2-.4 2.4.4 2.4 1.4S16.2 8 14 8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="choice-txt"><b data-i18n="kindSanta"></b><small data-i18n="kindSantaHint"></small></span>
+        <svg class="choice-go" viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M7.5 4.5 13 10l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button type="button" class="choice" id="pickWishlist" data-kind="wishlist" aria-expanded="false" aria-controls="occasionChoices">
+        <span class="choice-ico"><svg viewBox="0 0 20 20" width="22" height="22" aria-hidden="true"><path d="M8.5 5.5h8M8.5 10h8M8.5 14.5h8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="m3 5.4 1.1 1.1L6 4.3M3 9.9 4.1 11 6 8.8M3 14.4l1.1 1.1L6 13.3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="choice-txt"><b data-i18n="kindWishlist"></b><small data-i18n="kindWishlistHint"></small></span>
+        <svg class="choice-go" viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M7.5 4.5 13 10l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="occasions" id="occasionChoices" role="group" aria-labelledby="occasionLabel" hidden>
         <span class="lbl" id="occasionLabel" data-i18n="occasionLabel"></span>
-        <div class="seg" id="occasionSeg" role="radiogroup" aria-labelledby="occasionLabel">
-          <button type="button" role="radio" aria-checked="true" data-occasion="birthday" data-i18n="occBirthday"></button>
-          <button type="button" role="radio" aria-checked="false" data-occasion="wedding" data-i18n="occWedding"></button>
+        <div class="occasion-row">
+          <button type="button" class="choice sm" data-occasion="birthday">
+            <svg viewBox="0 0 28 20" width="34" height="24" aria-hidden="true"><path d="M6 19h16v-7.5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2z" fill="#ff5d8f"/><path d="M6 13.5c2 1.6 3.4 1.6 5.3 0s3.4-1.6 5.4 0 3.3 1.6 5.3 0" fill="none" stroke="#fff" stroke-width="1.5"/><path d="M10 9.5v-3M14 9.5v-3M18 9.5v-3" stroke="#35b8b0" stroke-width="1.7" stroke-linecap="round"/><circle cx="10" cy="4.4" r="1.5" fill="#ffc94d"/><circle cx="14" cy="4.4" r="1.5" fill="#ffc94d"/><circle cx="18" cy="4.4" r="1.5" fill="#ffc94d"/></svg>
+            <b data-i18n="occBirthday"></b>
+          </button>
+          <button type="button" class="choice sm" data-occasion="wedding">
+            <svg viewBox="0 0 28 20" width="34" height="24" aria-hidden="true"><circle cx="10.5" cy="11.5" r="6" fill="none" stroke="#c9a45c" stroke-width="2"/><circle cx="17.5" cy="11.5" r="6" fill="none" stroke="#b08a43" stroke-width="2"/><path d="M10.5 3.6 9 1.4h3z" fill="#f3c9cf"/></svg>
+            <b data-i18n="occWedding"></b>
+          </button>
         </div>
       </div>
+    </div>
+  </section>
+
+  <section class="card" id="createCard" hidden>
+    <button type="button" class="link back" id="backBtn"><svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true"><path d="M12.5 4.5 7 10l5.5 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="backToPick"></span></button>
+    <h2 id="createHead" tabindex="-1" data-i18n="createTitle"></h2>
+    <form id="createForm" class="stack">
+      <!-- what is being made was chosen on the front page; the gift exchange's form is exactly what it always was -->
+      <p class="hint" id="kindHint" data-i18n="kindSantaHint"></p>
       <label for="newTitle" id="newTitleLabel" data-i18n="eventName"></label>
       <input id="newTitle" maxlength="30" autocomplete="off">
       <label for="newBudget" id="newBudgetLabel" data-i18n="budget"></label>
@@ -967,6 +1078,10 @@ const SANTA_I18N = (() => {
     orgUnlinkedOk: '已解除绑定。现在只有组织者链接能管理这个活动。',
     merry: 'Merry Christmas！',
     // ---- 心愿清单 ----
+    frontHead: '礼物',
+    frontEyebrow: '交换礼物 · 心愿清单',
+    backToPick: '重新选择',
+    wlCreateTitle: '新建一张心愿清单',
     kindLabel: '要建什么',
     kindSanta: '交换礼物',
     kindWishlist: '心愿清单',
@@ -1260,6 +1375,10 @@ const SANTA_I18N = (() => {
     orgUnlinkedOk: 'Untied. Only the organizer link runs this event now.',
     merry: 'Merry Christmas!',
     // ---- wishlists ----
+    frontHead: 'Gifts',
+    frontEyebrow: 'GIFT EXCHANGE · WISHLIST',
+    backToPick: 'Choose something else',
+    wlCreateTitle: 'Start a wishlist',
     kindLabel: 'What to set up',
     kindSanta: 'Gift exchange',
     kindWishlist: 'Wishlist',
@@ -1553,6 +1672,10 @@ const SANTA_I18N = (() => {
     orgUnlinkedOk: '연결을 해제했어요. 이제 주최자 링크로만 이벤트를 관리할 수 있어요.',
     merry: '메리 크리스마스!',
     // ---- 위시리스트 ----
+    frontHead: '선물',
+    frontEyebrow: '선물 교환 · 위시리스트',
+    backToPick: '다시 고르기',
+    wlCreateTitle: '위시리스트 만들기',
     kindLabel: '무엇을 만들까요',
     kindSanta: '선물 교환',
     kindWishlist: '위시리스트',
@@ -1845,6 +1968,10 @@ const SANTA_I18N = (() => {
     orgUnlinkedOk: 'Đã bỏ gắn. Giờ chỉ link quản lý mới điều hành được sự kiện này.',
     merry: 'Giáng sinh vui vẻ!',
     // ---- danh sách quà mong muốn ----
+    frontHead: 'Quà tặng',
+    frontEyebrow: 'ĐỔI QUÀ · DANH SÁCH QUÀ',
+    backToPick: 'Chọn loại khác',
+    wlCreateTitle: 'Tạo danh sách quà',
     kindLabel: 'Bạn muốn tạo gì',
     kindSanta: 'Đổi quà',
     kindWishlist: 'Danh sách quà',
@@ -2361,7 +2488,7 @@ const dateLabelFor = (occ) => (occ === 'wedding' ? t('wlDateWedding') : t('wlDat
    ===================================================================================== */
 function renderMine() {
   const mine = (store.get(K_LIST) || []).filter((e) => e && typeof e.id === 'string');
-  $('mineCard').hidden = mine.length === 0 || !$('createdCard').hidden;
+  $('mineCard').hidden = mine.length === 0 || !$('createdCard').hidden || step === 'form';
   $('mineList').replaceChildren();
   for (const e of mine) {
     const li = el('li'); const who = el('div', 'who');
@@ -2373,34 +2500,50 @@ function renderMine() {
   renderCreated();
   renderKind();
 }
-/* What is being created: a gift exchange (the default; its form is the one it always was) or a wishlist for an occasion.
-   Choosing a wishlist previews its look on the spot. Each kind keeps its own half-typed name and date. */
+/* The home page has two steps. The front page asks what is being made: a gift exchange (straight to the form it
+   always had) or a wishlist, which then asks for the occasion. The form comes second and wears the look of what was
+   chosen. Each kind keeps its own half-typed name and date, and the browser's Back button returns to the front page. */
 let newKind = 'santa', newOccasion = 'birthday';
-const drafts = { santa: { title: '', date: '' }, wishlist: { title: '', date: '' } };
+let step = 'front';                                // 'front' (choose) or 'form' (fill in)
+let wlOpen = false;                                // the wishlist choice is open, showing its occasions
+const blank = { santa: { title: '', date: '' }, wishlist: { title: '', date: '' } };     // what each form starts with (the exchange's is set in startHome)
+const drafts = { santa: blank.santa, wishlist: blank.wishlist };
 function renderKind() {
   if (EVENT_ID) return;
-  const wl = newKind === 'wishlist';
-  for (const b of $('kindSeg').children) b.setAttribute('aria-checked', String(b.dataset.kind === newKind));
-  for (const b of $('occasionSeg').children) b.setAttribute('aria-checked', String(b.dataset.occasion === newOccasion));
+  const form = step === 'form', wl = form && newKind === 'wishlist', done = !$('createdCard').hidden;
+  $('frontCard').hidden = form || done;
+  $('createCard').hidden = !form || done;
+  $('homeFields').hidden = !form;
+  $('pickWishlist').setAttribute('aria-expanded', String(wlOpen));
+  $('occasionChoices').hidden = !wlOpen;
   $('kindHint').textContent = wl ? t('kindWishlistHint') : t('kindSantaHint');
-  $('occasionBox').hidden = !wl;
+  $('createHead').textContent = wl ? t('wlCreateTitle') : t('createTitle');
   $('newBudget').hidden = $('newBudgetLabel').hidden = wl;
   $('newTitleLabel').textContent = wl ? t('wlNameLabel') : t('eventName');
   $('newTitle').placeholder = wl ? (newOccasion === 'wedding' ? t('wlNamePhWedding') : t('wlNamePhBirthday')) : '';
   $('newDateLabel').textContent = wl ? dateLabelFor(newOccasion) : t('exchangeDay');
-  const head = wl ? t('wlHomeTitle') : 'Secret Santa';
+  const head = !form ? t('frontHead') : wl ? t('wlHomeTitle') : 'Secret Santa';
   $('title').textContent = head; $('title').classList.toggle('plain', titleNeedsPlain(head));
   $('howBody').textContent = wl ? t('wlHow') : t('howBody');
-  $('eyebrowText').textContent = wl ? eyebrowFor(newOccasion) : t('eyebrow');
+  $('eyebrowText').textContent = !form ? t('frontEyebrow') : wl ? eyebrowFor(newOccasion) : t('eyebrow');
   $('footCheer').textContent = wl ? (newOccasion === 'wedding' ? t('wlCheerWedding') : t('wlCheerBirthday')) : t('merry');
   applyOccasion(wl ? newOccasion : '');
 }
-function setKind(kind) {
-  if (kind === newKind) return;
-  drafts[newKind] = { title: $('newTitle').value, date: $('newDate').value };
-  newKind = kind;
-  $('newTitle').value = drafts[kind].title; $('newDate').value = drafts[kind].date; $('createErr').textContent = '';
-  renderKind();
+const keepDraft = () => { if (step === 'form' && !created) drafts[newKind] = { title: $('newTitle').value, date: $('newDate').value }; };
+function openForm(kind, occasion, push) {
+  keepDraft();
+  newKind = kind === 'wishlist' ? 'wishlist' : 'santa';
+  if (occasion === 'birthday' || occasion === 'wedding') newOccasion = occasion;
+  step = 'form';
+  $('newTitle').value = drafts[newKind].title; $('newDate').value = drafts[newKind].date; $('createErr').textContent = '';
+  if (push) { try { history.pushState({ santaStep: 'form', kind: newKind, occasion: newOccasion }, ''); } catch (e) { /* Back then leaves the page, as before */ } }
+  renderMine();
+  if (push) { $('createHead').focus({ preventScroll: true }); scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' }); }   // back to the top: the scene has just changed its look
+}
+function showFront() {
+  keepDraft();
+  step = 'front'; created = null; $('createdCard').hidden = true;
+  renderMine();
 }
 /* The "you're all set" screen: two hand-offs. The group link is for everyone; the organizer link is for one person only,
    so it starts masked (like a password) and offers a mail-to-self, which is the one place most people never lose a link. */
@@ -2424,15 +2567,20 @@ function startHome() {
   const now = new Date();
   const year = now.getMonth() === 11 && now.getDate() > 24 ? now.getFullYear() + 1 : now.getFullYear();
   $('skeleton').hidden = true;
-  $('homeFields').hidden = false;
-  $('createCard').hidden = false;
-  $('newTitle').value = 'Secret Santa ' + year;
-  $('newDate').value = year + '-12-24';
+  blank.santa = drafts.santa = { title: 'Secret Santa ' + year, date: year + '-12-24' };
   $('newDate').min = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
   rerender = renderMine;
-  renderMine();
-  $('kindSeg').addEventListener('click', (ev) => { const b = ev.target.closest('button[data-kind]'); if (b) setKind(b.dataset.kind); });
-  $('occasionSeg').addEventListener('click', (ev) => { const b = ev.target.closest('button[data-occasion]'); if (b) { newOccasion = b.dataset.occasion; renderKind(); } });
+  // A reload, or coming back with the browser's Forward button, lands on the step that was showing.
+  const was = history.state;
+  if (was && was.santaStep === 'form') openForm(was.kind, was.occasion, false); else renderMine();
+  $('pickSanta').addEventListener('click', () => openForm('santa', '', true));
+  $('pickWishlist').addEventListener('click', () => { wlOpen = !wlOpen; renderKind(); });
+  $('occasionChoices').addEventListener('click', (ev) => { const b = ev.target.closest('button[data-occasion]'); if (b) openForm('wishlist', b.dataset.occasion, true); });
+  $('backBtn').addEventListener('click', () => { if (history.state && history.state.santaStep === 'form') history.back(); else showFront(); });
+  addEventListener('popstate', (ev) => {
+    const to = ev.state;
+    if (to && to.santaStep === 'form') openForm(to.kind, to.occasion, false); else showFront();
+  });
 
   $('createForm').addEventListener('submit', async (ev) => {
     ev.preventDefault();
@@ -2451,6 +2599,8 @@ function startHome() {
     store.set('santa:' + id + ':admin', adminKey);
     remember(id, state.title, true);
     created = { id, adminKey, title: state.title, shown: false, kind: state.kind || 'santa' };
+    drafts[newKind] = blank[newKind];              // the next one starts fresh
+    try { history.replaceState(null, ''); } catch (e) { /* fine */ }   // a reload or Back from here lands on the front page, where the new event is listed
     renderCreated();
     $('createCard').hidden = true; $('mineCard').hidden = true; $('createdCard').hidden = false;
     $('createdCard').scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' });

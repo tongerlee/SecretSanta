@@ -215,6 +215,16 @@ input::placeholder,textarea::placeholder{opacity:1}
 .stage.dog-curious .pet-dog{animation:dog-perk .65s ease-in-out both}
 .stage .pet-cat.is-petted{animation:cat-petted .85s ease-in-out both}
 .stage .pet-dog.is-petted{animation:dog-petted .85s ease-in-out both}
+/* Wedding: the flower kids. Each overlay sits in the same box as its pet, with the same origin and the same motion,
+   and runs from the first moment (hidden, not removed) so the two never fall out of step. */
+.pet-acc{visibility:hidden;pointer-events:none}
+html[data-occasion="wedding"] .pet-acc{visibility:visible}
+.acc-cat{transform-origin:30.5% 94%;animation:cat-breathe 5.8s ease-in-out infinite}
+.acc-dog{transform-origin:68% 94%;animation:waffle-sway 4.6s ease-in-out infinite;animation-delay:-1.3s}
+.stage.cat-curious .acc-cat{animation:cat-perk .65s ease-in-out both}
+.stage.dog-curious .acc-dog{animation:dog-perk .65s ease-in-out both}
+.stage .pet-cat.is-petted~.acc-cat{animation:cat-petted .85s ease-in-out both}
+.stage .pet-dog.is-petted~.acc-dog{animation:dog-petted .85s ease-in-out both}
 @keyframes cat-perk{50%,100%{transform:rotate(-2deg) scaleY(1.025)}}
 @keyframes dog-perk{50%,100%{transform:rotate(2deg) scaleY(1.025)}}
 @keyframes cat-petted{0%,100%{transform:none}25%{transform:rotate(-3deg) scaleY(.97)}55%{transform:rotate(2deg) scaleY(1.02)}78%{transform:rotate(-1.5deg)}}
@@ -222,6 +232,7 @@ input::placeholder,textarea::placeholder{opacity:1}
 @keyframes pet-heart{0%{opacity:0;transform:translate(-50%,0) scale(.7)}20%{opacity:1}100%{opacity:0;transform:translate(-50%,-35px) scale(1.15)}}
 @media (prefers-reduced-motion:reduce){
   .stage .pets,.stage .pets.is-petted{animation:none}
+  .stage .pets.is-petted~.pet-acc{animation:none}
   .pet-touch.loved::after{animation:none;opacity:1}
 }
 
@@ -392,6 +403,25 @@ html[data-occasion] dialog::backdrop{background:rgba(16,10,18,.72)}
 .seg button{flex:1 1 0;min-width:0;min-height:44px;font:600 15px/1.2 var(--font-body);color:var(--moss);background:none;border:0;border-radius:10px;padding:8px 10px;cursor:pointer}
 .seg button[aria-checked="true"]{background:#fff;color:var(--pine);box-shadow:0 1px 3px rgba(0,0,0,.14)}
 .lbl{font-size:13px;font-weight:600;color:var(--moss);margin-top:4px}
+
+/* ---- front page: what to make, as big tappable rows; a wishlist opens its occasions underneath ---- */
+.choices{display:flex;flex-direction:column;gap:10px}
+.choice{display:flex;align-items:center;gap:12px;width:100%;min-height:64px;text-align:left;padding:13px 14px;border-radius:14px;border:1.5px solid var(--rule);background:var(--field);color:var(--pine);font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.choice:hover,.choice[aria-expanded="true"]{border-color:var(--pine);background:#fff}
+.choice:active{transform:scale(.99)}
+.choice-ico{flex:none;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:#fff;color:var(--berry);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.choice-txt{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:3px}
+.choice-txt b{font:700 16px/1.25 var(--font-body)}
+.choice-txt small{font-size:13px;line-height:1.4;color:var(--moss)}
+.choice-go{flex:none;color:var(--moss);transition:transform .15s ease}
+.choice[aria-expanded="true"] .choice-go{transform:rotate(90deg)}
+.occasions{display:flex;flex-direction:column;gap:8px;margin-left:21px;padding-left:16px;border-left:2px solid var(--rule)}
+.occasion-row{display:flex;gap:8px}
+.choice.sm{flex:1 1 0;min-width:0;min-height:76px;flex-direction:column;justify-content:center;gap:6px;padding:10px 8px;text-align:center;background:#fff}
+.choice.sm b{font:700 15px/1.25 var(--font-body)}
+.link.back{gap:4px;color:var(--moss);padding:2px 2px;margin:-4px 0 -2px;text-decoration:none}
+.link.back span{text-decoration:underline;text-underline-offset:3px}
+@media (prefers-reduced-motion:reduce){.choice-go{transition:none}.choice:active{transform:none}}
 
 /* ---- the wishlist ---- */
 .inset-b{border-bottom:1px solid var(--rule);padding-bottom:14px}

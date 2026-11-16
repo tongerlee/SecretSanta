@@ -311,7 +311,7 @@ const dateLabelFor = (occ) => (occ === 'wedding' ? t('wlDateWedding') : t('wlDat
    ===================================================================================== */
 function renderMine() {
   const mine = (store.get(K_LIST) || []).filter((e) => e && typeof e.id === 'string');
-  $('mineCard').hidden = mine.length === 0 || !$('createdCard').hidden;
+  $('mineCard').hidden = mine.length === 0 || !$('createdCard').hidden || step === 'form';
   $('mineList').replaceChildren();
   for (const e of mine) {
     const li = el('li'); const who = el('div', 'who');
@@ -323,34 +323,50 @@ function renderMine() {
   renderCreated();
   renderKind();
 }
-/* What is being created: a gift exchange (the default; its form is the one it always was) or a wishlist for an occasion.
-   Choosing a wishlist previews its look on the spot. Each kind keeps its own half-typed name and date. */
+/* The home page has two steps. The front page asks what is being made: a gift exchange (straight to the form it
+   always had) or a wishlist, which then asks for the occasion. The form comes second and wears the look of what was
+   chosen. Each kind keeps its own half-typed name and date, and the browser's Back button returns to the front page. */
 let newKind = 'santa', newOccasion = 'birthday';
-const drafts = { santa: { title: '', date: '' }, wishlist: { title: '', date: '' } };
+let step = 'front';                                // 'front' (choose) or 'form' (fill in)
+let wlOpen = false;                                // the wishlist choice is open, showing its occasions
+const blank = { santa: { title: '', date: '' }, wishlist: { title: '', date: '' } };     // what each form starts with (the exchange's is set in startHome)
+const drafts = { santa: blank.santa, wishlist: blank.wishlist };
 function renderKind() {
   if (EVENT_ID) return;
-  const wl = newKind === 'wishlist';
-  for (const b of $('kindSeg').children) b.setAttribute('aria-checked', String(b.dataset.kind === newKind));
-  for (const b of $('occasionSeg').children) b.setAttribute('aria-checked', String(b.dataset.occasion === newOccasion));
+  const form = step === 'form', wl = form && newKind === 'wishlist', done = !$('createdCard').hidden;
+  $('frontCard').hidden = form || done;
+  $('createCard').hidden = !form || done;
+  $('homeFields').hidden = !form;
+  $('pickWishlist').setAttribute('aria-expanded', String(wlOpen));
+  $('occasionChoices').hidden = !wlOpen;
   $('kindHint').textContent = wl ? t('kindWishlistHint') : t('kindSantaHint');
-  $('occasionBox').hidden = !wl;
+  $('createHead').textContent = wl ? t('wlCreateTitle') : t('createTitle');
   $('newBudget').hidden = $('newBudgetLabel').hidden = wl;
   $('newTitleLabel').textContent = wl ? t('wlNameLabel') : t('eventName');
   $('newTitle').placeholder = wl ? (newOccasion === 'wedding' ? t('wlNamePhWedding') : t('wlNamePhBirthday')) : '';
   $('newDateLabel').textContent = wl ? dateLabelFor(newOccasion) : t('exchangeDay');
-  const head = wl ? t('wlHomeTitle') : 'Secret Santa';
+  const head = !form ? t('frontHead') : wl ? t('wlHomeTitle') : 'Secret Santa';
   $('title').textContent = head; $('title').classList.toggle('plain', titleNeedsPlain(head));
   $('howBody').textContent = wl ? t('wlHow') : t('howBody');
-  $('eyebrowText').textContent = wl ? eyebrowFor(newOccasion) : t('eyebrow');
+  $('eyebrowText').textContent = !form ? t('frontEyebrow') : wl ? eyebrowFor(newOccasion) : t('eyebrow');
   $('footCheer').textContent = wl ? (newOccasion === 'wedding' ? t('wlCheerWedding') : t('wlCheerBirthday')) : t('merry');
   applyOccasion(wl ? newOccasion : '');
 }
-function setKind(kind) {
-  if (kind === newKind) return;
-  drafts[newKind] = { title: $('newTitle').value, date: $('newDate').value };
-  newKind = kind;
-  $('newTitle').value = drafts[kind].title; $('newDate').value = drafts[kind].date; $('createErr').textContent = '';
-  renderKind();
+const keepDraft = () => { if (step === 'form' && !created) drafts[newKind] = { title: $('newTitle').value, date: $('newDate').value }; };
+function openForm(kind, occasion, push) {
+  keepDraft();
+  newKind = kind === 'wishlist' ? 'wishlist' : 'santa';
+  if (occasion === 'birthday' || occasion === 'wedding') newOccasion = occasion;
+  step = 'form';
+  $('newTitle').value = drafts[newKind].title; $('newDate').value = drafts[newKind].date; $('createErr').textContent = '';
+  if (push) { try { history.pushState({ santaStep: 'form', kind: newKind, occasion: newOccasion }, ''); } catch (e) { /* Back then leaves the page, as before */ } }
+  renderMine();
+  if (push) { $('createHead').focus({ preventScroll: true }); scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' }); }   // back to the top: the scene has just changed its look
+}
+function showFront() {
+  keepDraft();
+  step = 'front'; created = null; $('createdCard').hidden = true;
+  renderMine();
 }
 /* The "you're all set" screen: two hand-offs. The group link is for everyone; the organizer link is for one person only,
    so it starts masked (like a password) and offers a mail-to-self, which is the one place most people never lose a link. */
@@ -374,15 +390,20 @@ function startHome() {
   const now = new Date();
   const year = now.getMonth() === 11 && now.getDate() > 24 ? now.getFullYear() + 1 : now.getFullYear();
   $('skeleton').hidden = true;
-  $('homeFields').hidden = false;
-  $('createCard').hidden = false;
-  $('newTitle').value = 'Secret Santa ' + year;
-  $('newDate').value = year + '-12-24';
+  blank.santa = drafts.santa = { title: 'Secret Santa ' + year, date: year + '-12-24' };
   $('newDate').min = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
   rerender = renderMine;
-  renderMine();
-  $('kindSeg').addEventListener('click', (ev) => { const b = ev.target.closest('button[data-kind]'); if (b) setKind(b.dataset.kind); });
-  $('occasionSeg').addEventListener('click', (ev) => { const b = ev.target.closest('button[data-occasion]'); if (b) { newOccasion = b.dataset.occasion; renderKind(); } });
+  // A reload, or coming back with the browser's Forward button, lands on the step that was showing.
+  const was = history.state;
+  if (was && was.santaStep === 'form') openForm(was.kind, was.occasion, false); else renderMine();
+  $('pickSanta').addEventListener('click', () => openForm('santa', '', true));
+  $('pickWishlist').addEventListener('click', () => { wlOpen = !wlOpen; renderKind(); });
+  $('occasionChoices').addEventListener('click', (ev) => { const b = ev.target.closest('button[data-occasion]'); if (b) openForm('wishlist', b.dataset.occasion, true); });
+  $('backBtn').addEventListener('click', () => { if (history.state && history.state.santaStep === 'form') history.back(); else showFront(); });
+  addEventListener('popstate', (ev) => {
+    const to = ev.state;
+    if (to && to.santaStep === 'form') openForm(to.kind, to.occasion, false); else showFront();
+  });
 
   $('createForm').addEventListener('submit', async (ev) => {
     ev.preventDefault();
@@ -401,6 +422,8 @@ function startHome() {
     store.set('santa:' + id + ':admin', adminKey);
     remember(id, state.title, true);
     created = { id, adminKey, title: state.title, shown: false, kind: state.kind || 'santa' };
+    drafts[newKind] = blank[newKind];              // the next one starts fresh
+    try { history.replaceState(null, ''); } catch (e) { /* fine */ }   // a reload or Back from here lands on the front page, where the new event is listed
     renderCreated();
     $('createCard').hidden = true; $('mineCard').hidden = true; $('createdCard').hidden = false;
     $('createdCard').scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' });
