@@ -1,3 +1,5 @@
+**中文** · [English](README.en.md)
+
 # Secret Santa 和心愿清单（Waffle 和蛋饼版）· 多活动
 
 谁都可以在网站上建两种活动：
