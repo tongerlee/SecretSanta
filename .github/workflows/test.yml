@@ -1,0 +1,37 @@
+# Every pull request: the unit tests and the browser walk-throughs, against a local site + API with an in-memory
+# database. Nothing here touches AWS. main is covered by deploy.yml, which runs the unit tests again before it deploys.
+name: Test
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Unit tests (API with an in-memory database, and the four languages)
+        run: npm test
+      - name: The built page is the one in the repository
+        run: python3 page/build.py && git diff --exit-code web/index.html
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install playwright pillow && python -m playwright install --with-deps chromium
+      - name: Browser walk-throughs (Secret Santa flow, four languages, wishlist)
+        run: CHROME="$(python -c 'from playwright.sync_api import sync_playwright as s; p=s().start(); print(p.chromium.executable_path); p.stop()')" ./test/browser.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots
+          path: test/shots/
+          retention-days: 7

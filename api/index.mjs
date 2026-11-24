@@ -10,6 +10,13 @@
 //     reset a PIN / delete the event. The API never returns the pairs to the organizer either.
 //     The organizer may tie the role to their own sign-up (`organizer` = that person's key): then name + PIN
 //     can mint a fresh organizer key from any device, which also retires the old one (claimAdmin).
+// A second kind of event, the wishlist (kind: 'wishlist'): the owner (same organizer key) keeps a list of items;
+// friends sign in with name + PIN exactly like participants and pick items so nobody buys the same thing twice.
+//   - anyone with the link: the items; NOT what is picked
+//   - a signed-in friend: who picked what
+//   - the owner: the items and the friends' names; never the picks, so the surprise holds
+// Events stored before kinds existed have no `kind` and are Secret Santa events; every answer for them keeps the
+// exact shape it always had.
 // Pairs are stored scrambled so a glance at the table does not spoil the draw. That is a spoiler guard, not
 // encryption: whoever owns the AWS account can always dig them out.
 // An event deletes itself a week after its exchange date (DynamoDB TTL, plus a check on every read).
@@ -27,6 +34,8 @@ const KEEP_DAYS = 7;                 // an event is deleted this many days after
 const MAX_AHEAD_DAYS = 400;          // how far in the future an exchange date may be
 const CREATE_PER_HOUR = 5;           // new events per network address per hour
 const MAX_SESSIONS = 5;              // devices one person can stay signed in on
+const MAX_ITEMS = 40;                // things on one wishlist
+const OCCASIONS = ['birthday', 'wedding'];     // what a wishlist can be for (each has its own look on the page)
 const DAY = 24 * 60 * 60 * 1000;
 // Tests move the clock with this; it is never set in Lambda.
 const clock = () => Date.now() + Number(process.env.SANTA_CLOCK_SKEW_MS || 0);
@@ -191,6 +200,7 @@ function doDraw(doc, now) {
   doc.drawnAt = now;
 }
 function autoDraw(doc, now) {
+  if (isWishlist(doc)) return false;
   if (doc.status !== 'open' || !doc.drawAt || now < doc.drawAt || doc.people.length < MIN_PEOPLE) return false;
   doDraw(doc, now);
   return true;
@@ -203,10 +213,13 @@ function recipientOf(doc, person) {
 }
 
 /* ---------- what each caller gets to see ---------- */
+const isWishlist = (doc) => doc.kind === 'wishlist';
 const publicState = (doc) => ({
   id: doc.id, title: doc.title, budget: doc.budget, exchangeOn: doc.exchangeOn, status: doc.status, drawAt: doc.drawAt || 0,
   people: doc.people.map((p) => p.name), min: MIN_PEOPLE, deleteAt: expiresAt(doc.exchangeOn), keepDays: KEEP_DAYS,
   orgPin: !!doc.orgPin,                                      // an organizer PIN exists: "I'm the organizer" + PIN brings the controls back
+  // A wishlist adds its kind, occasion and items (never who picked them). A Secret Santa event adds nothing.
+  ...(isWishlist(doc) ? { kind: 'wishlist', occasion: doc.occasion, items: (doc.items || []).map((it) => ({ id: it.id, text: it.text, link: it.link || '' })) } : {}),
 });
 const isOrganizer = (doc, person) => !!doc.organizer && doc.organizer === person.key;
 function personalView(doc, person) {
@@ -216,6 +229,11 @@ function personalView(doc, person) {
     me: { name: person.name, wish: person.wish || '', pinResetAt: person.pinResetAt || 0, organizer: isOrganizer(doc, person) },
     giftTo: r ? { name: r.name, wish: r.wish || '' } : null,
     missed: doc.status === 'drawn' && !r,
+    // for a signed-in friend of a wishlist: item id -> who picked it
+    ...(isWishlist(doc) ? { picks: Object.fromEntries((doc.items || []).filter((it) => it.by).map((it) => {
+      const who = doc.people.find((q) => q.key === it.by);
+      return [it.id, { by: who ? who.name : '', mine: it.by === person.key }];
+    })) } : {}),
   };
 }
 const adminView = (doc, now) => ({
@@ -239,12 +257,16 @@ async function create(b, ip) {
   const bad = checkDate(b.exchangeOn, now);
   if (bad) return fail(400, bad);
   if (b.orgPin !== undefined && b.orgPin !== '' && !pinOk(b.orgPin)) return fail(400, 'bad_pin_format');
+  const wishlist = b.kind === 'wishlist';
+  if (b.kind !== undefined && b.kind !== 'santa' && !wishlist) return fail(400, 'bad_kind');
+  if (wishlist && !OCCASIONS.includes(b.occasion)) return fail(400, 'bad_occasion');
   if (!(await mayCreate(ip || 'unknown', now))) return fail(429, 'slow_down');
   const id = newId();
   const doc = {
     ...itemKey(id), v: 1, id,
-    title: clean(b.title, 30) || 'Secret Santa', budget: clean(b.budget, 20), exchangeOn: b.exchangeOn,
+    title: clean(b.title, 30) || (wishlist ? 'Wishlist' : 'Secret Santa'), budget: wishlist ? '' : clean(b.budget, 20), exchangeOn: b.exchangeOn,
     status: 'open', drawAt: 0, drawId: '', draw: '', people: [], organizer: '',
+    ...(wishlist ? { kind: 'wishlist', occasion: b.occasion, items: [] } : {}),
     createdAt: now, ttl: Math.floor(expiresAt(b.exchangeOn) / 1000),
   };
   const adminKey = newAdminKey(doc);
@@ -331,6 +353,7 @@ const setWish = withToken((doc, person, b) => {
 function dropPerson(doc, person) {
   doc.people = doc.people.filter((p) => p !== person);
   if (isOrganizer(doc, person)) doc.organizer = '';
+  for (const it of doc.items || []) if (it.by === person.key) { it.by = ''; it.at = 0; }     // their picks go back on the list
 }
 const leave = withToken((doc, person) => {
   if (doc.status !== 'open') return fail(409, 'closed');
@@ -342,6 +365,39 @@ const logout = withToken((doc, person, b, now, at) => {
   return { code: 200, body: { ok: true }, save: true };
 });
 
+/* ---------- wishlist: a friend picks an item, or puts it back ---------- */
+const findItem = (doc, id) => (typeof id === 'string' ? (doc.items || []).find((it) => it.id === id) : undefined);
+const pick = withToken((doc, person, b, now) => {
+  if (!isWishlist(doc)) return fail(409, 'not_wishlist');
+  const it = findItem(doc, b.itemId);
+  if (!it) return fail(404, 'no_such_item');
+  if (it.by && it.by !== person.key) return { code: 409, body: { error: 'taken', ...personalView(doc, person) } };   // someone was quicker: the answer carries the fresh list
+  it.by = person.key; it.at = now;
+  return { code: 200, body: personalView(doc, person), save: true };
+});
+const unpick = withToken((doc, person, b) => {
+  if (!isWishlist(doc)) return fail(409, 'not_wishlist');
+  const it = findItem(doc, b.itemId);
+  if (!it) return fail(404, 'no_such_item');
+  if (it.by !== person.key) return fail(409, 'not_yours');
+  it.by = ''; it.at = 0;
+  return { code: 200, body: personalView(doc, person), save: true };
+});
+/** An item as the owner typed it: a short text, and optionally a link to the thing (http or https only). */
+function itemFrom(b) {
+  const text = clean(b.text, 80);
+  if (!text || !hasSomethingToSee(text)) return { error: 'bad_item' };
+  let link = typeof b.link === 'string' ? b.link.trim() : '';
+  if (link) {
+    if (link.length > 300) return { error: 'bad_link' };
+    if (!/^[a-z][a-z0-9+.-]*:/i.test(link)) link = 'https://' + link;        // "amazon.com/..." typed without the scheme
+    let u; try { u = new URL(link); } catch { return { error: 'bad_link' }; }
+    if ((u.protocol !== 'https:' && u.protocol !== 'http:') || !u.hostname.includes('.')) return { error: 'bad_link' };
+    link = u.href;
+  }
+  return { text, link };
+}
+
 /* ---------- organizer actions ---------- */
 function admin(doc, b, now, work) {
   if (typeof b.adminKey !== 'string' || !sameHash(doc.adminHash, sha(b.adminKey))) return fail(403, 'forbidden');
@@ -350,12 +406,33 @@ function admin(doc, b, now, work) {
   switch (b.action) {
     case 'list':
       return { code: 200, body: adminView(doc, now) };
+    case 'addItem': case 'editItem': case 'removeItem': {
+      if (!isWishlist(doc)) return fail(409, 'not_wishlist');
+      if (b.action === 'removeItem') {
+        if (!findItem(doc, b.itemId)) return fail(404, 'no_such_item');
+        doc.items = doc.items.filter((it) => it.id !== b.itemId);
+        return done();
+      }
+      const fresh = itemFrom(b);
+      if (fresh.error) return fail(400, fresh.error);
+      if (b.action === 'editItem') {
+        const it = findItem(doc, b.itemId);
+        if (!it) return fail(404, 'no_such_item');
+        Object.assign(it, fresh);                                // a pick stays with the item when its wording changes
+        return done();
+      }
+      if (doc.items.length >= MAX_ITEMS) return fail(409, 'full_list');
+      doc.items.push({ id: randomBytes(4).toString('hex'), ...fresh, by: '', at: 0 });
+      return done();
+    }
     case 'draw':
+      if (isWishlist(doc)) return fail(409, 'not_santa');
       if (doc.status !== 'open') return fail(409, 'already_drawn');
       if (doc.people.length < MIN_PEOPLE) return fail(409, 'too_few');
       doDraw(doc, now);
       return done();
     case 'reopen':
+      if (isWishlist(doc)) return fail(409, 'not_santa');
       doc.status = 'open'; doc.draw = ''; doc.drawId = ''; doc.drawAt = 0;
       return done();
     case 'remove':
@@ -390,6 +467,7 @@ function admin(doc, b, now, work) {
         doc.exchangeOn = b.exchangeOn;
       }
       doc.title = clean(b.title, 30) || doc.title;
+      if (isWishlist(doc)) return done();                        // a wishlist has no budget and no draw time
       doc.budget = clean(b.budget, 20);
       const at = Number(b.drawAt);
       doc.drawAt = Number.isFinite(at) && at > 0 ? Math.floor(at) : 0;
@@ -410,7 +488,7 @@ const json = (code, body) => ({
   body: JSON.stringify(body),
 });
 const state = (doc) => ({ code: 200, body: publicState(doc) });
-const ROUTES = { '/api/state': state, '/api/join': join, '/api/login': login, '/api/me': me, '/api/wish': setWish, '/api/leave': leave, '/api/logout': logout, '/api/admin': admin, '/api/claimAdmin': claimAdmin };
+const ROUTES = { '/api/state': state, '/api/join': join, '/api/login': login, '/api/me': me, '/api/wish': setWish, '/api/leave': leave, '/api/logout': logout, '/api/admin': admin, '/api/claimAdmin': claimAdmin, '/api/pick': pick, '/api/unpick': unpick };
 
 export async function handler(event) {
   const method = event.requestContext?.http?.method || 'GET';

@@ -4,7 +4,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 python3 page/build.py >/dev/null
-for walk in browser.py languages.py; do
+for walk in browser.py languages.py wishlist.py; do
   node test/server.mjs >/dev/null 2>&1 & server=$!
   trap 'kill $server 2>/dev/null || true' EXIT
   sleep 2

@@ -63,7 +63,7 @@ def run(p):
     # ---------------------------------------------------------------- first visit
     print("\n== first visit")
     first = phone(chrome, "first visit")
-    first.goto(SITE, wait_until="load"); first.wait_for_selector("#createCard:not([hidden])")
+    first.goto(SITE, wait_until="load"); first.wait_for_selector("#frontCard:not([hidden])")
     nav = first.evaluate("(() => { const n = performance.getEntriesByType('navigation')[0]; return [Math.round(n.responseStart), Math.round(n.domContentLoadedEventEnd), Math.round(n.loadEventEnd)]; })()")
     res = first.evaluate("performance.getEntriesByType('resource').map(r => [r.name.split('/').pop().slice(0, 40), r.transferSize, Math.round(r.duration)])")
     print(f"      first byte {nav[0]} ms, page usable {nav[1]} ms, everything loaded {nav[2]} ms; files: {res}")
@@ -74,7 +74,7 @@ def run(p):
     # ---------------------------------------------------------------- create, copy buttons
     print("\n== creating an event on the real site")
     org = phone(chrome, "organizer", permissions=["clipboard-read", "clipboard-write"])
-    org.goto(SITE); org.wait_for_selector("#createCard:not([hidden])")
+    org.goto(SITE); org.wait_for_selector("#frontCard:not([hidden])"); org.click("#pickSanta"); org.wait_for_selector("#createCard:not([hidden])")
     org.fill("#newTitle", "TEST please ignore"); org.fill("#newBudget", "under $50"); org.fill("#newDate", "2026-12-24"); org.fill("#newOrgPin", "8642")
     org.click("#createBtn"); org.wait_for_selector("#createdCard:not([hidden])", timeout=20000)
     share, admin_link = org.input_value("#newShare"), org.input_value("#newAdmin")

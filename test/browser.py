@@ -33,7 +33,9 @@ with sync_playwright() as p:
 
     # the organizer creates an event on the home page
     org = device(browser, "organizer")
-    org.goto(SITE); org.wait_for_selector("#createCard:not([hidden])")
+    org.goto(SITE); org.wait_for_selector("#frontCard:not([hidden])")
+    assert org.is_hidden("#createCard"), "the front page asks what to make before any form shows"
+    org.click("#pickSanta"); org.wait_for_selector("#createCard:not([hidden])")          # gift exchange: straight to the form the home page always had
     assert not org.is_visible("#joinCard") and not org.is_visible("#adminCard")
     org.fill("#newBudget", "$50 以内"); org.fill("#newDate", "2026-12-24"); org.fill("#newOrgPin", "8642")
     org.screenshot(path=str(OUT / "1-home.png"), full_page=True)

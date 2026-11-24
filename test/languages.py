@@ -53,10 +53,14 @@ def shot(page, lang, name, full=True):
     check(page, f"{lang}/{name}")
     page.screenshot(path=str(OUT / f"{lang}-{name}.png"), full_page=full)
 
+def new_exchange(page, url=SITE):
+    """The home page opens on the front page; "gift exchange" there leads to the form the home page used to open with."""
+    page.goto(url); page.wait_for_selector("#frontCard:not([hidden])"); page.click("#pickSanta"); page.wait_for_selector("#createCard:not([hidden])")
+
 def walk(browser, lang, c):
     a, b, me = c["people"]
     org = phone(browser, lang + " organizer", c["locale"])
-    org.goto(SITE); org.wait_for_selector("#createCard:not([hidden])")
+    new_exchange(org)
     assert org.evaluate("document.documentElement.lang") == c["html"], (lang, "did not follow the phone's language")
     assert org.get_attribute(f"#langs button[data-lang={lang}]", "aria-pressed") == "true"
     org.fill("#newBudget", c["budget"]); org.fill("#newDate", "2026-12-24"); org.fill("#newOrgPin", "8642")
@@ -158,7 +162,7 @@ with sync_playwright() as p:
     assert link.inner_text("#joinCard h2") == "Đăng ký tham gia" and link.url == fresh, link.url
     link.click("#langs button[data-lang=zh]"); link.reload(); link.wait_for_selector("#joinCard:not([hidden])")
     assert link.inner_text("#joinCard h2") == "报名"                                     # a later choice sticks
-    home = phone(browser, "lang link home", "en-US"); home.goto(SITE + "?lang=ko"); home.wait_for_selector("#createCard:not([hidden])")
+    home = phone(browser, "lang link home", "en-US"); home.goto(SITE + "?lang=ko"); home.wait_for_selector("#frontCard:not([hidden])")
     assert home.evaluate("document.documentElement.lang") == "ko" and home.url == SITE, home.url
 
     # a result already showing is rewritten when the language changes (and goes back face down)
@@ -192,9 +196,11 @@ with sync_playwright() as p:
     # ---- the review's checklist: desktop and the two phone widths, organizer vs participant, keyboard, reduced motion
     drawn_share = shares["en"]
     for label, w, h in (("320 phone", 320, 568), ("390 phone", 390, 844), ("desktop", 1280, 800)):
-        for name, url, wait in (("home", SITE, "#createCard:not([hidden])"), ("open event", fresh, "#joinCard:not([hidden])"), ("drawn event", drawn_share, "#names button")):
+        for name, url, wait in (("home", SITE, "#frontCard:not([hidden])"), ("new exchange form", SITE, "#frontCard:not([hidden])"), ("open event", fresh, "#joinCard:not([hidden])"), ("drawn event", drawn_share, "#names button")):
             pg = phone(browser, f"{label} {name}", "en-US"); pg.set_viewport_size({"width": w, "height": h})
-            pg.goto(url); pg.wait_for_selector(wait); pg.wait_for_timeout(400)
+            pg.goto(url); pg.wait_for_selector(wait)
+            if name == "new exchange form": pg.click("#pickSanta"); pg.wait_for_selector("#createCard:not([hidden])")
+            pg.wait_for_timeout(400)
             check(pg, f"{label} / {name}")
             if name == "open event":
                 # the first thing to do (tap your name, or sign up) must start within the first screen on a phone
@@ -220,13 +226,14 @@ with sync_playwright() as p:
     assert "plain" not in (dv.get_attribute("#title", "class") or "")
 
     # saved events sit above "start a new event" once this device has any
-    home = phone(browser, "home order", "en-US"); home.goto(SITE); home.wait_for_selector("#createCard:not([hidden])")
+    home = phone(browser, "home order", "en-US"); home.goto(SITE); home.wait_for_selector("#frontCard:not([hidden])")
     assert home.is_hidden("#mineCard"), "no saved events yet, so the list should be hidden"
+    home.click("#pickSanta"); home.wait_for_selector("#createCard:not([hidden])")
     home.fill("#newDate", "2026-12-24"); home.fill("#newOrgPin", "8642"); home.click("#createBtn"); home.wait_for_selector("#createdCard:not([hidden])")
     home.goto(SITE); home.wait_for_selector("#mineCard:not([hidden])")
     order = home.evaluate("[...document.querySelectorAll('.flow > .card:not([hidden])')].map(c => c.id)")
-    assert order.index("mineCard") < order.index("createCard"), order
-    assert home.is_visible("#createCard"), "starting a new event must stay available underneath"
+    assert order.index("mineCard") < order.index("frontCard"), order
+    assert home.is_visible("#pickSanta") and home.is_visible("#pickWishlist"), "starting something new must stay available underneath"
     assert "organizer" in home.inner_text("#mineList").lower() and "this device only" in home.inner_text("#mineCard")
     # after signing up from this device, the home list says which name was used
     home.click("#mineList a"); home.wait_for_selector("#joinCard:not([hidden])")
@@ -267,7 +274,7 @@ with sync_playwright() as p:
     assert a.is_hidden("#adminCard")
     # a new event made on the page carries its PIN from the start
     # the form insists on a PIN (checked before anything is sent), and an event created with one is covered from the start
-    c = phone(browser, "new organizer", "en-US"); c.goto(SITE); c.wait_for_selector("#createCard:not([hidden])")
+    c = phone(browser, "new organizer", "en-US"); new_exchange(c)
     c.fill("#newDate", "2026-12-24"); c.click("#createBtn"); c.wait_for_selector("#createErr:not(:empty)")
     assert c.evaluate("document.activeElement.id") == "newOrgPin"
     ev2 = post("create", {"title": "With a PIN", "exchangeOn": "2026-12-24", "orgPin": "2468"})
@@ -328,7 +335,7 @@ with sync_playwright() as p:
         ctx.add_init_script("window.SANTA_HOME = 'https://gifts.example';")
         pg = ctx.new_page(); pg.on("pageerror", lambda e: errors.append(f"{label}: {e}"))
         if admin: pg.goto(url + "#admin=" + admin); pg.wait_for_selector("#adminCard:not([hidden])")
-        else: pg.goto(url); pg.wait_for_selector("#createCard:not([hidden]), #joinCard:not([hidden])")
+        else: pg.goto(url); pg.wait_for_selector("#frontCard:not([hidden]), #joinCard:not([hidden])")
         pg.wait_for_selector("#moved:not([hidden])")
         return pg
     pg = at_old_address("moved home", SITE)
@@ -342,7 +349,7 @@ with sync_playwright() as p:
     pg.screenshot(path=str(OUT / "check-moved.png"), full_page=False)
     same = browser.new_context(viewport={"width": 390, "height": 844}, locale="en-US")
     same.add_init_script("window.SANTA_HOME = location.origin;")
-    sp = same.new_page(); sp.goto(SITE); sp.wait_for_selector("#createCard:not([hidden])")
+    sp = same.new_page(); sp.goto(SITE); sp.wait_for_selector("#frontCard:not([hidden])")
     assert sp.is_hidden("#moved"), "no note at the official address"
     browser.close()
 
