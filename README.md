@@ -1,6 +1,11 @@
-# Secret Santa（Waffle 和蛋饼版）· 多活动
+**中文** · [English](README.en.md)
 
-谁都可以在网站上建一个自己的 Secret Santa：建活动，把链接发到群里，大家各自报名，抽签后每个人只看得到自己的结果。
+# Secret Santa 和心愿清单（Waffle 和蛋饼版）· 多活动
+
+谁都可以在网站上建两种活动：
+
+- **交换礼物（Secret Santa）**：建活动，把链接发到群里，大家各自报名，抽签后每个人只看得到自己的结果。
+- **心愿清单**（生日 / 婚礼）：主人列出想要的东西，朋友们各自认领，主人看不到谁认领了什么。详见下面「心愿清单」一节。
 
 ```
 浏览器 ──> Amplify Hosting（静态页面：web/）
@@ -41,7 +46,7 @@ gh secret set ALERT_EMAIL --repo tongerlee/SecretSanta     # 可选，见下面�
 
 **组织者**
 
-1. 打开网站，填活动名称、预算、交换日，再设一个只有你知道的**组织者 PIN**（4–8 位数字），点「创建活动」。
+1. 打开网站，在首页点「交换礼物」，填活动名称、预算、交换日，再设一个只有你知道的**组织者 PIN**（4–8 位数字），点「创建活动」。
 2. 页面给你两个链接。**群链接**发到群里。**组织者链接**只给自己，抽签和改设置都靠它，建议马上存一份；创建活动的这台设备会自动记住。
 3. 自己也在活动页报名（可选，不报名也能抽签）。
    组织者链接弄丢了、换了手机或浏览器：在任何设备上打开群链接，点页面底部的「我是组织者，拿回权限」，输组织者 PIN，就拿到一条新的组织者链接（旧的同时失效）。以前建的活动没有组织者 PIN，在「我的组织者链接」里补设一个即可。
@@ -98,7 +103,7 @@ gh secret set ALERT_EMAIL --repo tongerlee/SecretSanta     # 可选，见下面�
 - 电脑宽屏（≥900px）左右两栏：左边场景和标签固定，右边是卡片。
 - 页脚是 DOUT 的印章，点开跳转到店铺。
 
-- 首页：这台设备参加过或组织过的活动排在最前面，下面才是「新建活动」。
+- 首页：这台设备参加过或组织过的活动排在最前面，下面是「要建什么」的选择（交换礼物 / 心愿清单），选了才出现对应的表单。
 - 活动页：顶部的场景缩小，让报名或结果更快进入视野；首页保留完整场景。
 - 「组织者操作区」只在存有组织者链接的浏览器里出现（虚线边框、锁图标），参与者管理默认折叠。
 - 自动抽签不是闹钟：设定时间过后，第一个打开页面的人触发抽签（且至少 3 人），页面上会写明并带时区。
@@ -117,9 +122,11 @@ gh secret set ALERT_EMAIL --repo tongerlee/SecretSanta     # 可选，见下面�
 | 组织者密钥 | 只在创建时显示一次，表里只存哈希 |
 | 组织者 PIN | 和参与者 PIN 一样 scrypt 哈希存，同样 5 次错误锁 10 分钟；凭它能换发一把新密钥（旧的立刻作废）。旧版"绑定到报名"的方式服务端仍支持，页面上只对已绑定的活动显示「解除绑定」 |
 | 抽签配对 | 打乱后存。接口只把「你要送给谁」返回给本人，连组织者也拿不到 |
+| 心愿清单上的东西（文字 + 可选链接） | 有链接的人都能看到。一张清单最多 40 样 |
+| 心愿清单的认领（谁要送哪一样） | 只有留了名字 + PIN 的朋友看得到。主人看不到，公开状态和组织者接口都不返回 |
 
 - 不收手机号、邮箱，没有 cookie 和统计。
-- **自动删除**：活动在交换日 7 天后整条删除（每次访问时检查，另有 DynamoDB TTL 兜底）。组织者也可以随时手动删除。
+- **自动删除**：活动在交换日 7 天后整条删除（心愿清单按清单上填的日期算；每次访问时检查，另有 DynamoDB TTL 兜底）。组织者也可以随时手动删除。
 - **防滥用**：同一个网络地址每小时最多建 5 个活动。计数用的是地址的哈希，2 小时后过期，不存原始 IP。
 - 组织者重设某人的 PIN 会把 TA 的所有设备登出，并且留痕：TA 下次登录会看到「组织者在某时帮你重设过 PIN」。
 - 配对的「打乱」只是防止在 DynamoDB 控制台里随手翻到被剧透，不是加密。AWS 账号的主人想查总能查到。
@@ -130,15 +137,19 @@ gh secret set ALERT_EMAIL --repo tongerlee/SecretSanta     # 可选，见下面�
 ## 结构
 
 ```
-api/index.mjs    Lambda：建活动、报名、PIN、令牌、抽签。每个活动一条 DynamoDB 记录，乐观锁更新
-web/             Amplify 托管的静态站：index.html、pets.png（Waffle 和蛋饼，原图）、config.js（接口地址）
-page/            页面源文件（i18n.js 是四种语言的文字），python3 page/build.py 拼成 web/index.html
-template.yaml    SAM 模板：表、Lambda、Amplify 应用
-deploy.sh        一条命令部署
-test/            本地测试
+api/index.mjs        Lambda：建活动、报名、PIN、令牌、抽签，以及心愿清单的增删改和认领。每个活动一条 DynamoDB 记录，乐观锁更新
+web/                 Amplify 托管的静态站：index.html、pets.png（Waffle 和蛋饼，原图）、config.js（接口地址，部署时生成）
+page/                页面源文件（i18n.js 是四种语言的文字，flowerkids.svg 等是各场合的装饰），python3 page/build.py 拼成 web/index.html
+template.yaml        SAM 模板：表、Lambda、Amplify 应用、告警
+deploy.sh            一条命令部署
+domain.sh            把自己的域名挂到 Amplify，并打印要加的 DNS 记录
+setup-ci.sh          一次性准备 GitHub Actions 的部署权限
+recover.sh           组织者链接彻底丢了时，账号主人换发一把新密钥
+.github/workflows/   deploy.yml（push 到 main 就部署）、test.yml（每个 pull request 跑测试）
+test/                本地测试（api.test.mjs、i18n.test.mjs、browser.sh）和上线后的检查（live_*.py）
 ```
 
-网址长这样：`https://main.<应用ID>.amplifyapp.com/?e=<活动ID>`。想用自己的域名，在 Amplify 控制台给这个应用绑域名，然后把新域名加进 `template.yaml` 里的 `AllowOrigins` 再部署一次。
+网址长这样：`https://<你的域名>/?e=<活动ID>`，没配域名时是 `https://main.<应用ID>.amplifyapp.com/?e=<活动ID>`。交换礼物和心愿清单的链接是同一种格式。域名怎么配见上面「自己的域名」。
 
 ## 本地跑和测试
 
@@ -155,17 +166,24 @@ npm run dev                # 网站 http://127.0.0.1:8787/ ，接口在 8788 端
 
 ## 上线后的检查
 
-部署完可以对着真实网址再查一遍。下面三条都会自己建测试活动（名字是 TEST please ignore），结束时不管通过与否都会全部删掉，不碰别的活动。
+部署完可以对着真实网址再查一遍。下面四条都会自己建测试活动（名字是 TEST please ignore），结束时不管通过与否都会全部删掉，不碰别的活动。前三条查交换礼物，第四条查心愿清单。
 
 ```bash
 export SITE=https://main.xxxx.amplifyapp.com API=https://xxxx.lambda-url.us-east-2.on.aws
 python3 test/live_api.py                              # 接口规则约 120 项：报名、PIN 锁定、只能看自己的结果、抽签、60 人满员、同时报名…
 python3 test/live_browser.py                          # 真浏览器约 50 项：多设备、四种语言 × 四种屏幕、Safari 内核、断网、存储被禁…
 SITE=$SITE/ ENGINE=webkit python3 test/browser.py     # 中文全流程，用 Safari 内核（iPhone 和 iPhone 微信用的就是它）
+python3 test/live_wishlist.py                         # 心愿清单约 20 项：首页选择、婚礼清单、认领、两人抢同一样、换设备、主人看不到认领
+```
+
+`SITE` 和 `API` 换成真实地址。现在线上的是：
+
+```bash
+export SITE=https://gifts.departmentofunnecessarythings.com API=https://p2yg2w4mbgqms5eqzpjj5qb66i0tburz.lambda-url.us-east-2.on.aws
 ```
 
 已知的限制：
 
 - 新 AWS 账号的 Lambda 同时只能跑 10 个请求。同一瞬间超过 10 个时，多出来的会被 AWS 挡回（429），页面会自己悄悄重试，一般察觉不到。
-- 「每个网络地址每小时最多建 5 个活动」只是减速带，换 IP 就能绕过。
+- 「每个网络地址每小时最多建 5 个活动」只是减速带，换 IP 就能绕过。上面四条检查加起来建 5 个测试活动，正好是一个网络一小时的额度；一小时内再跑第二遍会被这条规则挡住（建活动时报 429），等一小时再跑。
 - 这些检查替代不了真机：微信内置浏览器、真实的 iPhone / 安卓手机还是要自己点一遍。
